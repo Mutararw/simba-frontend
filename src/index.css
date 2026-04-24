@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Simba brand: deep green primary, warm red accent — DoorDash-inspired clean white surfaces */
+    --background: 0 0% 100%;
+    --foreground: 150 25% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 25% 10%;
+
+    --primary: 152 72% 22%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 152 60% 38%;
+
+    --secondary: 150 30% 96%;
+    --secondary-foreground: 152 72% 18%;
+
+    --muted: 150 15% 96%;
+    --muted-foreground: 150 8% 42%;
+
+    --accent: 8 88% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 12% 90%;
+    --input: 150 12% 90%;
+    --ring: 152 72% 30%;
+
+    --radius: 1rem;
+
+    /* Category tile palette (pastel, DoorDash style) */
+    --tile-1: 38 95% 92%;
+    --tile-2: 150 55% 90%;
+    --tile-3: 8 88% 93%;
+    --tile-4: 220 80% 93%;
+    --tile-5: 280 70% 94%;
+    --tile-6: 168 72% 90%;
+    --tile-7: 50 95% 90%;
+    --tile-8: 340 80% 94%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(152 72% 22%) 0%, hsl(168 70% 30%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(38 95% 60%) 0%, hsl(8 88% 56%) 100%);
+    --shadow-card: 0 1px 2px hsl(150 25% 10% / 0.04), 0 8px 24px -12px hsl(150 25% 10% / 0.08);
+    --shadow-elevated: 0 12px 40px -12px hsl(152 72% 22% / 0.25);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 150 20% 7%;
+    --foreground: 0 0% 98%;
+    --card: 150 18% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 150 18% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 152 60% 45%;
+    --primary-foreground: 150 25% 8%;
+    --secondary: 150 15% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 150 15% 16%;
+    --muted-foreground: 150 8% 65%;
+    --accent: 8 85% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 150 15% 18%;
+    --input: 150 15% 18%;
+    --ring: 152 60% 45%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .category-tile {
+    @apply relative flex flex-col items-center justify-end overflow-hidden rounded-2xl p-3 aspect-[4/5] cursor-pointer transition-transform;
+    box-shadow: var(--shadow-card);
+  }
+  .category-tile:hover { transform: translateY(-2px); }
+
+  .product-card {
+    @apply bg-card rounded-2xl overflow-hidden transition-all cursor-pointer;
+    box-shadow: var(--shadow-card);
+  }
+  .product-card:hover { box-shadow: var(--shadow-elevated); transform: translateY(-2px); }
+}
