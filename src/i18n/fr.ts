@@ -77,6 +77,47 @@ const fr: Dict = {
   },
   reviews: { title: "Notez votre retrait", placeholder: "Comment s'est passée l'expérience ?", submit: "Envoyer", thanks: "Merci pour votre avis !" },
   lang: { en: "Anglais", rw: "Kinyarwanda", fr: "Français" },
-  footer: { rights: "Tous droits réservés.", built: "Construit pour A2SV Rwanda — Simba 2.0." },
+  footer: {
+    rights: "Tous droits réservés.",
+    built: "Construit pour A2SV Rwanda — Simba 2.0.",
+    description: "Le supermarché le plus fiable de Kigali, désormais à portée de main. Fraîcheur et qualité livrées en 45 minutes.",
+    sections: {
+      shop: {
+        title: "Achat",
+        categories: {
+          food: "Alimentation et épicerie",
+          drinks: "Boissons alcoolisées",
+          baby: "Produits pour bébés",
+          cleaning: "Nettoyage et hygiène",
+          electronics: "Cuisine et électronique"
+        }
+      },
+      company: {
+        title: "Entreprise",
+        about: "À propos de nous",
+        branches: "Nos magasins",
+        careers: "Carrières",
+        press: "Presse"
+      },
+      support: {
+        title: "Support",
+        help: "Centre d'aide",
+        contact: "Contactez-nous",
+        pickup: "Infos retrait",
+        returns: "Retours"
+      },
+      newsletter: {
+        title: "Restez au courant",
+        subtitle: "Inscrivez-vous à notre newsletter pour les offres hebdomadaires.",
+        placeholder: "Entrez votre email",
+        button: "S'abonner"
+      },
+      legal: {
+        privacy: "Politique de confidentialité",
+        terms: "Conditions d'utilisation",
+        cookies: "Politique des cookies"
+      }
+    }
+  },
 };
 export default fr;

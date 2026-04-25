@@ -6,11 +6,13 @@ import { CheckCircle2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useOrder } from "@/store/order";
+import { useReviews } from "@/store/reviews";
 import { toast } from "sonner";
 
 export default function Confirmation() {
   const { t } = useTranslation();
   const order = useOrder((s) => s.lastOrder);
+  const { hasReviewed, addReview } = useReviews();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -40,29 +42,35 @@ export default function Confirmation() {
         </div>
       </div>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-lg font-bold">{t("reviews.title")}</h2>
-        <div className="mt-3 flex gap-1">
-          {[1,2,3,4,5].map((n) => (
-            <button key={n} onClick={() => setRating(n)} aria-label={`${n} stars`}>
-              <Star className={`h-7 w-7 transition-colors ${n <= rating ? "fill-accent text-accent" : "text-muted-foreground/40"}`} />
-            </button>
-          ))}
+      {!hasReviewed ? (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-lg font-bold">How was your experience?</h2>
+          <div className="mt-3 flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button key={n} onClick={() => setRating(n)} aria-label={`${n} stars`} className="transform transition-transform hover:scale-110">
+                <Star className={`h-8 w-8 transition-colors ${n <= rating ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
+              </button>
+            ))}
+          </div>
+          <Textarea
+            className="mt-3 rounded-xl resize-none"
+            placeholder="Tell us what you loved or what we can improve..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <Button
+            className="mt-4 rounded-full font-bold w-full"
+            disabled={rating === 0 || !comment.trim()}
+            onClick={() => {
+              addReview({ name: "Guest User", rating, text: comment });
+              setRating(0);
+              setComment("");
+            }}
+          >
+            Submit Feedback
+          </Button>
         </div>
-        <Textarea
-          className="mt-3"
-          placeholder={t("reviews.placeholder")}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-        <Button
-          className="mt-3 rounded-full"
-          disabled={rating === 0}
-          onClick={() => { toast.success(t("reviews.thanks")); setRating(0); setComment(""); }}
-        >
-          {t("reviews.submit")}
-        </Button>
-      </div>
+      ) : null}
 
       <div className="mt-6 text-center">
         <Button asChild variant="outline" className="rounded-full"><Link to="/">{t("confirm.home")}</Link></Button>

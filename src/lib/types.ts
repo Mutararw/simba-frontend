@@ -28,6 +28,7 @@ export interface User {
   email: string;
   name: string;
   image?: string;
+  role?: "customer" | "manager" | "admin" | "accountant";
   accountType?: string;
   adminRole?: string;
 }

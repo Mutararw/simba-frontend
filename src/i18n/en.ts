@@ -2,10 +2,10 @@ const en = {
   brand: { name: "Simba", tagline: "Rwanda's Online Supermarket" },
   nav: { home: "Home", browse: "Browse", branches: "Branches", cart: "Cart", login: "Sign in", logout: "Sign out", account: "Account" },
   hero: {
-    title: "Groceries from Simba, ready in 45 minutes.",
-    subtitle: "Order online, pick up at your nearest Kigali branch — fresh, fast, trusted.",
-    cta: "Start shopping",
-    secondary: "Find a branch",
+    title: "Fresh, Quality Groceries. Ready When You Are.",
+    subtitle: "Experience Kigali's premium supermarket from the comfort of your home. Shop online and collect at your nearest Simba branch in just 45 minutes. Fresh, fast, and always trusted.",
+    cta: "Start Shopping",
+    secondary: "Explore Branches",
   },
   perks: {
     pickup: { title: "45-min pick-up", body: "Order now, collect from your branch in under an hour." },
@@ -76,7 +76,48 @@ const en = {
   },
   reviews: { title: "Rate your pick-up", placeholder: "How was your experience?", submit: "Submit review", thanks: "Thanks for your feedback!" },
   lang: { en: "English", rw: "Kinyarwanda", fr: "Français" },
-  footer: { rights: "All rights reserved.", built: "Built for A2SV Rwanda — Simba 2.0." },
+  footer: {
+    rights: "All rights reserved.",
+    built: "Built for A2SV Rwanda — Simba 2.0.",
+    description: "Kigali's most trusted supermarket, now at your fingertips. Freshness and quality delivered in 45 minutes.",
+    sections: {
+      shop: {
+        title: "Shop",
+        categories: {
+          food: "Food & Groceries",
+          drinks: "Alcoholic Drinks",
+          baby: "Baby Products",
+          cleaning: "Cleaning & Sanitary",
+          electronics: "Kitchenware & Electronics"
+        }
+      },
+      company: {
+        title: "Company",
+        about: "About Us",
+        branches: "Our Branches",
+        careers: "Careers",
+        press: "Press"
+      },
+      support: {
+        title: "Support",
+        help: "Help Center",
+        contact: "Contact Us",
+        pickup: "Pick-up Info",
+        returns: "Returns"
+      },
+      newsletter: {
+        title: "Stay Fresh",
+        subtitle: "Join our newsletter for weekly deals.",
+        placeholder: "Enter your email",
+        button: "Subscribe"
+      },
+      legal: {
+        privacy: "Privacy Policy",
+        terms: "Terms of Service",
+        cookies: "Cookie Policy"
+      }
+    }
+  },
 };
 export default en;
 export type Dict = typeof en;

@@ -15,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<"customer" | "manager" | "admin" | "accountant">("customer");
 
   async function handleSocialLogin(provider: 'google' | 'github') {
     try {
@@ -30,11 +31,17 @@ export default function Login() {
     setLoading(true);
     try {
       const u = await signIn(email, password);
-      setUser(u);
+      const userWithRole = { ...u, role };
+      setUser(userWithRole);
       toast.success(`Welcome back, ${u.name}!`);
-      navigate("/");
+      
+      if (role === "admin" || role === "manager") {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Sign-in failed");
+      toast.error("Invalid credentials");
     } finally { setLoading(false); }
   }
 
@@ -42,7 +49,6 @@ export default function Login() {
     <div className="container grid place-items-center py-12">
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-[var(--shadow-card)]">
         <h1 className="font-display text-3xl font-bold">{t("auth.signin")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("brand.tagline")}</p>
 
         <div className="mt-6 flex flex-col gap-2">
           <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('google')}>
@@ -57,20 +63,26 @@ export default function Login() {
         </div>
 
         <form onSubmit={submit} className="space-y-4">
+          <div className="space-y-1.5"><Label htmlFor="email">{t("auth.email")}</Label><Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+          <div className="space-y-1.5"><Label htmlFor="password">{t("auth.password")}</Label><Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
+          
           <div className="space-y-1.5">
-            <Label htmlFor="email">{t("auth.email")}</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Label htmlFor="role">Simulate Login As</Label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as any)}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="customer">Customer</option>
+              <option value="accountant">Accountant</option>
+              <option value="manager">Branch Manager</option>
+              <option value="admin">Administrator</option>
+            </select>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="password">{t("auth.password")}</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <div className="text-right">
-            <Link to="/forgot" className="text-xs font-semibold text-primary hover:underline">{t("auth.forgot")}</Link>
-          </div>
-          <Button type="submit" className="w-full rounded-full" disabled={loading}>
-            {loading ? "…" : t("auth.signin")}
-          </Button>
+
+          <div className="flex justify-end"><Link to="/forgot" className="text-xs font-semibold text-primary hover:underline">{t("auth.forgot")}</Link></div>
+          <Button type="submit" className="w-full rounded-full" disabled={loading}>{loading ? "…" : t("auth.signin")}</Button>
         </form>
 
         <p className="mt-5 text-center text-sm text-muted-foreground">

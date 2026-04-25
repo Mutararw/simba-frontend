@@ -77,6 +77,47 @@ const rw: Dict = {
   },
   reviews: { title: "Tanga amanota ku gufata", placeholder: "Wabonye iki?", submit: "Ohereza", thanks: "Murakoze ku gitekerezo!" },
   lang: { en: "Icyongereza", rw: "Ikinyarwanda", fr: "Igifaransa" },
-  footer: { rights: "Uburenganzira bwose burabitswe.", built: "Yubatswe kuri A2SV Rwanda — Simba 2.0." },
+  footer: {
+    rights: "Uburenganzira bwose burabitswe.",
+    built: "Yubatswe kuri A2SV Rwanda — Simba 2.0.",
+    description: "Isupermarket ya Kigali yizewe cyane, ubu iri mu ntoki zawe. Ibishya n'ubuziranenge biboneka mu minota 45.",
+    sections: {
+      shop: {
+        title: "Gura",
+        categories: {
+          food: "Ibiribwa n'ibikenerwa",
+          drinks: "Ibinyobwa bisindisha",
+          baby: "Ibikenerwa n'abana",
+          cleaning: "Ibikoresho by'isuku",
+          electronics: "Ibikoresho byo mu gikoni n'ikoranabuhanga"
+        }
+      },
+      company: {
+        title: "Ikigo",
+        about: "Turi ba nde?",
+        branches: "Amaduka yacu",
+        careers: "Akazi",
+        press: "Amakuru"
+      },
+      support: {
+        title: "Ubufasha",
+        help: "Ahabanza h'ubufasha",
+        contact: "Twandikire",
+        pickup: "Amakuru yo gufata",
+        returns: "Gusubiza ibicuruzwa"
+      },
+      newsletter: {
+        title: "Horana amakuru",
+        subtitle: "Injira mu banyamakuru bacu ubone poromosiyo buri cyumweru.",
+        placeholder: "Shyiramo imeli yawe",
+        button: "Injira"
+      },
+      legal: {
+        privacy: "Amategeko y'ibanga",
+        terms: "Amategeko n'amabwiriza",
+        cookies: "Amategeko ya cookies"
+      }
+    }
+  },
 };
 export default rw;

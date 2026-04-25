@@ -17,32 +17,36 @@
  */
 import { PRODUCTS, searchProducts } from "./products";
 import type { Product } from "./types";
+import { api } from "./api";
 
 export interface AiSearchResult {
   reply: string;
   products: Product[];
+  addToCartIds?: string[];
 }
 
 export async function aiSearch(query: string): Promise<AiSearchResult> {
-  const endpoint = (import.meta as any).env?.VITE_AI_SEARCH_URL as string | undefined;
+  try {
+    const { data } = await api.post("/api/ai/chat", { query });
+    
+    // Convert returned productIds to full Product objects using the local cache
+    const matchedProducts = data.productIds 
+      ? PRODUCTS.filter(p => data.productIds.includes(String(p.id)) || data.productIds.includes(p.id))
+      : [];
 
-  if (endpoint) {
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, catalog_size: PRODUCTS.length }),
-      });
-      if (res.ok) return (await res.json()) as AiSearchResult;
-    } catch (e) {
-      console.warn("AI search endpoint failed, using fallback", e);
-    }
+    return {
+      reply: data.reply || "I didn't quite catch that. Could you try asking another way?",
+      products: matchedProducts,
+      addToCartIds: data.addToCartIds || []
+    };
+  } catch (error) {
+    console.error("AI search via backend failed, using fallback", error);
+    
+    // Fallback: smart keyword search with a friendly natural-language reply
+    const products = searchProducts(query);
+    const reply = products.length
+      ? `I found ${products.length} item${products.length > 1 ? "s" : ""} that match "${query}".`
+      : `Sorry, I couldn't find anything matching "${query}". Try another keyword.`;
+    return { reply, products };
   }
-
-  // Fallback: smart keyword search with a friendly natural-language reply
-  const products = searchProducts(query);
-  const reply = products.length
-    ? `I found ${products.length} item${products.length > 1 ? "s" : ""} that match "${query}".`
-    : `Sorry, I couldn't find anything matching "${query}". Try another keyword.`;
-  return { reply, products };
 }
