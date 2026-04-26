@@ -44,7 +44,12 @@ export function OrderCountdown() {
 
   if (!lastOrder) {
     return (
-      <Button variant="ghost" size="sm" className="hidden sm:flex gap-1.5 font-medium text-muted-foreground hover:text-primary" onClick={() => navigate("/orders")}>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="hidden sm:flex gap-1.5 font-bold text-white bg-green-600 hover:bg-green-700 rounded-full px-4 shadow-sm" 
+        onClick={() => navigate("/orders")}
+      >
         <Clock className="h-4 w-4" /> Track Order
       </Button>
     );
@@ -55,14 +60,14 @@ export function OrderCountdown() {
       variant="outline" 
       size="sm" 
       onClick={() => navigate("/orders")}
-      className={`hidden sm:flex items-center gap-2 border-primary/50 shadow-sm transition-all ${
-        isReady ? "bg-green-500/10 text-green-600 border-green-500/50" : "bg-primary/10 text-primary"
+      className={`hidden sm:flex items-center gap-2 border-white/20 shadow-sm transition-all rounded-full px-4 py-4 ${
+        isReady ? "bg-green-500 text-white hover:bg-green-600 border-none" : "bg-green-600 text-white hover:bg-green-700 border-none"
       }`}
     >
       <Clock className={`h-4 w-4 ${!isReady && timeLeft ? "animate-pulse" : ""}`} />
       <div className="flex flex-col items-start text-left">
-        <span className="text-[10px] leading-none font-bold uppercase opacity-80">
-          {isReady ? "Pick Up Now" : "Time Left"}
+        <span className="text-[10px] leading-none font-bold uppercase opacity-90">
+          {isReady ? "Ready Now" : "Time Left"}
         </span>
         <span className="text-sm leading-none font-mono font-bold tracking-tight">
           {timeLeft || "--m --s"}

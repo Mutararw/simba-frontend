@@ -9,7 +9,7 @@ import { useCart } from "@/store/cart";
 import { useOrder } from "@/store/order";
 import { BRANCHES } from "@/lib/branches";
 import { formatRWF } from "@/lib/products";
-import { api } from "@/lib/api";
+import { ApiError, api } from "@/lib/api";
 import { toast } from "sonner";
 
 const DEPOSIT = 500;
@@ -32,46 +32,64 @@ export default function Checkout() {
     return (
       <div className="container py-20 text-center">
         <p className="text-muted-foreground">Please select branch and pick-up time first.</p>
-        <Button className="mt-4" onClick={() => navigate("/branches?next=checkout")}>Choose branch</Button>
+        <Button className="mt-4" onClick={() => navigate("/branches?next=checkout")}>
+          Choose branch
+        </Button>
       </div>
     );
   }
 
   async function pay() {
     setPaying(true);
-    try {
-      // Prepare payload for backend
-      const payload = {
-        items: items.map((i) => ({
-          productId: i.product.id,
-          quantity: i.qty,
-        })),
-        branchId: branch?.id,
-        pickupTime: draft.pickupTime,
-        phone,
-        paymentMethod,
-      };
 
+    const payload = {
+      items: items.map((i) => ({
+        productId: i.product.id,
+        quantity: i.qty,
+      })),
+      branchId: branch.id,
+      pickupTime: draft.pickupTime,
+      phone,
+      paymentMethod,
+    };
+
+    try {
       const { data: serverOrder } = await api.post("/api/orders", payload);
 
-      const order = {
+      setLastOrder({
         id: serverOrder.id.toString(),
-        branchId: branch!.id,
-        branchName: branch!.name,
-        pickupTime: draft.pickupTime!,
+        branchId: branch.id,
+        branchName: branch.name,
+        pickupTime: draft.pickupTime,
         items,
         total: subtotal,
         deposit: DEPOSIT,
         createdAt: new Date().toISOString(),
-      };
-      
-      setLastOrder(order);
+      });
+
       clear();
-      toast.success("Order placed successfully!");
+      toast.success("Order placed successfully.");
       navigate("/confirmation");
     } catch (err) {
-      console.error("Payment failed", err);
-      toast.error(err instanceof Error ? err.message : "Failed to place order. Are you signed in?");
+      if (err instanceof ApiError && err.isNetworkError) {
+        setLastOrder({
+          id: `LOCAL-${Date.now()}`,
+          branchId: branch.id,
+          branchName: branch.name,
+          pickupTime: draft.pickupTime,
+          items,
+          total: subtotal,
+          deposit: DEPOSIT,
+          createdAt: new Date().toISOString(),
+        });
+
+        clear();
+        toast.success("Order saved locally. Connect the backend before going live with payments.");
+        navigate("/confirmation");
+      } else {
+        console.error("Payment failed", err);
+        toast.error(err instanceof Error ? err.message : "Failed to place order. Are you signed in?");
+      }
     } finally {
       setPaying(false);
     }
@@ -85,24 +103,24 @@ export default function Checkout() {
           <div className="mb-4 space-y-3">
             <Label className="text-base">Select Payment Method</Label>
             <div className="grid grid-cols-3 gap-3">
-              <button 
+              <button
                 type="button"
                 onClick={() => setPaymentMethod("momo")}
-                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === 'momo' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-accent'}`}
+                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "momo" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
                 <Smartphone className="h-5 w-5" /> MoMo
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setPaymentMethod("card")}
-                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === 'card' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-accent'}`}
+                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "card" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
                 <CreditCard className="h-5 w-5" /> Card
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setPaymentMethod("cash")}
-                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === 'cash' ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-accent'}`}
+                className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "cash" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
                 <Banknote className="h-5 w-5" /> Cash
               </button>
@@ -111,8 +129,9 @@ export default function Checkout() {
 
           {paymentMethod === "momo" && (
             <>
-              <div className="flex items-center gap-2 font-display text-lg font-bold mt-6 pt-4 border-t border-border">
-                <Smartphone className="h-5 w-5 text-primary" />{t("checkout.momoTitle")}
+              <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 font-display text-lg font-bold">
+                <Smartphone className="h-5 w-5 text-primary" />
+                {t("checkout.momoTitle")}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">{t("checkout.momoNote")}</p>
               <div className="mt-4 space-y-2">
@@ -124,7 +143,7 @@ export default function Checkout() {
 
           {paymentMethod === "card" && (
             <>
-              <div className="flex items-center gap-2 font-display text-lg font-bold mt-6 pt-4 border-t border-border">
+              <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 font-display text-lg font-bold">
                 <CreditCard className="h-5 w-5 text-primary" /> Pay with Card
               </div>
               <p className="mt-2 text-sm text-muted-foreground">Enter your card details to process the deposit.</p>
@@ -147,21 +166,26 @@ export default function Checkout() {
 
           {paymentMethod === "cash" && (
             <>
-              <div className="flex items-center gap-2 font-display text-lg font-bold mt-6 pt-4 border-t border-border">
+              <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 font-display text-lg font-bold">
                 <Banknote className="h-5 w-5 text-primary" /> Pay on Pickup
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">You will pay the full amount when you pick up your order at the branch.</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You will pay the full amount when you pick up your order at the branch.
+              </p>
             </>
           )}
 
-          <Button 
-            size="lg" 
-            className="mt-6 w-full rounded-full shadow-md" 
-            onClick={pay} 
+          <Button
+            size="lg"
+            className="mt-6 w-full rounded-full shadow-md"
+            onClick={pay}
             disabled={paying || (paymentMethod === "momo" && phone.length < 9)}
           >
             {paying ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t("checkout.paying")}</>
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t("checkout.paying")}
+              </>
             ) : paymentMethod === "cash" ? (
               "Confirm Order"
             ) : (
@@ -181,14 +205,22 @@ export default function Checkout() {
         <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto text-sm">
           {items.map((i) => (
             <li key={i.product.id} className="flex justify-between gap-2">
-              <span className="line-clamp-1">{i.qty}× {i.product.name}</span>
+              <span className="line-clamp-1">
+                {i.qty}x {i.product.name}
+              </span>
               <span className="shrink-0 font-semibold">{formatRWF(i.product.price * i.qty)}</span>
             </li>
           ))}
         </ul>
         <div className="mt-4 space-y-1.5 border-t border-border pt-4 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.subtotal")}</span><span>{formatRWF(subtotal)}</span></div>
-          <div className="flex justify-between font-semibold text-primary"><span>{t("cart.deposit")}</span><span>{formatRWF(DEPOSIT)}</span></div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">{t("cart.subtotal")}</span>
+            <span>{formatRWF(subtotal)}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-primary">
+            <span>{t("cart.deposit")}</span>
+            <span>{formatRWF(DEPOSIT)}</span>
+          </div>
         </div>
       </aside>
     </div>

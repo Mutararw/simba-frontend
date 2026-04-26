@@ -1,69 +1,98 @@
-/**
- * Better Auth Client Integration.
- * Points to the backend server configured in auth-client.ts.
- */
 import { authClient } from "./auth-client";
+import { getAppPath, getAppUrl } from "./config";
 import type { User } from "./types";
 
-export async function signUp(email: string, password: string, name: string): Promise<User> {
-  const { data, error } = await authClient.signUp.email({
-    email,
-    password,
-    name,
-  });
+function getAuthErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) {
+    if (error.message.includes("Network Error") || error.message.toLowerCase().includes("fetch")) {
+      return "Authentication service is currently unavailable. Please try again shortly.";
+    }
 
-  if (error) {
-    throw new Error(error.message || "An error occurred during sign up.");
+    return error.message || fallback;
   }
 
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    name: data.user.name,
-  };
+  return fallback;
+}
+
+export async function signUp(email: string, password: string, name: string): Promise<User> {
+  try {
+    const { data, error } = await authClient.signUp.email({
+      email,
+      password,
+      name,
+    });
+
+    if (error) {
+      throw new Error(error.message || "An error occurred during sign up.");
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+    };
+  } catch (error) {
+    throw new Error(getAuthErrorMessage(error, "An error occurred during sign up."));
+  }
 }
 
 export async function signIn(email: string, password: string): Promise<User> {
-  const { data, error } = await authClient.signIn.email({
-    email,
-    password,
-  });
+  try {
+    const { data, error } = await authClient.signIn.email({
+      email,
+      password,
+    });
 
-  if (error) {
-    throw new Error(error.message || "Invalid credentials.");
+    if (error) {
+      throw new Error(error.message || "Invalid credentials.");
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+    };
+  } catch (error) {
+    throw new Error(getAuthErrorMessage(error, "Invalid credentials."));
   }
-
-  return {
-    id: data.user.id,
-    email: data.user.email,
-    name: data.user.name,
-  };
 }
 
 export async function signInWithGoogle() {
-  return await authClient.signIn.social({
-    provider: "google",
-    callbackURL: window.location.origin + "/dashboard",
-  });
+  try {
+    return await authClient.signIn.social({
+      provider: "google",
+      callbackURL: getAppUrl("/dashboard"),
+    });
+  } catch (error) {
+    throw new Error(getAuthErrorMessage(error, "Google sign-in is unavailable right now."));
+  }
 }
 
 export async function signInWithGithub() {
-  return await authClient.signIn.social({
-    provider: "github",
-    callbackURL: window.location.origin + "/dashboard",
-  });
+  try {
+    return await authClient.signIn.social({
+      provider: "github",
+      callbackURL: getAppUrl("/dashboard"),
+    });
+  } catch (error) {
+    throw new Error(getAuthErrorMessage(error, "GitHub sign-in is unavailable right now."));
+  }
 }
 
 export async function logout() {
   await authClient.signOut();
-  window.location.href = "/login";
+  window.location.href = getAppPath("/login");
 }
 
 export async function requestReset(email: string): Promise<void> {
-  const { error } = await authClient.forgetPassword({
-    email,
-    redirectTo: "/reset-password",
-  });
-  
-  if (error) throw new Error(error.message);
+  try {
+    const { error } = await authClient.forgetPassword({
+      email,
+      redirectTo: getAppUrl("/reset-password"),
+    });
+
+    if (error) throw new Error(error.message);
+  } catch (error) {
+    throw new Error(getAuthErrorMessage(error, "Password reset is unavailable right now."));
+  }
 }

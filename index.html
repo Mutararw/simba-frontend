@@ -3,22 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
-    <title>Simba Supermarket — Order online, pick up in 45 min in Kigali</title>
-    <meta name="description" content="Shop fresh groceries from Simba, Rwanda's online supermarket. Order online and pick up at 9 Simba branches across Kigali in 45 minutes. Pay with MoMo." />
+    <title>Simba Supermarket - Order online, pick up in 45 min in Kigali</title>
+    <meta
+      name="description"
+      content="Shop fresh groceries from Simba, Rwanda's online supermarket. Order online and pick up at 9 Simba branches across Kigali in 45 minutes. Pay with MoMo."
+    />
     <meta name="author" content="Simba Supermarket" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    <meta property="og:title" content="Simba Supermarket — Rwanda's Online Supermarket" />
-    <meta property="og:description" content="Order online, pick up at your nearest Simba branch in Kigali in 45 minutes." />
+    <meta property="og:title" content="Simba Supermarket - Rwanda's Online Supermarket" />
+    <meta
+      property="og:description"
+      content="Order online, pick up at your nearest Simba branch in Kigali in 45 minutes."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var path = params.get("spa-path");
+
+        if (!path) return;
+
+        var search = params.get("spa-search");
+        var url = path + (search ? "?" + search : "") + window.location.hash;
+
+        window.history.replaceState({}, "", url);
+      })();
+    </script>
   </head>
 
   <body>

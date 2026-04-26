@@ -1,9 +1,8 @@
 import { createAuthClient } from "better-auth/react";
+import { API_URL } from "./config";
 
-// The baseURL points to your backend. 
-// In development, if the backend is not running, the client will simply return errors instead of crashing the app.
 export const authClient = createAuthClient({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL: API_URL,
 });
 
 export const { signIn, signUp, useSession, signOut } = authClient;

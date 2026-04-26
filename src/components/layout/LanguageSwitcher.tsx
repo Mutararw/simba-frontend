@@ -10,7 +10,7 @@ const LANGS = [
   { code: "fr", label: "FR" },
   { code: "ar", label: "AR" },
   { code: "zh", label: "ZH" },
-];
+] as const;
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
             onClick={() => i18n.changeLanguage(l.code)}
             className={i18n.language.startsWith(l.code) ? "font-semibold text-primary" : ""}
           >
-            {t(`lang.${l.code}` as any)}
+            {t(`lang.${l.code}`)}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

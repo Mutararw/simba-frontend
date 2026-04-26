@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Facebook, 
   Instagram, 
@@ -12,16 +13,30 @@ import {
   Mail,
   Smartphone,
   ArrowRight,
-  Apple
+  Apple,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const SHOP_CATEGORY_KEYS = ["food", "drinks", "baby", "cleaning", "electronics"] as const;
+const COMPANY_LINK_KEYS = ["about", "branches", "careers", "press"] as const;
+
 export function Footer() {
   const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+    }
   };
 
   return (
@@ -103,14 +118,14 @@ export function Footer() {
                 { key: "baby", to: "/browse?cat=Baby Products" },
                 { key: "cleaning", to: "/browse?cat=Cleaning & Sanitary" },
                 { key: "electronics", to: "/browse?cat=Kitchenware & Electronics" },
-              ].map(({ key, to }) => (
+              ].map(({ key, to }: { key: (typeof SHOP_CATEGORY_KEYS)[number]; to: string }) => (
                 <li key={key}>
                   <Link 
                     to={to} 
                     className="text-sm text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group"
                   >
                     <span className="h-1 w-1 rounded-full bg-slate-800 group-hover:bg-primary transition-colors" />
-                    {t(`footer.sections.shop.categories.${key}` as any)}
+                    {t(`footer.sections.shop.categories.${key}`)}
                   </Link>
                 </li>
               ))}
@@ -123,13 +138,13 @@ export function Footer() {
               {t("footer.sections.company.title")}
             </h3>
             <ul className="flex flex-col gap-3">
-              {["about", "branches", "careers", "press"].map((key) => (
+              {COMPANY_LINK_KEYS.map((key) => (
                 <li key={key}>
                   <Link 
                     to={key === "branches" ? "/branches" : "#"} 
                     className="text-sm text-slate-400 hover:text-primary transition-colors"
                   >
-                    {t(`footer.sections.company.${key}` as any)}
+                    {t(`footer.sections.company.${key}`)}
                   </Link>
                 </li>
               ))}
@@ -145,19 +160,42 @@ export function Footer() {
               {t("footer.sections.newsletter.subtitle")}
             </p>
             <div className="flex flex-col gap-3">
-              <div className="relative group">
-                <Input 
-                  placeholder={t("footer.sections.newsletter.placeholder")}
-                  className="rounded-xl border-slate-800 bg-slate-900 text-white pr-12 focus-visible:ring-primary/20"
-                />
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="absolute right-1 top-1 h-8 w-8 rounded-lg text-primary hover:bg-primary/10"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <AnimatePresence mode="wait">
+                {submitted ? (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-2 text-green-500 font-medium"
+                  >
+                    <CheckCircle2 className="h-5 w-5" />
+                    {t("footer.sections.newsletter.success")}
+                  </motion.div>
+                ) : (
+                  <motion.form 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    onSubmit={handleNewsletter}
+                    className="relative group"
+                  >
+                    <Input 
+                      placeholder={t("footer.sections.newsletter.placeholder")}
+                      className="rounded-xl border-slate-800 bg-slate-900 text-white pr-12 focus-visible:ring-primary/20"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Button 
+                      type="submit"
+                      size="icon" 
+                      variant="ghost" 
+                      className="absolute right-1 top-1 h-8 w-8 rounded-lg text-primary hover:bg-primary/10"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
               
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <motion.div whileHover={{ scale: 1.05 }} className="cursor-pointer">
@@ -180,40 +218,6 @@ export function Footer() {
                 </motion.div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Bottom bar */}
-        <div className="mt-16 border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <p className="text-xs text-slate-500 whitespace-nowrap">
-              © {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}
-            </p>
-            <div className="flex items-center gap-4">
-              {["privacy", "terms", "cookies"].map((key) => (
-                <Link 
-                  key={key} 
-                  to="#" 
-                  className="text-xs text-slate-500 hover:text-primary transition-colors whitespace-nowrap"
-                >
-                  {t(`footer.sections.legal.${key}` as any)}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <p className="text-[10px] text-slate-600 italic uppercase tracking-widest hidden sm:block">
-              {t("footer.built")}
-            </p>
-            <motion.button
-              onClick={scrollToTop}
-              whileHover={{ y: -5 }}
-              whileTap={{ scale: 0.9 }}
-              className="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-primary hover:border-primary/50 shadow-sm transition-colors"
-            >
-              <ChevronUp className="h-5 w-5" />
-            </motion.button>
           </div>
         </div>
       </div>

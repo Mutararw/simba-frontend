@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,9 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useReviews } from "@/store/reviews";
 import { useOrder } from "@/store/order";
-import * as confettiPkg from "canvas-confetti";
-
-const confetti = (confettiPkg as any).default || confettiPkg;
+import confetti from "canvas-confetti";
 
 export function GlobalReviewPrompter() {
   const { t } = useTranslation();
@@ -37,7 +35,7 @@ export function GlobalReviewPrompter() {
   const [isInReviewFrame, setIsInReviewFrame] = useState(false);
   
   // Use a single timer ref for all logic
-  const timerRef = useRef<any>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasFiredClickLogic = useRef(false);
   const hasFiredCheckoutLogic = useRef(false);
 
@@ -130,7 +128,7 @@ export function GlobalReviewPrompter() {
 
       const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-      const interval: any = setInterval(function() {
+      const interval = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {

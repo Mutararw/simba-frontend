@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, MapPin, User as UserIcon, LogOut, Home, Grid, Store } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Home, Grid, Store, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -11,6 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Header() {
   const { t } = useTranslation();
@@ -18,28 +20,54 @@ export function Header() {
   const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navLinks = [
+    { to: "/", label: t("nav.home"), icon: Home },
+    { to: "/browse", label: t("nav.browse"), icon: Grid },
+    { to: "/branches", label: t("nav.branches"), icon: Store },
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#fd7e14]/20 bg-[#fd7e14] text-white shadow-md">
-      <div className="container flex h-16 items-center gap-3">
-        <Link to="/" className="flex items-center gap-2 font-display text-xl font-extrabold tracking-tight">
-          <img 
-            src="https://www.simbaonlineshopping.com/images/simbaheaderM.png" 
-            alt="Simba Logo" 
-            className="h-10 object-contain" 
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement!.innerHTML = '<span class="text-primary-foreground text-xl">🦁 SIMBA</span>';
-            }} 
-          />
-        </Link>
+      <div className="container flex h-20 items-center justify-between gap-3">
+        {/* Mobile Menu & Logo */}
+        <div className="flex items-center gap-3">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild className="lg:hidden">
+                    <Button variant="ghost" size="icon" className="text-white">
+                        <Menu className="h-6 w-6" />
+                    </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="bg-[#fd7e14] text-white border-none w-64">
+                    <div className="flex flex-col gap-4 mt-8">
+                        {navLinks.map((item) => (
+                            <NavLink
+                                key={item.to}
+                                to={item.to}
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center gap-3 text-lg font-medium p-3 rounded-lg hover:bg-white/10"
+                            >
+                                <item.icon className="h-5 w-5" />
+                                {item.label}
+                            </NavLink>
+                        ))}
+                    </div>
+                </SheetContent>
+            </Sheet>
 
-        <nav className="ml-4 hidden items-center gap-1 lg:flex">
-          {[
-            { to: "/", label: t("nav.home"), icon: Home },
-            { to: "/browse", label: t("nav.browse"), icon: Grid },
-            { to: "/branches", label: t("nav.branches"), icon: Store },
-          ].map((item) => (
+            <Link to="/" className="flex items-center gap-2 font-display text-xl font-extrabold tracking-tight">
+              <img 
+                src="https://www.simbaonlineshopping.com/images/simbaheaderM.png" 
+                alt="Simba Logo" 
+                className="h-8 md:h-10 object-contain" 
+              />
+            </Link>
+        </div>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {navLinks.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -56,8 +84,8 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Global Navbar Search */}
-        <div className="ml-4 hidden md:flex flex-1 max-w-sm relative text-white">
+        {/* Global Navbar Search - Hidden on Smallest Mobile */}
+        <div className="hidden sm:flex flex-1 max-w-sm mx-2">
           <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -68,17 +96,18 @@ export function Header() {
           >
             <input 
               name="search"
-              placeholder="Search products..." 
-              className="w-full h-9 rounded-full border border-white/20 bg-white/10 pl-10 pr-4 text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+              placeholder="Search..." 
+              className="w-full h-10 rounded-full border border-white bg-white pl-10 pr-4 text-sm text-[#fd7e14] placeholder:text-[#fd7e14]/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium"
             />
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#fd7e14]"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </form>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <OrderCountdown />
+        <div className="flex items-center gap-1 md:gap-2">
+          <div className="hidden md:block mr-2">
+             <OrderCountdown />
+          </div>
           <ThemeToggle />
-          <LanguageSwitcher />
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/cart")} aria-label="Cart">
             <ShoppingCart className="h-5 w-5" />
             {count > 0 && (
@@ -103,7 +132,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button size="sm" onClick={() => navigate("/login")} className="ml-1 rounded-full bg-white text-[#fd7e14] hover:bg-white/90 px-4 font-bold shadow-md hover:-translate-y-0.5 transition-transform">
+            <Button size="sm" onClick={() => navigate("/login")} className="rounded-full bg-white text-[#fd7e14] hover:bg-white/90 px-3 md:px-4 font-bold shadow-md">
               {t("nav.login")}
             </Button>
           )}

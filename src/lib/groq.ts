@@ -25,24 +25,48 @@ export interface AiSearchResult {
   addToCartIds?: string[];
 }
 
+interface ApiProduct {
+  id: string | number;
+  price: string | number;
+  stock: number;
+  imageUrl?: string;
+  image_url?: string;
+}
+
+interface AiSearchApiResponse {
+  reply?: string;
+  products?: ApiProduct[];
+  productIds?: Array<string | number>;
+  addToCartIds?: string[];
+}
+
 export async function aiSearch(query: string): Promise<AiSearchResult> {
   try {
-    const { data } = await api.post("/api/ai/chat", { query });
-    
-    // Convert returned productIds to full Product objects using the local cache
-    const matchedProducts = data.productIds 
-      ? PRODUCTS.filter(p => data.productIds.includes(String(p.id)) || data.productIds.includes(p.id))
-      : [];
+    const { data } = await api.post<AiSearchApiResponse>("/api/ai/chat", { query });
+
+    const matchedProducts = data.products
+      ? data.products.map((product) => ({
+          ...product,
+          id: typeof product.id === "string" ? parseInt(product.id, 10) : Number(product.id),
+          price: Number(product.price),
+          inStock: product.stock > 0,
+          image: product.imageUrl || product.image_url || "",
+        }))
+      : data.productIds
+        ? PRODUCTS.filter(
+            (product) =>
+              data.productIds?.includes(String(product.id)) || data.productIds?.includes(product.id)
+          )
+        : [];
 
     return {
       reply: data.reply || "I didn't quite catch that. Could you try asking another way?",
       products: matchedProducts,
-      addToCartIds: data.addToCartIds || []
+      addToCartIds: data.addToCartIds || [],
     };
   } catch (error) {
     console.error("AI search via backend failed, using fallback", error);
-    
-    // Fallback: smart keyword search with a friendly natural-language reply
+
     const products = searchProducts(query);
     const reply = products.length
       ? `I found ${products.length} item${products.length > 1 ? "s" : ""} that match "${query}".`

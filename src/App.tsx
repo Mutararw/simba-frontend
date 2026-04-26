@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, HashRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,22 +16,21 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Forgot from "./pages/Forgot";
 import Orders from "./pages/Orders";
-
 import { AiAssistant } from "@/components/shop/AiAssistant";
-
 import { GlobalReviewPrompter } from "@/components/shop/GlobalReviewPrompter";
-
 import Dashboard from "@/pages/Dashboard";
 import ScrollToTop from "@/components/ScrollToTop";
+import { ROUTER_MODE } from "@/lib/config";
 
 const queryClient = new QueryClient();
+const Router = ROUTER_MODE === "hash" ? HashRouter : BrowserRouter;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <Router>
         <ScrollToTop />
         <Routes>
           <Route element={<Layout />}>
@@ -52,7 +51,7 @@ const App = () => (
         </Routes>
         <AiAssistant />
         <GlobalReviewPrompter />
-      </BrowserRouter>
+      </Router>
     </TooltipProvider>
   </QueryClientProvider>
 );

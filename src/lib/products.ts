@@ -6,10 +6,22 @@ import i18n from "@/i18n";
 export const STORE = data.store as { name: string; tagline: string; location: string; currency: string };
 export const PRODUCTS: Product[] = data.products as Product[];
 
+interface ApiProduct {
+  id: string | number;
+  name: string;
+  price: string | number;
+  category: string;
+  subcategoryId: number;
+  stock: number;
+  imageUrl?: string;
+  image_url?: string;
+  unit: string;
+}
+
 export interface CategoryMeta {
   key: string;
   count: number;
-  tile: number; // 1-8 -> tailwind tile color
+  tile: number;
   emoji: string;
   image?: string;
 }
@@ -17,7 +29,7 @@ export interface CategoryMeta {
 const TILE_MAP: Record<string, { tile: number; emoji: string }> = {
   "Alcoholic Drinks": { tile: 8, emoji: "🍷" },
   "Cosmetics & Personal Care": { tile: 5, emoji: "🧴" },
-  "General": { tile: 4, emoji: "🛒" },
+  General: { tile: 4, emoji: "🛒" },
   "Food Products": { tile: 1, emoji: "🥫" },
   "Kitchenware & Electronics": { tile: 6, emoji: "🍳" },
   "Cleaning & Sanitary": { tile: 2, emoji: "🧼" },
@@ -26,6 +38,16 @@ const TILE_MAP: Record<string, { tile: number; emoji: string }> = {
   "Kitchen Storage": { tile: 6, emoji: "🥡" },
   "Sports & Wellness": { tile: 2, emoji: "⚽" },
 };
+
+function mapApiProduct(product: ApiProduct): Product {
+  return {
+    ...product,
+    id: typeof product.id === "string" ? parseInt(product.id, 10) : Number(product.id),
+    price: Number(product.price),
+    inStock: product.stock > 0,
+    image: product.imageUrl || product.image_url || "",
+  };
+}
 
 export function getCategoryMeta(products: Product[]): CategoryMeta[] {
   const PREFERENCES: Record<string, string[]> = {
@@ -40,55 +62,56 @@ export function getCategoryMeta(products: Product[]): CategoryMeta[] {
     "Sports & Wellness": ["massage", "wellness", "sport"],
   };
 
-  const counts = products.reduce((acc, p) => {
-    acc.set(p.category, (acc.get(p.category) ?? 0) + 1);
+  const counts = products.reduce((acc, product) => {
+    acc.set(product.category, (acc.get(product.category) ?? 0) + 1);
     return acc;
   }, new Map<string, number>());
 
-  // For each category, find the BEST image from the ENTIRE database
-  return Array.from(counts.entries()).map(([key, count]) => {
-    const keywords = PREFERENCES[key] || [];
-    
-    // 1. Try to find a match WITH keywords in the SAME category
-    let bestProduct = products.find(p => p.category === key && p.image && keywords.some(k => p.name.toLowerCase().includes(k)));
-    
-    // 2. Fallback: Try to find a match WITH keywords in ANY category (handle miscategorization)
-    if (!bestProduct) {
-      bestProduct = products.find(p => p.image && keywords.some(k => p.name.toLowerCase().includes(k)));
-    }
-    
-    // 3. Last fallback: First product in category with an image
-    if (!bestProduct) {
-      bestProduct = products.find(p => p.category === key && p.image);
-    }
+  return Array.from(counts.entries())
+    .map(([key, count]) => {
+      const keywords = PREFERENCES[key] || [];
 
-    return {
-      key,
-      count,
-      tile: TILE_MAP[key]?.tile ?? 4,
-      emoji: TILE_MAP[key]?.emoji ?? "🛍️",
-      image: bestProduct?.image,
-    };
-  }).sort((a, b) => b.count - a.count);
+      let bestProduct = products.find(
+        (product) =>
+          product.category === key &&
+          product.image &&
+          keywords.some((keyword) => product.name.toLowerCase().includes(keyword))
+      );
+
+      if (!bestProduct) {
+        bestProduct = products.find(
+          (product) => product.image && keywords.some((keyword) => product.name.toLowerCase().includes(keyword))
+        );
+      }
+
+      if (!bestProduct) {
+        bestProduct = products.find((product) => product.category === key && product.image);
+      }
+
+      return {
+        key,
+        count,
+        tile: TILE_MAP[key]?.tile ?? 4,
+        emoji: TILE_MAP[key]?.emoji ?? "🛍️",
+        image: bestProduct?.image,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 }
 
 export const CATEGORIES: CategoryMeta[] = getCategoryMeta(PRODUCTS);
 
 export const formatRWF = (n: number) => {
   const lang = i18n.language.split("-")[0];
-  
+
   switch (lang) {
     case "en":
-      // $1 USD ≈ 1300 RWF
       return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n / 1300);
     case "fr":
-      // €1 EUR ≈ 1400 RWF
       return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(n / 1400);
     case "ar":
-      // 1 AED ≈ 350 RWF
       return new Intl.NumberFormat("ar-AE", { style: "currency", currency: "AED", maximumFractionDigits: 2 }).format(n / 350);
     case "zh":
-      // 1 CNY ≈ 180 RWF
       return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(n / 180);
     case "rw":
     default:
@@ -97,29 +120,22 @@ export const formatRWF = (n: number) => {
 };
 
 export function getProductsByCategory(category: string) {
-  return PRODUCTS.filter((p) => p.category === category);
+  return PRODUCTS.filter((product) => product.category === category);
 }
 
 export function searchProducts(q: string): Product[] {
   const term = q.trim().toLowerCase();
   if (!term) return [];
+
   return PRODUCTS.filter(
-    (p) =>
-      p.name.toLowerCase().includes(term) ||
-      p.category.toLowerCase().includes(term)
+    (product) => product.name.toLowerCase().includes(term) || product.category.toLowerCase().includes(term)
   ).slice(0, 40);
 }
 
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    const { data } = await api.get("/api/products");
-    return data.map((p: any) => ({
-      ...p,
-      id: typeof p.id === 'string' ? parseInt(p.id) : Number(p.id),
-      price: Number(p.price),
-      inStock: p.stock > 0,
-      image: p.imageUrl || p.image_url || "",
-    }));
+    const { data } = await api.get<ApiProduct[]>("/api/products");
+    return data.map(mapApiProduct);
   } catch (error) {
     console.error("Failed to fetch products, falling back to static data", error);
     return PRODUCTS;
@@ -128,16 +144,10 @@ export async function fetchProducts(): Promise<Product[]> {
 
 export async function fetchProduct(id: string | number): Promise<Product | null> {
   try {
-    const { data } = await api.get(`/api/products/${id}`);
-    return {
-      ...data,
-      id: typeof data.id === 'string' ? parseInt(data.id) : Number(data.id),
-      price: Number(data.price),
-      inStock: data.stock > 0,
-      image: data.imageUrl || data.image_url || "",
-    };
+    const { data } = await api.get<ApiProduct>(`/api/products/${id}`);
+    return mapApiProduct(data);
   } catch (error) {
     console.error(`Failed to fetch product ${id}`, error);
-    return PRODUCTS.find(p => p.id === Number(id)) || null;
+    return PRODUCTS.find((product) => product.id === Number(id)) || null;
   }
 }

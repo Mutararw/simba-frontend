@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { api } from "../lib/api";
+import { API_URL } from "../lib/config";
 
 describe("API Client", () => {
   it("should have the correct base URL", () => {
-    const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    expect(api.defaults.baseURL).toBe(baseURL);
+    expect(api.defaults.baseURL).toBe(API_URL);
   });
 
   it("should have withCredentials enabled", () => {

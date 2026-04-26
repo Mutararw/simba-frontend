@@ -32,6 +32,15 @@ interface ReviewsState {
   setDismissedCurrent: (val: boolean) => void;
 }
 
+interface PersistedReviewsState {
+  reviews?: Review[];
+  hasReviewed?: boolean;
+  dismissCount?: number;
+  likesGiven?: number;
+  cardClickCount?: number;
+  hasShownLikePrompt?: boolean;
+}
+
 const INITIAL_REVIEWS: Review[] = [
   {
     id: "r1",
@@ -159,8 +168,12 @@ export const useReviews = create<ReviewsState>()(
         cardClickCount: state.cardClickCount,
         hasShownLikePrompt: state.hasShownLikePrompt,
       }),
-      merge: (persistedState: any, currentState) => {
-        const merged = { ...currentState, ...persistedState };
+      merge: (persistedState: unknown, currentState) => {
+        const safePersistedState =
+          persistedState && typeof persistedState === "object"
+            ? (persistedState as PersistedReviewsState)
+            : {};
+        const merged = { ...currentState, ...safePersistedState };
         
         // Ensure default reviews are always present by checking IDs
         const existingIds = new Set((merged.reviews || []).map((r: Review) => r.id));
