@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { AiSearchBar } from "@/components/shop/AiSearchBar";
 import { BranchRouteFinder } from "@/components/shop/BranchRouteFinder";
 import { WhyChooseUs } from "@/components/shop/WhyChooseUs";
+import { GetInTouch } from "@/components/shop/GetInTouch";
 import { useProducts } from "@/hooks/use-products";
 import hero from "@/assets/hero-groceries.jpg";
 
@@ -164,6 +165,9 @@ export default function Index() {
       </div>
 
       <WhyChooseUs />
+
+      {/* Get In Touch / Feedback Section */}
+      <GetInTouch />
     </>
   );
 }

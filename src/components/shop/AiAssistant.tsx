@@ -7,11 +7,14 @@ import { aiSearch } from "@/lib/groq";
 import { useCart } from "@/store/cart";
 import { PRODUCTS } from "@/lib/products";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import type { Product } from "@/lib/types";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  products?: Product[]; 
 }
 
 interface SpeechRecognitionEventLike {
@@ -68,12 +71,14 @@ export function AiAssistant() {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: result.reply,
+          products: result.products,
         };
 
         setMessages((prev) => [...prev, assistantMsg]);
 
         if (result.addToCartIds && result.addToCartIds.length > 0) {
-          const itemsToAdd = PRODUCTS.filter((p) => result.addToCartIds?.includes(String(p.id)));
+          const cartIds = result.addToCartIds.map(String);
+          const itemsToAdd = PRODUCTS.filter((p) => cartIds.includes(String(p.id)));
           let addedCount = 0;
 
           itemsToAdd.forEach((p) => {
@@ -203,6 +208,43 @@ export function AiAssistant() {
                     }`}
                   >
                     {msg.content}
+                    
+                    {msg.products && msg.products.length > 0 && (
+                      <div className="mt-3 -mx-2 overflow-x-auto no-scrollbar">
+                        <div className="flex gap-3 pb-2 px-2" style={{ width: "max-content" }}>
+                          {msg.products.map((p) => (
+                            <div 
+                              key={p.id} 
+                              className="w-48 shrink-0 rounded-xl border border-border bg-card p-2 shadow-sm"
+                            >
+                              <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted mb-2">
+                                <img src={p.imageUrl || p.image} alt={p.name} className="h-full w-full object-cover" />
+                              </div>
+                              <div className="text-[11px] font-medium line-clamp-1 mb-1">{p.name}</div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-primary">RWF {Number(p.price).toLocaleString()}</span>
+                                <Button 
+                                  size="sm" 
+                                  className="h-6 px-2 text-[9px] rounded-full"
+                                  onClick={() => {
+                                    add({
+                                      ...p,
+                                      id: Number(p.id),
+                                      price: Number(p.price),
+                                      inStock: p.stock > 0 || p.inStock,
+                                      image: p.imageUrl || p.image || ""
+                                    });
+                                    toast.success("Added to cart");
+                                  }}
+                                >
+                                  Add
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

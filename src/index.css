@@ -402,6 +402,10 @@
     background: #e4405f;
   }
 
+  .wrapper .whatsapp {
+    background: #25d366;
+  }
+
   .wrapper .tooltip {
     /* ... existing tooltip styles ... */
     position: absolute;
@@ -461,6 +465,12 @@
   .wrapper .instagram:hover .tooltip,
   .wrapper .instagram:hover .tooltip::before {
     background: #e4405f;
+    color: #fff;
+  }
+
+  .wrapper .whatsapp:hover .tooltip,
+  .wrapper .whatsapp:hover .tooltip::before {
+    background: #25d366;
     color: #fff;
   }
 }

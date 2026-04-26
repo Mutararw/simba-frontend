@@ -57,9 +57,11 @@ export function AiSearchBar() {
       try {
         const response = await aiSearch(query);
         setResult(response);
+        setQ(""); // Clear the search bar after response
 
         if (response.addToCartIds && response.addToCartIds.length > 0) {
-          const itemsToAdd = PRODUCTS.filter((p) => response.addToCartIds?.includes(String(p.id)));
+          const cartIds = response.addToCartIds.map(String);
+          const itemsToAdd = PRODUCTS.filter((p) => cartIds.includes(String(p.id)));
           itemsToAdd.forEach((p) => {
             if (p.inStock) add(p);
           });
@@ -170,8 +172,18 @@ export function AiSearchBar() {
 
       {result && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
-            <Sparkles className="h-4 w-4" /> AI Assistant Response
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <Sparkles className="h-4 w-4" /> AI Assistant Response
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setResult(null)}
+              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+            >
+              Clear Results
+            </Button>
           </div>
           <p className="mb-6 rounded-2xl border border-secondary bg-secondary/50 p-4 text-base leading-relaxed text-secondary-foreground shadow-sm">
             {result.reply}
