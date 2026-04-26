@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { aiSearch } from "@/lib/groq";
 import { useCart } from "@/store/cart";
-import { PRODUCTS } from "@/lib/products";
+import { PRODUCTS, formatRWF } from "@/lib/products";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import type { Product } from "@/lib/types";
@@ -222,7 +222,7 @@ export function AiAssistant() {
                               </div>
                               <div className="text-[11px] font-medium line-clamp-1 mb-1">{p.name}</div>
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-bold text-primary">RWF {Number(p.price).toLocaleString()}</span>
+                                <span className="text-[10px] font-bold text-primary">{formatRWF(Number(p.price))}</span>
                                 <Button 
                                   size="sm" 
                                   className="h-6 px-2 text-[9px] rounded-full"

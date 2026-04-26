@@ -215,8 +215,8 @@ export function Footer() {
                   <div className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-white shadow-lg transition-colors hover:bg-slate-700 border border-slate-700">
                     <Apple className="h-4 w-4" />
                     <div className="flex flex-col leading-none">
-                      <span className="text-[10px] opacity-70">Download on</span>
-                      <span className="text-xs font-bold font-display">App Store</span>
+                      <span className="text-[10px] opacity-70">{t("footer.sections.apps.download")}</span>
+                      <span className="text-xs font-bold font-display">{t("footer.sections.apps.appStore")}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -224,8 +224,8 @@ export function Footer() {
                   <div className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-white shadow-lg transition-colors hover:bg-slate-700 border border-slate-700">
                     <Smartphone className="h-4 w-4" />
                     <div className="flex flex-col leading-none">
-                      <span className="text-[10px] opacity-70">Get it on</span>
-                      <span className="text-xs font-bold font-display">Google Play</span>
+                      <span className="text-[10px] opacity-70">{t("footer.sections.apps.get")}</span>
+                      <span className="text-xs font-bold font-display">{t("footer.sections.apps.playStore")}</span>
                     </div>
                   </div>
                 </motion.div>

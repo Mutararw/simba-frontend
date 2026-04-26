@@ -29,7 +29,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5 font-semibold">
+        <Button variant="ghost" size="sm" className="gap-1.5 font-semibold text-white hover:bg-white/20 hover:text-white">
           <Globe className="h-4 w-4" />
           {current.label}
         </Button>

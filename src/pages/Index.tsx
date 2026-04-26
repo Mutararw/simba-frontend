@@ -53,16 +53,16 @@ export default function Index() {
             
             <h1 className="font-display text-5xl font-extrabold leading-[1.1] tracking-tight md:text-6xl lg:text-7xl">
               <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Fresh, Quality Groceries.
+                {t("hero.title").split(".")[0]}.
               </span>
               <br />
               <span className="bg-gradient-to-r from-primary to-[#fd7e14] bg-clip-text text-transparent">
-                Ready When You Are.
+                {t("hero.title").split(".")[1]}
               </span>
             </h1>
             
             <p className="max-w-lg text-lg text-muted-foreground leading-relaxed">
-              Experience Kigali's premium supermarket from the comfort of your home. Shop online and collect at your nearest Simba branch in just 45 minutes. Fresh, fast, and always trusted.
+              {t("hero.subtitle")}
             </p>
             
             <div className="flex flex-wrap gap-4 pt-2">
@@ -102,8 +102,8 @@ export default function Index() {
                 <Clock className="h-6 w-6" />
               </div>
               <div>
-                <div className="font-display text-lg font-black text-foreground">45 min</div>
-                <div className="text-sm font-medium text-muted-foreground">Avg. pick-up time</div>
+                <div className="font-display text-lg font-black text-foreground">{t("hero.stats.time")}</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("hero.stats.label")}</div>
               </div>
             </motion.div>
           </motion.div>
@@ -135,8 +135,8 @@ export default function Index() {
             {/* Featured Section */}
             <section className="container">
               <div className="mb-4 flex items-end justify-between">
-                <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">Popular this week</h2>
-                <Link to="/browse" className="text-sm font-semibold text-primary hover:underline">See all →</Link>
+                <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">{t("home.popular")}</h2>
+                <Link to="/browse" className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {featured.slice(0, 5).map((p) => <ProductCard key={p.id} product={p} />)}
@@ -150,7 +150,7 @@ export default function Index() {
                   <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
                     {cat.emoji} {cat.key}
                   </h2>
-                  <Link to={`/browse?cat=${encodeURIComponent(cat.key)}`} className="text-sm font-semibold text-primary hover:underline">See all →</Link>
+                  <Link to={`/browse?cat=${encodeURIComponent(cat.key)}`} className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
                 </div>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                   {products

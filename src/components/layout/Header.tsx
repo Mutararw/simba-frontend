@@ -107,6 +107,7 @@ export function Header() {
           <div className="hidden md:block mr-2">
              <OrderCountdown />
           </div>
+          <LanguageSwitcher />
           <ThemeToggle />
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/cart")} aria-label="Cart">
             <ShoppingCart className="h-5 w-5" />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Navigation, ShoppingBag, Truck, Crosshair, Map } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,6 +33,7 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 }
 
 export function BranchRouteFinder() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setDraft = useOrder((s) => s.setDraft);
 
@@ -112,16 +114,16 @@ export function BranchRouteFinder() {
           <div className="p-6 md:p-8 flex flex-col justify-center">
             <h2 className="font-display text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Map className="h-6 w-6 text-primary" />
-              Find Your Way to Simba
+              {t("route.title")}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Enter your location or let us find the nearest branch for you.
+              {t("route.subtitle")}
             </p>
 
             <div className="mt-6 space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Your Location
+                  {t("route.startLabel")}
                 </label>
                 <div className="flex gap-2">
                   <Input 
@@ -143,22 +145,22 @@ export function BranchRouteFinder() {
 
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Destination Branch
+                  {t("route.destLabel")}
                 </label>
                 <select
                   value={selectedBranchId}
                   onChange={(e) => setSelectedBranchId(e.target.value)}
                   className="flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="" disabled>Select a branch</option>
+                  <option value="" disabled>{t("route.selectBranch")}</option>
                   {BRANCHES.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {b.name} {nearestBranchId === b.id ? "(Nearest)" : ""}
+                      {b.name} {nearestBranchId === b.id ? `(${t("route.nearest")})` : ""}
                     </option>
                   ))}
                 </select>
                 {nearestBranchId && nearestBranchId === selectedBranchId && (
-                  <p className="text-xs text-primary font-medium mt-1">✓ Recommended based on your location</p>
+                  <p className="text-xs text-primary font-medium mt-1">✓ {t("route.recommended")}</p>
                 )}
               </div>
 
@@ -168,7 +170,7 @@ export function BranchRouteFinder() {
                 disabled={!startLocation || !selectedBranchId}
               >
                 <Navigation className="mr-2 h-5 w-5" />
-                Show Route & Distance
+                {t("route.cta")}
               </Button>
             </div>
           </div>
@@ -203,9 +205,9 @@ export function BranchRouteFinder() {
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             className="absolute top-full mt-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl shadow-primary/20"
           >
-            <h3 className="font-display text-xl font-bold text-center mb-2">Planning your visit?</h3>
+            <h3 className="font-display text-xl font-bold text-center mb-2">{t("route.popupTitle")}</h3>
             <p className="text-muted-foreground text-center text-sm mb-6">
-              You are routing to <strong className="text-foreground">{selectedBranch.name}</strong>. How would you like to proceed?
+              {t("route.popupText", { name: selectedBranch.name })}
             </p>
             
             <div className="grid grid-cols-2 gap-4">
@@ -217,8 +219,8 @@ export function BranchRouteFinder() {
                   <ShoppingBag className="h-6 w-6" />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold">Shop In-Store</div>
-                  <div className="text-xs text-muted-foreground">Browse catalog now</div>
+                  <div className="font-bold">{t("route.shopInStore")}</div>
+                  <div className="text-xs text-muted-foreground">{t("route.shopInStoreSub")}</div>
                 </div>
               </button>
 
@@ -230,8 +232,8 @@ export function BranchRouteFinder() {
                   <Truck className="h-6 w-6" />
                 </div>
                 <div className="text-center">
-                  <div className="font-bold text-primary">Place Pick-up</div>
-                  <div className="text-xs text-primary/80">Order online, pick up there</div>
+                  <div className="font-bold text-primary">{t("route.placePickup")}</div>
+                  <div className="text-xs text-primary/80">{t("route.placePickupSub")}</div>
                 </div>
               </button>
             </div>
@@ -240,7 +242,7 @@ export function BranchRouteFinder() {
               onClick={() => setShowActionPopup(false)}
               className="mt-6 w-full text-center text-xs font-semibold text-muted-foreground hover:text-foreground underline"
             >
-              Just looking at the route for now
+              {t("route.close")}
             </button>
           </motion.div>
         )}

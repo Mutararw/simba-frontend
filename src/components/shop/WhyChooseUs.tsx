@@ -27,9 +27,9 @@ export function WhyChooseUs() {
     <section id="review-section" className="container py-12 pb-20">
       <div className="mb-8 flex items-end justify-between">
         <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-          {t("whyChooseUs", { defaultValue: "Why Choose Us" })}
+          {t("reviews.whyChooseUs")}
         </h2>
-        <span className="text-sm font-semibold text-primary">Over 10,000+ happy customers</span>
+        <span className="text-sm font-semibold text-primary">{t("home.happyCustomers")}</span>
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -123,7 +123,7 @@ export function WhyChooseUs() {
                 </p>
                 
                 <div className="mt-8 flex items-center justify-between border-t border-border pt-4">
-                  <span className="text-sm font-medium text-muted-foreground">Verified Customer • {selectedReview.date}</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t("home.verified")} • {selectedReview.date}</span>
                   <button
                     onClick={(e) => toggleLike(e, selectedReview.id)}
                     className={`flex items-center gap-2 rounded-full px-4 py-2 font-bold transition-all ${
@@ -133,7 +133,7 @@ export function WhyChooseUs() {
                     }`}
                   >
                     <Heart className={`h-5 w-5 ${localLiked[selectedReview.id] ? "fill-current" : ""}`} />
-                    {localLiked[selectedReview.id] ? "Liked" : "Helpful"} ({(selectedReview.likes + (localLiked[selectedReview.id] ? 1 : 0))})
+                    {localLiked[selectedReview.id] ? t("home.liked") : t("home.helpful")} ({(selectedReview.likes + (localLiked[selectedReview.id] ? 1 : 0))})
                   </button>
                 </div>
               </motion.div>

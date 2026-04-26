@@ -67,8 +67,8 @@ export function AiSearchBar() {
           });
 
           if (itemsToAdd.length > 0) {
-            toast.success(`Automatically added ${itemsToAdd.length} item(s) to your cart!`, {
-              icon: "Cart",
+            toast.success(t("search.autoAdd", { count: itemsToAdd.length }), {
+              icon: "🛒",
             });
           }
         }
@@ -93,11 +93,11 @@ export function AiSearchBar() {
       setIsListening(false);
       void askWithQuery(transcript);
     };
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error", event.error);
-      setIsListening(false);
-      toast.error("Could not hear you properly. Please try again.");
-    };
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+        toast.error(t("search.voiceError"));
+      };
     recognition.onend = () => setIsListening(false);
     recognitionRef.current = recognition;
 
@@ -115,7 +115,7 @@ export function AiSearchBar() {
     }
 
     if (!recognitionRef.current) {
-      toast.error("Voice input is not supported in your browser.");
+      toast.error(t("search.voiceSupport"));
       return;
     }
 
@@ -140,7 +140,7 @@ export function AiSearchBar() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={isListening ? "Listening..." : t("search.placeholder")}
+          placeholder={isListening ? t("search.listening") : t("search.placeholder")}
           className="flex-1 border-0 bg-transparent text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
 
@@ -174,7 +174,7 @@ export function AiSearchBar() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-              <Sparkles className="h-4 w-4" /> AI Assistant Response
+              <Sparkles className="h-4 w-4" /> {t("search.response")}
             </div>
             <Button 
               variant="ghost" 
@@ -182,7 +182,7 @@ export function AiSearchBar() {
               onClick={() => setResult(null)}
               className="h-8 text-xs text-muted-foreground hover:text-foreground"
             >
-              Clear Results
+              {t("search.clear")}
             </Button>
           </div>
           <p className="mb-6 rounded-2xl border border-secondary bg-secondary/50 p-4 text-base leading-relaxed text-secondary-foreground shadow-sm">

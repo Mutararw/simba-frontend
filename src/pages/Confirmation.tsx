@@ -37,14 +37,14 @@ export default function Confirmation() {
           <div className="font-display text-2xl font-extrabold tracking-wider text-primary">{order.id}</div>
         </div>
         <div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">Pick-up</div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">{t("confirm.pickup")}</div>
           <div className="font-display text-base font-bold">{t("confirm.eta", { time: order.pickupTime })}</div>
         </div>
       </div>
 
       {!hasReviewed ? (
         <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-          <h2 className="font-display text-lg font-bold">How was your experience?</h2>
+          <h2 className="font-display text-lg font-bold">{t("reviews.formTitle")}</h2>
           <div className="mt-3 flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
               <button key={n} onClick={() => setRating(n)} aria-label={`${n} stars`} className="transform transition-transform hover:scale-110">
@@ -54,7 +54,7 @@ export default function Confirmation() {
           </div>
           <Textarea
             className="mt-3 rounded-xl resize-none"
-            placeholder="Tell us what you loved or what we can improve..."
+            placeholder={t("reviews.formPlaceholder")}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
@@ -67,7 +67,7 @@ export default function Confirmation() {
               setComment("");
             }}
           >
-            Submit Feedback
+            {t("reviews.formSubmit")}
           </Button>
         </div>
       ) : null}

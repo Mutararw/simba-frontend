@@ -31,9 +31,9 @@ export default function Checkout() {
   if (!branch || !draft.pickupTime || items.length === 0) {
     return (
       <div className="container py-20 text-center">
-        <p className="text-muted-foreground">Please select branch and pick-up time first.</p>
+        <p className="text-muted-foreground">{t("checkout.missingInfo")}</p>
         <Button className="mt-4" onClick={() => navigate("/branches?next=checkout")}>
-          Choose branch
+          {t("checkout.chooseBranch")}
         </Button>
       </div>
     );
@@ -101,28 +101,28 @@ export default function Checkout() {
         <h1 className="font-display text-3xl font-bold">{t("checkout.title")}</h1>
         <div className="mt-6 rounded-2xl border border-border bg-card p-5">
           <div className="mb-4 space-y-3">
-            <Label className="text-base">Select Payment Method</Label>
+            <Label className="text-base">{t("checkout.paymentMethod")}</Label>
             <div className="grid grid-cols-3 gap-3">
               <button
                 type="button"
                 onClick={() => setPaymentMethod("momo")}
                 className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "momo" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
-                <Smartphone className="h-5 w-5" /> MoMo
+                <Smartphone className="h-5 w-5" /> {t("checkout.momo")}
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod("card")}
                 className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "card" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
-                <CreditCard className="h-5 w-5" /> Card
+                <CreditCard className="h-5 w-5" /> {t("checkout.card")}
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod("cash")}
                 className={`flex flex-col items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all ${paymentMethod === "cash" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"}`}
               >
-                <Banknote className="h-5 w-5" /> Cash
+                <Banknote className="h-5 w-5" /> {t("checkout.cash")}
               </button>
             </div>
           </div>
@@ -144,20 +144,20 @@ export default function Checkout() {
           {paymentMethod === "card" && (
             <>
               <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 font-display text-lg font-bold">
-                <CreditCard className="h-5 w-5 text-primary" /> Pay with Card
+                <CreditCard className="h-5 w-5 text-primary" /> {t("checkout.cardTitle")}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">Enter your card details to process the deposit.</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t("checkout.cardNote")}</p>
               <div className="mt-4 space-y-2">
-                <Label htmlFor="card">Card Number</Label>
+                <Label htmlFor="card">{t("checkout.cardNumber")}</Label>
                 <Input id="card" placeholder="0000 0000 0000 0000" />
               </div>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="expiry">Expiry</Label>
+                  <Label htmlFor="expiry">{t("checkout.expiry")}</Label>
                   <Input id="expiry" placeholder="MM/YY" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cvv">CVV</Label>
+                  <Label htmlFor="cvv">{t("checkout.cvv")}</Label>
                   <Input id="cvv" placeholder="123" />
                 </div>
               </div>
@@ -167,10 +167,10 @@ export default function Checkout() {
           {paymentMethod === "cash" && (
             <>
               <div className="mt-6 flex items-center gap-2 border-t border-border pt-4 font-display text-lg font-bold">
-                <Banknote className="h-5 w-5 text-primary" /> Pay on Pickup
+                <Banknote className="h-5 w-5 text-primary" /> {t("checkout.cashTitle")}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                You will pay the full amount when you pick up your order at the branch.
+                {t("checkout.cashNote")}
               </p>
             </>
           )}
@@ -187,7 +187,7 @@ export default function Checkout() {
                 {t("checkout.paying")}
               </>
             ) : paymentMethod === "cash" ? (
-              "Confirm Order"
+              t("checkout.confirm")
             ) : (
               t("checkout.pay", { amount: formatRWF(DEPOSIT) })
             )}
@@ -198,9 +198,9 @@ export default function Checkout() {
       <aside className="h-fit rounded-2xl border border-border bg-card p-5">
         <h2 className="mb-3 font-display text-lg font-bold">{t("checkout.summary")}</h2>
         <div className="space-y-1 text-sm">
-          <div className="text-muted-foreground">Pick-up at</div>
+          <div className="text-muted-foreground">{t("checkout.pickupAt")}</div>
           <div className="font-semibold">{branch.name}</div>
-          <div className="text-muted-foreground">at {draft.pickupTime}</div>
+          <div className="text-muted-foreground">{t("checkout.at")} {draft.pickupTime}</div>
         </div>
         <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto text-sm">
           {items.map((i) => (

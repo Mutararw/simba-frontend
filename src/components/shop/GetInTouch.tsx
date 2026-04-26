@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageCircle,
@@ -16,6 +17,7 @@ import {
 type FormState = "box" | "form" | "thanks";
 
 export function GetInTouch() {
+  const { t } = useTranslation();
   const [state, setState] = useState<FormState>("box");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -53,7 +55,7 @@ export function GetInTouch() {
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary mb-6">
             <MessageCircle className="h-3.5 w-3.5" />
-            Get In Touch
+            {t("contact.badge")}
           </span>
         </motion.div>
 
@@ -65,10 +67,10 @@ export function GetInTouch() {
           className="font-display text-3xl font-extrabold tracking-tight md:text-5xl lg:text-6xl mb-6"
         >
           <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            We'd Love to{" "}
+            {t("contact.title").split(" ").slice(0, 3).join(" ")}{" "}
           </span>
           <span className="bg-gradient-to-r from-primary to-[#fd7e14] bg-clip-text text-transparent">
-            Hear From You
+            {t("contact.title").split(" ").slice(3).join(" ")}
           </span>
         </motion.h2>
 
@@ -79,10 +81,7 @@ export function GetInTouch() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed mb-12"
         >
-          Did you face any challenges while shopping with us? Did our service make your day better? 
-          Or maybe you have some advice to help us improve? Whatever it is —{" "}
-          <span className="font-semibold text-primary">we want to know!</span>{" "}
-          Your feedback shapes the future of Simba.
+          {t("contact.subtitle")}
         </motion.p>
 
         {/* The Surprise Box / Form / Thank You */}
@@ -137,10 +136,10 @@ export function GetInTouch() {
                   </motion.div>
 
                   <h3 className="font-display text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
-                    Tap to Share Your Thoughts
+                    {t("contact.boxTitle")}
                   </h3>
                   <p className="text-sm text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
-                    A little surprise awaits inside — your voice matters to us! 💬
+                    {t("contact.boxSubtitle")}
                   </p>
 
                   {/* Shimmer effect */}
@@ -170,8 +169,8 @@ export function GetInTouch() {
                         <MessageSquare className="h-4.5 w-4.5" />
                       </div>
                       <div className="text-left">
-                        <p className="font-display text-sm font-bold text-foreground">Send Us Feedback</p>
-                        <p className="text-xs text-muted-foreground">We read every single message</p>
+                        <p className="font-display text-sm font-bold text-foreground">{t("contact.formTitle")}</p>
+                        <p className="text-xs text-muted-foreground">{t("contact.formSubtitle")}</p>
                       </div>
                     </div>
                     <button
@@ -187,7 +186,7 @@ export function GetInTouch() {
                     {/* Name */}
                     <div className="relative group">
                       <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Your Name
+                        {t("contact.nameLabel")}
                       </label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
@@ -205,7 +204,7 @@ export function GetInTouch() {
                     {/* Email (optional) */}
                     <div className="relative group">
                       <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Email <span className="text-muted-foreground/40 normal-case">(optional)</span>
+                        {t("contact.emailLabel")}
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
@@ -222,7 +221,7 @@ export function GetInTouch() {
                     {/* Message */}
                     <div className="relative group">
                       <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Your Message
+                        {t("contact.messageLabel")}
                       </label>
                       <textarea
                         value={message}
@@ -243,7 +242,7 @@ export function GetInTouch() {
                     >
                       <span className="relative z-10 flex items-center gap-2">
                         <Send className="h-4 w-4" />
-                        Send Feedback
+                        {t("contact.submit")}
                       </span>
                       {/* Hover shimmer */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -311,7 +310,7 @@ export function GetInTouch() {
                     transition={{ delay: 0.3 }}
                     className="font-display text-2xl md:text-3xl font-extrabold text-foreground mb-3"
                   >
-                    Thank You for Your Feedback! 🎉
+                    {t("contact.thanksTitle")}
                   </motion.h3>
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
@@ -319,7 +318,7 @@ export function GetInTouch() {
                     transition={{ delay: 0.4 }}
                     className="text-muted-foreground text-sm md:text-base"
                   >
-                    Your message means the world to us. We'll use it to make Simba even better!
+                    {t("contact.thanksSubtitle")}
                   </motion.p>
                 </div>
               </motion.div>
