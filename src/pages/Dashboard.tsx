@@ -41,7 +41,25 @@ const recentOrders = [
 ];
 
 export default function Dashboard() {
-  const user = useAuth((s) => s.user);
+  const storeUser = useAuth((s) => s.user);
+  const { data: session, isPending } = useSession();
+  
+  // Use session user as fallback while store is syncing
+  const user = storeUser || (session?.user ? {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    role: (session.user as any).accountType || "customer"
+  } : null);
+
+  // Wait for session to load before deciding to redirect
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   // Protect route
   if (!user || (user.role !== "admin" && user.role !== "manager")) {

@@ -56,6 +56,10 @@ export default function Checkout() {
     try {
       const { data: serverOrder } = await api.post("/api/orders", payload);
 
+      if (!serverOrder || !serverOrder.id) {
+        throw new Error("Invalid response from server");
+      }
+
       setLastOrder({
         id: serverOrder.id.toString(),
         branchId: branch.id,

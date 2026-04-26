@@ -21,6 +21,7 @@ import { GlobalReviewPrompter } from "@/components/shop/GlobalReviewPrompter";
 import Dashboard from "@/pages/Dashboard";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ROUTER_MODE } from "@/lib/config";
+import { SessionManager } from "@/lib/SessionManager";
 
 const queryClient = new QueryClient();
 const Router = ROUTER_MODE === "hash" ? HashRouter : BrowserRouter;
@@ -28,6 +29,7 @@ const Router = ROUTER_MODE === "hash" ? HashRouter : BrowserRouter;
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <SessionManager />
       <Toaster />
       <Sonner />
       <Router>
