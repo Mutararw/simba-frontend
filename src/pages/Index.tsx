@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
-import { Clock, Sparkles, MapPin, Smartphone, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Clock, Sparkles, MapPin, Smartphone, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CategoryRail } from "@/components/shop/CategoryRail";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { AiSearchBar } from "@/components/shop/AiSearchBar";
@@ -10,11 +11,63 @@ import { BranchRouteFinder } from "@/components/shop/BranchRouteFinder";
 import { WhyChooseUs } from "@/components/shop/WhyChooseUs";
 import { GetInTouch } from "@/components/shop/GetInTouch";
 import { useProducts } from "@/hooks/use-products";
+import { ProductFilters, type FilterState } from "@/components/shop/ProductFilters";
 import hero from "@/assets/hero-groceries.jpg";
+import { useMemo, useState } from "react";
 
 export default function Index() {
   const { t } = useTranslation();
   const { products, categories, loading } = useProducts();
+
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 100000;
+    return Math.max(...products.map((p) => p.price));
+  }, [products]);
+
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [0, maxPrice],
+    inStockOnly: false,
+    sortBy: "relevance",
+  });
+
+  // Sync max price when products load
+  useMemo(() => {
+    if (maxPrice > 0 && filters.priceRange[1] === 100000) {
+      setFilters(f => ({ ...f, priceRange: [0, maxPrice] }));
+    }
+  }, [maxPrice]);
+
+  const isFiltering = useMemo(() => {
+    return filters.priceRange[0] > 0 || 
+           filters.priceRange[1] < maxPrice || 
+           filters.inStockOnly || 
+           filters.sortBy !== "relevance";
+  }, [filters, maxPrice]);
+
+  const filteredProducts = useMemo(() => {
+    if (!isFiltering) return [];
+    
+    let l = [...products];
+    
+    // Price range
+    l = l.filter((p) => p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]);
+
+    // Stock
+    if (filters.inStockOnly) {
+      l = l.filter((p) => p.inStock);
+    }
+
+    // Sort
+    if (filters.sortBy === "price-low") {
+      l = l.sort((a, b) => a.price - b.price);
+    } else if (filters.sortBy === "price-high") {
+      l = l.sort((a, b) => b.price - a.price);
+    } else if (filters.sortBy === "name") {
+      l = l.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return l.slice(0, 20);
+  }, [products, filters, isFiltering]);
   
   // Get top categories with products
   const topCategories = categories
@@ -110,59 +163,119 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Search */}
-      <section className="container -mt-2 pb-2 md:pb-4">
+      {/* Search & Filters */}
+      <section className="container -mt-2 pb-8 space-y-4">
         <AiSearchBar />
+        <ProductFilters 
+          maxPrice={maxPrice} 
+          initialFilters={filters} 
+          onFilterChange={setFilters} 
+        />
       </section>
 
-      {/* Location Finder */}
-      <BranchRouteFinder />
-
-      <CategoryRail />
-
-      <div className="space-y-16 pb-16">
-        {loading ? (
-          <section className="container">
-            <div className="h-8 w-48 bg-secondary animate-pulse rounded-md mb-4" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="aspect-[3/4] bg-secondary animate-pulse rounded-2xl" />
-              ))}
+      <AnimatePresence mode="wait">
+        {isFiltering ? (
+          <motion.div
+            key="filtered"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="container pb-16"
+          >
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="font-display text-2xl font-bold tracking-tight">Search Results</h2>
+                <Badge variant="outline" className="rounded-full px-3 py-1 font-bold text-primary border-primary/20">
+                  {filteredProducts.length} items
+                </Badge>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setFilters({ priceRange: [0, maxPrice], inStockOnly: false, sortBy: "relevance" })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="mr-2 h-4 w-4" /> Reset
+              </Button>
             </div>
-          </section>
+            
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {filteredProducts.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center bg-muted/30 rounded-3xl border border-dashed">
+                <p className="text-muted-foreground font-medium">No products match your current filters.</p>
+                <Button 
+                  variant="link" 
+                  onClick={() => setFilters({ priceRange: [0, maxPrice], inStockOnly: false, sortBy: "relevance" })}
+                  className="mt-2 text-primary"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </motion.div>
         ) : (
-          <>
-            {/* Featured Section */}
-            <section className="container">
-              <div className="mb-4 flex items-end justify-between">
-                <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">{t("home.popular")}</h2>
-                <Link to="/browse" className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {featured.slice(0, 5).map((p) => <ProductCard key={p.id} product={p} />)}
-              </div>
-            </section>
+          <motion.div
+            key="default"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-4"
+          >
+            {/* Location Finder */}
+            <BranchRouteFinder />
 
-            {/* Category Blocks */}
-            {topCategories.map((cat) => (
-              <section key={cat.key} className="container">
-                <div className="mb-4 flex items-end justify-between">
-                  <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
-                    {cat.emoji} {cat.key}
-                  </h2>
-                  <Link to={`/browse?cat=${encodeURIComponent(cat.key)}`} className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
-                </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                  {products
-                    .filter((p) => p.category === cat.key && p.inStock)
-                    .slice(0, 5)
-                    .map((p) => <ProductCard key={p.id} product={p} />)}
-                </div>
-              </section>
-            ))}
-          </>
+            <CategoryRail />
+
+            <div className="space-y-16 pb-16">
+              {loading ? (
+                <section className="container">
+                  <div className="h-8 w-48 bg-secondary animate-pulse rounded-md mb-4" />
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="aspect-[3/4] bg-secondary animate-pulse rounded-2xl" />
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <>
+                  {/* Featured Section */}
+                  <section className="container">
+                    <div className="mb-4 flex items-end justify-between">
+                      <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">{t("home.popular")}</h2>
+                      <Link to="/browse" className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                      {featured.slice(0, 5).map((p) => <ProductCard key={p.id} product={p} />)}
+                    </div>
+                  </section>
+
+                  {/* Category Blocks */}
+                  {topCategories.map((cat) => (
+                    <section key={cat.key} className="container">
+                      <div className="mb-4 flex items-end justify-between">
+                        <h2 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
+                          {cat.emoji} {cat.key}
+                        </h2>
+                        <Link to={`/browse?cat=${encodeURIComponent(cat.key)}`} className="text-sm font-semibold text-primary hover:underline">{t("home.seeAll")}</Link>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                        {products
+                          .filter((p) => p.category === cat.key && p.inStock)
+                          .slice(0, 5)
+                          .map((p) => <ProductCard key={p.id} product={p} />)}
+                      </div>
+                    </section>
+                  ))}
+                </>
+              )}
+            </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
       <WhyChooseUs />
 
