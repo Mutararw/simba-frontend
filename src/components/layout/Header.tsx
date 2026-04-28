@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User as UserIcon, LogOut, Home, Grid, Store, Menu, X } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Home, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -109,6 +109,10 @@ export function Header() {
           </div>
           <LanguageSwitcher />
           <ThemeToggle />
+          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/notifications")} aria-label="Notifications">
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-white ring-2 ring-[#fd7e14]" />
+          </Button>
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/cart")} aria-label="Cart">
             <ShoppingCart className="h-5 w-5" />
             {count > 0 && (
@@ -124,10 +128,22 @@ export function Header() {
                   <UserIcon className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">{user.email}</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl">
+                <DropdownMenuLabel className="p-3">
+                  <div className="font-bold">{user.name}</div>
+                  <div className="text-xs text-muted-foreground">{user.email}</div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => { setUser(null); navigate("/"); }}>
+                {(user.role === 'manager' || (user as any).accountType === 'admin') && (
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <Settings className="mr-2 h-4 w-4" /> Account Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { setUser(null); navigate("/"); }} className="text-red-500 focus:text-red-500">
                   <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>

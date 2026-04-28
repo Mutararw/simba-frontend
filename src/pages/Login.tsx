@@ -8,8 +8,10 @@ import { signIn, signInWithGoogle, signInWithGithub } from "@/lib/auth";
 import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
 import { BRANCHES } from "@/lib/branches";
-import { User, ShieldCheck, Building2, Eye, EyeOff, Lock } from "lucide-react";
+import { User, ShieldCheck, Building2, Eye, EyeOff, Lock, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+type UserRole = "customer" | "manager" | "admin" | "supplier";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -18,7 +20,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<"customer" | "manager">("customer");
+  const [role, setRole] = useState<UserRole>("customer");
   const [selectedBranch, setSelectedBranch] = useState(BRANCHES[0].id);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,29 +38,43 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // For demonstration: Check if it's a manager login simulation
-      let u;
-      if (role === "manager") {
-        const branch = BRANCHES.find(b => b.id === selectedBranch);
-        u = {
-          id: `mgr-${selectedBranch}`,
-          name: `${branch?.name} Manager`,
-          email: `${selectedBranch}@simba.com`,
-          role: "manager",
-          branchId: selectedBranch
-        };
-      } else {
-        u = await signIn(email, password);
-        u = { ...u, role };
-      }
+      const u = await signIn(email, password);
       
-      setUser(u);
+      // DB stores "user" but UI shows "customer" — normalize
+      const accountType = (u as any).accountType || "user";
+
+      // Role verification
+      if (role === "manager" && accountType !== "manager" && accountType !== "admin") {
+        throw new Error("You do not have manager privileges.");
+      }
+      if (role === "admin" && accountType !== "admin") {
+        throw new Error("Access denied. Admin privileges required.");
+      }
+      if (role === "supplier" && accountType !== "supplier" && accountType !== "admin") {
+        throw new Error("Access denied. Supplier privileges required.");
+      }
+
+      const isApproved = (u as any).isApproved ?? true;
+      if (!isApproved && accountType !== "user") {
+        throw new Error("Your account is pending administrator approval.");
+      }
+
+      const finalUser = { 
+        ...u, 
+        role: accountType,
+        accountType,
+        isApproved,
+        branchId: role === "manager" ? selectedBranch : (u as any).branchId 
+      };
+      
+      setUser(finalUser);
       toast.success(`Welcome back, ${u.name}!`);
 
-      if (role === "manager") {
-        navigate("/dashboard");
-      } else {
+      // "user" = regular customer → go home. Everything else → dashboard
+      if (accountType === "user") {
         navigate("/");
+      } else {
+        navigate("/dashboard");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Invalid credentials");
@@ -76,42 +92,28 @@ export default function Login() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md rounded-[2.5rem] border border-border bg-card p-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]"
+        className="relative w-full max-w-lg rounded-[2.5rem] border border-border bg-card p-1 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)]"
       >
         <div className="p-8 md:p-10">
           <div className="text-center mb-8">
             <h1 className="font-display text-4xl font-black tracking-tight text-foreground">{t("auth.signin")}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Access your Simba Supermarket account</p>
+            <p className="mt-2 text-sm text-muted-foreground">Access your Simba Supermarket portal</p>
           </div>
 
           {/* User Type Tabs */}
-          <div className="relative mb-8 grid grid-cols-2 gap-1 rounded-2xl bg-secondary p-1">
-            <button
-              onClick={() => setRole("customer")}
-              className={`relative flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
-                role === "customer" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <User className="h-4 w-4" />
-              Customer
-            </button>
-            <button
-              onClick={() => setRole("manager")}
-              className={`relative flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all ${
-                role === "manager" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              Manager
-            </button>
+          <div className="relative mb-8 grid grid-cols-4 gap-1 rounded-2xl bg-secondary p-1">
+            <TabButton active={role === "customer"} onClick={() => setRole("customer")} icon={<User className="h-4 w-4" />} label="Client" />
+            <TabButton active={role === "manager"} onClick={() => setRole("manager")} icon={<ShieldCheck className="h-4 w-4" />} label="Manager" />
+            <TabButton active={role === "supplier"} onClick={() => setRole("supplier")} icon={<Truck className="h-4 w-4" />} label="Supplier" />
+            <TabButton active={role === "admin"} onClick={() => setRole("admin")} icon={<Lock className="h-4 w-4" />} label="Admin" />
           </div>
 
           <AnimatePresence mode="wait">
             <motion.div
               key={role}
-              initial={{ opacity: 0, x: role === "customer" ? -20 : 20 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: role === "customer" ? 20 : -20 }}
+              exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
               {role === "customer" && (
@@ -149,16 +151,6 @@ export default function Login() {
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                      <motion.svg 
-                        width="12" height="8" viewBox="0 0 12 8" fill="none" 
-                        xmlns="http://www.w3.org/2000/svg"
-                        animate={{ y: [0, 2, 0] }}
-                        transition={{ repeat: Infinity, duration: 2 }}
-                      >
-                        <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </motion.svg>
-                    </div>
                   </div>
                 </div>
               )}
@@ -176,17 +168,17 @@ export default function Login() {
           <form onSubmit={submit} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
-                {role === "manager" ? "Manager Username" : t("auth.email")}
+                {role === "customer" ? t("auth.email") : `${role.charAt(0).toUpperCase() + role.slice(1)} ID`}
               </Label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input 
                   id="email" 
-                  type={role === "manager" ? "text" : "email"} 
+                  type={role === "customer" ? "email" : "text"} 
                   required 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)} 
-                  placeholder={role === "manager" ? "Enter your username" : "you@example.com"}
+                  placeholder={role === "customer" ? "you@example.com" : `Enter your ${role} ID`}
                   className="h-14 rounded-2xl border-border bg-background pl-12 pr-4 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>
@@ -232,32 +224,42 @@ export default function Login() {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
-                  Please wait...
+                  Authenticating...
                 </div>
               ) : (
-                role === "manager" ? "Access Dashboard" : t("auth.signin")
+                role === "customer" ? t("auth.signin") : `Enter ${role.charAt(0).toUpperCase() + role.slice(1)} Portal`
               )}
             </Button>
           </form>
 
-          {role === "customer" && (
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              {t("auth.noAccount")}{" "}
-              <Link to="/register" className="font-bold text-primary hover:underline">
-                {t("auth.signup")}
-              </Link>
-            </p>
-          )}
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            {t("auth.noAccount")}{" "}
+            <Link to="/register" className="font-bold text-primary hover:underline">
+              {t("auth.signup")}
+            </Link>
+          </p>
           
-          {role === "manager" && (
-            <div className="mt-6 rounded-xl bg-primary/5 p-4 text-center">
-              <p className="text-xs text-primary font-medium">
-                Tip: Manager login is simulated for training purposes.
-              </p>
-            </div>
-          )}
+          <div className="mt-6 rounded-xl bg-primary/5 p-4 text-center">
+            <p className="text-[10px] text-primary/70 font-bold uppercase tracking-widest">
+              Authorized Simba Supermarket Personnel Only
+            </p>
+          </div>
         </div>
       </motion.div>
     </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 transition-all ${
+        active ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {icon}
+      <span className="text-[10px] font-black uppercase tracking-tighter">{label}</span>
+    </button>
   );
 }

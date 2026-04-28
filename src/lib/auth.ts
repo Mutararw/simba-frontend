@@ -4,22 +4,28 @@ import type { User } from "./types";
 
 function getAuthErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) {
-    if (error.message.includes("Network Error") || error.message.toLowerCase().includes("fetch")) {
-      return "Authentication service is currently unavailable. Please try again shortly.";
-    }
-
+    // Show the real error for debugging, not a generic message
     return error.message || fallback;
   }
-
   return fallback;
 }
 
-export async function signUp(email: string, password: string, name: string): Promise<User> {
+export async function signUp(
+  email: string,
+  password: string,
+  name: string,
+  accountType: string = "user",
+  adminRole?: string,
+  branchId?: string
+): Promise<User> {
   try {
     const { data, error } = await authClient.signUp.email({
       email,
       password,
       name,
+      accountType,
+      adminRole,
+      branchId,
     });
 
     if (error) {
@@ -30,6 +36,9 @@ export async function signUp(email: string, password: string, name: string): Pro
       id: data.user.id,
       email: data.user.email,
       name: data.user.name,
+      accountType: (data.user as any).accountType,
+      branchId: (data.user as any).branchId,
+      role: (data.user as any).accountType,
     };
   } catch (error) {
     throw new Error(getAuthErrorMessage(error, "An error occurred during sign up."));
@@ -47,10 +56,14 @@ export async function signIn(email: string, password: string): Promise<User> {
       throw new Error(error.message || "Invalid credentials.");
     }
 
+    // Return ALL fields from the server including accountType and branchId
     return {
       id: data.user.id,
       email: data.user.email,
       name: data.user.name,
+      accountType: (data.user as any).accountType,
+      branchId: (data.user as any).branchId,
+      role: (data.user as any).accountType,
     };
   } catch (error) {
     throw new Error(getAuthErrorMessage(error, "Invalid credentials."));

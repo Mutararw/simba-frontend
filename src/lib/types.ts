@@ -31,4 +31,5 @@ export interface User {
   role?: "customer" | "manager" | "admin" | "accountant";
   accountType?: string;
   adminRole?: string;
+  branchId?: string;
 }
