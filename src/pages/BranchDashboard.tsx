@@ -49,11 +49,14 @@ export default function BranchDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [inventory, setInventory] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     revenue: 0,
     ordersCount: 0,
     stockCount: 0,
     staffCount: 0,
+    customersCount: 0,
     salesOverTime: [] as any[]
   });
   const [loading, setLoading] = useState(true);
@@ -68,17 +71,19 @@ export default function BranchDashboard() {
   const fetchBranchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, ordersRes, inventoryRes, usersRes] = await Promise.all([
+      const [statsRes, ordersRes, inventoryRes, usersRes, customersRes] = await Promise.all([
         api.get("/api/branches/stats"),
         api.get("/api/orders/branch"),
         api.get("/api/branches/inventory"),
-        api.get("/api/branches/users")
+        api.get("/api/branches/users"),
+        api.get("/api/branches/customers")
       ]);
       
       setStats(statsRes.data);
       setOrders(ordersRes.data);
       setInventory(inventoryRes.data);
       setStaff(usersRes.data);
+      setCustomers(customersRes.data);
     } catch (err) {
       toast.error("Failed to fetch branch data");
     } finally {
@@ -127,6 +132,7 @@ export default function BranchDashboard() {
           <SidebarLink icon={<DollarSign />} label="Payments" active={activeTab === "payments"} onClick={() => setActiveTab("payments")} />
           <SidebarLink icon={<Package />} label="Inventory" active={activeTab === "inventory"} onClick={() => setActiveTab("inventory")} />
           <SidebarLink icon={<Users />} label="Team" active={activeTab === "team"} onClick={() => setActiveTab("team")} />
+          <SidebarLink icon={<UserPlus />} label="Customers" active={activeTab === "customers"} onClick={() => setActiveTab("customers")} />
           <SidebarLink icon={<Truck />} label="Suppliers" active={activeTab === "suppliers"} onClick={() => setActiveTab("suppliers")} />
           <SidebarLink icon={<MessageSquare />} label="Messages" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
         </nav>
@@ -161,11 +167,12 @@ export default function BranchDashboard() {
               className="space-y-8"
             >
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
                 <StatCard title="Total Sales" value={`RWF ${(stats?.revenue || 0).toLocaleString()}`} trend="Real-time" icon={<DollarSign />} />
                 <StatCard title="Total Orders" value={(stats?.ordersCount || 0).toString()} trend="Global" icon={<ShoppingBag />} />
+                <StatCard title="Total Customers" value={(stats?.customersCount || 0).toString()} trend="Active" icon={<UserPlus />} />
                 <StatCard title="Products in Store" value={(inventory || []).reduce((acc, curr) => acc + (curr.stock || 0), 0).toString()} trend="Current Stock" icon={<Package />} />
-                <StatCard title="Staff Members" value={(stats?.staffCount || 0).toString()} trend="Team" icon={<Users />} />
+                <StatCard title="Branch Staff" value={(stats?.staffCount || 0).toString()} trend="Team" icon={<Users />} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -461,6 +468,73 @@ export default function BranchDashboard() {
                     </div>
                   ))}
                 </div>
+             </motion.div>
+          )}
+
+          {activeTab === "customers" && (
+             <motion.div key="customers" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+               <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-black">Branch Customers</h2>
+                  <div className="relative max-w-md flex-1 ml-8">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search customers..." 
+                      className="pl-12 rounded-2xl h-12 bg-card border-border"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+               </div>
+
+               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden">
+                 <table className="w-full text-left">
+                   <thead className="bg-muted/30 border-b border-border">
+                     <tr>
+                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Customer</th>
+                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</th>
+                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Last Order</th>
+                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Joined</th>
+                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody className="divide-y divide-border">
+                     {customers.filter(c => 
+                       c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                       c.email.toLowerCase().includes(searchQuery.toLowerCase())
+                     ).map(c => (
+                       <tr key={c.id} className="hover:bg-muted/10 transition-colors">
+                         <td className="px-8 py-6">
+                           <div className="flex items-center gap-4">
+                             <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">
+                               {c.name ? c.name[0].toUpperCase() : "?"}
+                             </div>
+                             <div className="font-bold text-sm">{c.name}</div>
+                           </div>
+                         </td>
+                         <td className="px-8 py-6 text-sm">{c.email}</td>
+                         <td className="px-8 py-6 text-sm">
+                            {c.lastOrderDate ? new Date(c.lastOrderDate).toLocaleDateString() : "N/A"}
+                         </td>
+                         <td className="px-8 py-6 text-sm text-muted-foreground">
+                            {new Date(c.createdAt).toLocaleDateString()}
+                         </td>
+                         <td className="px-8 py-6 text-right">
+                           <Button variant="ghost" size="sm" className="rounded-xl hover:bg-primary/10 hover:text-primary">
+                             View Orders
+                           </Button>
+                         </td>
+                       </tr>
+                     ))}
+                     {customers.length === 0 && (
+                       <tr>
+                         <td colSpan={5} className="py-20 text-center text-muted-foreground">
+                           No customers found for this branch.
+                         </td>
+                       </tr>
+                     )}
+                   </tbody>
+                 </table>
+               </div>
              </motion.div>
           )}
 
