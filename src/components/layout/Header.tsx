@@ -29,12 +29,19 @@ export function Header() {
   ];
 
   if (user) {
-    const role = (user as any).accountType || user.role;
-    if (role === 'admin') {
+    const accountType = (user as any).accountType;
+    const adminRole = (user as any).adminRole;
+    const userRole = user.role;
+
+    const isAdmin = accountType === 'admin' || userRole === 'admin' || adminRole === 'admin';
+    const isManager = accountType === 'manager' || userRole === 'manager' || adminRole === 'manager';
+    const isSupplier = accountType === 'supplier' || userRole === 'supplier' || adminRole === 'supplier';
+
+    if (isAdmin) {
       navLinks.push({ to: "/dashboard", label: "Admin Panel", icon: ShieldCheck });
-    } else if (role === 'manager') {
-      navLinks.push({ to: "/dashboard", label: "Manager", icon: LayoutDashboard });
-    } else if (role === 'supplier') {
+    } else if (isManager) {
+      navLinks.push({ to: "/dashboard", label: "Manager", icon: Store });
+    } else if (isSupplier) {
       navLinks.push({ to: "/dashboard", label: "Supplier", icon: Truck });
     }
   }
