@@ -134,14 +134,14 @@ export function AiSearchBar() {
           e.preventDefault();
           void ask();
         }}
-        className={`flex items-center gap-2 rounded-2xl border bg-card p-2 shadow-sm transition-all duration-300 ${isListening ? "border-primary ring-2 ring-primary/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]" : "border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring"}`}
+        className={`flex items-center gap-2 rounded-2xl border bg-background/95 p-2 shadow-sm backdrop-blur transition-all duration-300 ${isListening ? "border-primary ring-2 ring-primary/30 shadow-[0_0_15px_rgba(16,185,129,0.18)]" : "border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring"}`}
       >
         <Search className={`ml-2 h-5 w-5 ${isListening ? "text-primary" : "text-muted-foreground"}`} />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={isListening ? t("search.listening") : t("search.placeholder")}
-          className="flex-1 border-0 bg-transparent text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="flex-1 border-0 bg-transparent text-base text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
         />
 
         <Button
@@ -171,8 +171,12 @@ export function AiSearchBar() {
       </form>
 
       {result && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 rounded-3xl border border-border bg-card p-4 shadow-xl md:p-5"
+        >
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-primary">
               <Sparkles className="h-4 w-4" /> {t("search.response")}
             </div>
@@ -180,16 +184,16 @@ export function AiSearchBar() {
               variant="ghost" 
               size="sm" 
               onClick={() => setResult(null)}
-              className="h-8 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               {t("search.clear")}
             </Button>
           </div>
-          <p className="mb-6 rounded-2xl border border-secondary bg-secondary/50 p-4 text-base leading-relaxed text-secondary-foreground shadow-sm">
+          <div className="rounded-2xl border border-border bg-muted/60 p-4 text-sm leading-relaxed text-foreground shadow-sm md:text-base">
             {result.reply}
-          </p>
+          </div>
           {result.products.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
               {result.products.slice(0, 10).map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
