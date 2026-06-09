@@ -41,6 +41,7 @@ declare global {
 }
 
 export function AiSearchBar() {
+  const dropdownMode = true;
   const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
@@ -128,7 +129,7 @@ export function AiSearchBar() {
   };
 
   return (
-    <div className="w-full">
+    <div className="relative w-full">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -174,31 +175,33 @@ export function AiSearchBar() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 rounded-3xl border border-border bg-card p-4 shadow-xl md:p-5"
+          className={`z-50 ${dropdownMode ? "fixed left-1/2 top-[92px] w-[calc(100vw-1rem)] max-w-7xl -translate-x-1/2" : "absolute left-0 right-0 top-full mt-3"}`}
         >
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-              <Sparkles className="h-4 w-4" /> {t("search.response")}
+          <div className="max-h-[calc(100vh-120px)] overflow-auto rounded-3xl border border-border bg-card/98 p-4 shadow-2xl backdrop-blur md:p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Sparkles className="h-4 w-4" /> {t("search.response")}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setResult(null)}
+                className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                {t("search.clear")}
+              </Button>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setResult(null)}
-              className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              {t("search.clear")}
-            </Button>
-          </div>
-          <div className="rounded-2xl border border-border bg-muted/60 p-4 text-sm leading-relaxed text-foreground shadow-sm md:text-base">
-            {result.reply}
-          </div>
-          {result.products.length > 0 && (
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-              {result.products.slice(0, 10).map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+            <div className="rounded-2xl border border-border bg-muted/60 p-4 text-sm leading-relaxed text-foreground shadow-sm md:text-base">
+              {result.reply}
             </div>
-          )}
+            {result.products.length > 0 && (
+              <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-4">
+                {result.products.slice(0, 10).map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
+          </div>
         </motion.div>
       )}
     </div>
