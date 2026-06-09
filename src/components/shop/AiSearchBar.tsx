@@ -175,9 +175,9 @@ export function AiSearchBar() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`z-50 ${dropdownMode ? "fixed left-1/2 top-[88px] w-[min(96vw,1280px)] -translate-x-1/2" : "absolute left-0 right-0 top-full mt-3"}`}
+          className="fixed inset-x-0 top-[80px] z-[100] flex justify-center p-4 md:top-[85px]"
         >
-          <div className="max-h-[calc(100vh-120px)] overflow-auto rounded-3xl border border-border bg-card/98 p-4 shadow-2xl backdrop-blur md:p-6">
+          <div className="w-full max-w-6xl max-h-[calc(100vh-120px)] overflow-auto rounded-3xl border border-border bg-card/98 p-4 shadow-2xl backdrop-blur md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                 <Sparkles className="h-4 w-4" /> {t("search.response")}
