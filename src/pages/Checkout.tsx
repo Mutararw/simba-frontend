@@ -74,6 +74,7 @@ export default function Checkout() {
         items,
         total: subtotal,
         deposit: DEPOSIT,
+        status: "pending",
         createdAt: new Date().toISOString(),
       });
 

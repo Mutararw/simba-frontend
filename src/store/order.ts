@@ -10,6 +10,7 @@ export interface PickupOrder {
   items: CartItem[];
   total: number;
   deposit: number;
+  status?: string;
   createdAt: string;
 }
 

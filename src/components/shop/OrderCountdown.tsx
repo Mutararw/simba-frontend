@@ -18,6 +18,13 @@ export function OrderCountdown() {
       return;
     }
 
+    // Only track if accepted/completed
+    if (lastOrder.status !== 'completed' && lastOrder.status !== 'accepted') {
+        setTimeLeft(null);
+        setIsReady(false);
+        return;
+    }
+
     const interval = setInterval(() => {
       const now = new Date();
       // Parse "HH:mm"
@@ -44,10 +51,10 @@ export function OrderCountdown() {
 
   if (!lastOrder) {
     return (
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        className="hidden sm:flex gap-1.5 font-bold text-white bg-green-600 hover:bg-green-700 rounded-full px-4 shadow-sm" 
+      <Button
+        variant="ghost"
+        size="sm"
+        className="hidden sm:flex gap-1.5 font-bold text-white bg-green-600 hover:bg-green-700 rounded-full px-4 shadow-sm"
         onClick={() => navigate("/orders")}
       >
         <Clock className="h-4 w-4" /> Track Order
@@ -55,24 +62,25 @@ export function OrderCountdown() {
     );
   }
 
+  const isPending = lastOrder.status !== 'completed' && lastOrder.status !== 'accepted';
+
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
+    <Button
+      variant="outline"
+      size="sm"
       onClick={() => navigate("/orders")}
       className={`hidden sm:flex items-center gap-2 border-white/20 shadow-sm transition-all rounded-full px-4 py-4 ${
         isReady ? "bg-green-500 text-white hover:bg-green-600 border-none" : "bg-green-600 text-white hover:bg-green-700 border-none"
       }`}
     >
-      <Clock className={`h-4 w-4 ${!isReady && timeLeft ? "animate-pulse" : ""}`} />
+      <Clock className={`h-4 w-4 ${(!isReady && timeLeft) || isPending ? "animate-pulse" : ""}`} />
       <div className="flex flex-col items-start text-left">
         <span className="text-[10px] leading-none font-bold uppercase opacity-90">
-          {isReady ? "Ready Now" : "Time Left"}
+          {isPending ? "Awaiting Acceptance" : isReady ? "Ready Now" : "Time Left"}
         </span>
         <span className="text-sm leading-none font-mono font-bold tracking-tight">
-          {timeLeft || "--m --s"}
+          {isPending ? "Pending..." : (timeLeft || "--m --s")}
         </span>
       </div>
     </Button>
-  );
-}
+  );}
