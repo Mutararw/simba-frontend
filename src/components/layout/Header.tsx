@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User as UserIcon, LogOut, Home, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { OrderCountdown } from "../shop/OrderCountdown";
+import { SearchBar } from "../shop/SearchBar";
 import { useCart } from "@/store/cart";
 import { useAuth } from "@/store/auth";
 import {
@@ -23,8 +24,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { to: "/", label: t("nav.home"), icon: Home },
-    { to: "/browse", label: t("nav.browse"), icon: Grid },
+    { to: "/browse", label: "Products", icon: Grid },
     { to: "/branches", label: t("nav.branches"), icon: Store },
   ];
 
@@ -86,21 +86,7 @@ export function Header() {
 
         {/* Global Navbar Search - Hidden on Smallest Mobile */}
         <div className="hidden sm:flex flex-1 max-w-sm mx-2">
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const q = (e.target as HTMLFormElement).search.value;
-              if (q.trim()) navigate(`/browse?q=${encodeURIComponent(q)}`);
-            }}
-            className="w-full relative"
-          >
-            <input 
-              name="search"
-              placeholder="Search..." 
-              className="w-full h-10 rounded-full border border-white bg-white pl-10 pr-4 text-sm text-[#fd7e14] placeholder:text-[#fd7e14]/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium"
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#fd7e14]"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          </form>
+          <SearchBar />
         </div>
 
         <div className="flex items-center gap-1 md:gap-2">
