@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
+import { BRANCHES } from "@/lib/branches";
 
 // Mock data for the branch manager experience
 const MOCK_ORDERS = [
@@ -50,6 +51,8 @@ export default function BranchDashboard() {
   const [inventory, setInventory] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>(MOCK_SUPPLIERS);
+  const [chatUser, setChatUser] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({
     revenue: 0,
