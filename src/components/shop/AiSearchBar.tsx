@@ -175,7 +175,7 @@ export function AiSearchBar() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`z-50 ${dropdownMode ? "fixed left-1/2 top-[92px] w-[calc(100vw-1rem)] max-w-7xl -translate-x-1/2" : "absolute left-0 right-0 top-full mt-3"}`}
+          className={`z-50 ${dropdownMode ? "fixed left-1/2 top-[88px] w-[min(96vw,1280px)] -translate-x-1/2" : "absolute left-0 right-0 top-full mt-3"}`}
         >
           <div className="max-h-[calc(100vh-120px)] overflow-auto rounded-3xl border border-border bg-card/98 p-4 shadow-2xl backdrop-blur md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -195,7 +195,7 @@ export function AiSearchBar() {
               {result.reply}
             </div>
             {result.products.length > 0 && (
-              <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-4">
+              <div className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
                 {result.products.slice(0, 10).map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
