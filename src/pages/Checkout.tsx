@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/store/cart";
 import { useOrder } from "@/store/order";
-import { BRANCHES } from "@/lib/branches";
+import { BRANCHES, getNearbyBranches } from "@/lib/branches";
 import { formatRWF } from "@/lib/products";
 import { ApiError, api } from "@/lib/api";
 import { toast } from "sonner";
@@ -21,12 +21,17 @@ export default function Checkout() {
   const subtotal = useCart((s) => s.items.reduce((n, i) => n + i.qty * i.product.price, 0));
   const clear = useCart((s) => s.clear);
   const draft = useOrder((s) => s.pendingDraft);
+  const setDraft = useOrder((s) => s.setDraft);
   const setLastOrder = useOrder((s) => s.setLastOrder);
   const branch = BRANCHES.find((b) => b.id === draft.branchId);
 
   const [phone, setPhone] = useState("078");
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const [paying, setPaying] = useState(false);
+  const [stockRecommendation, setStockRecommendation] = useState<{
+    productName: string;
+    branches: Array<(typeof BRANCHES)[number]>;
+  } | null>(null);
 
   if (!branch || !draft.pickupTime || items.length === 0) {
     return (
@@ -41,6 +46,7 @@ export default function Checkout() {
 
   async function pay() {
     setPaying(true);
+    setStockRecommendation(null);
 
     const payload = {
       items: items.map((i) => ({
@@ -75,7 +81,44 @@ export default function Checkout() {
       toast.success("Order placed successfully.");
       navigate("/confirmation");
     } catch (err) {
-      if (err instanceof ApiError && err.isNetworkError) {
+      if (err instanceof ApiError && err.status === 409 && err.code === "BRANCH_STOCK_UNAVAILABLE") {
+        const details = err.details as
+          | {
+              productName?: string;
+              productId?: number;
+              availableBranches?: Array<{ branchId: string }>;
+            }
+          | undefined;
+
+        let availableBranchIds = details?.availableBranches?.map((branch) => branch.branchId) || [];
+
+        if (availableBranchIds.length === 0 && details?.productId) {
+          try {
+            const { data } = await api.get<Array<{ branchId: string }>>(
+              `/api/branches/recommendations/${details.productId}`,
+              {
+                params: { excludeBranchId: branch.id },
+              }
+            );
+            availableBranchIds = data.map((item) => item.branchId);
+          } catch {
+            availableBranchIds = [];
+          }
+        }
+
+        const recommendedBranches = getNearbyBranches(branch.id, availableBranchIds);
+
+        setStockRecommendation({
+          productName: details?.productName || "An item in your cart",
+          branches: recommendedBranches,
+        });
+
+        toast.error(
+          details?.productName
+            ? `${details.productName} is not available at ${branch.name}. We found nearby branches that can fulfill it.`
+            : `Some items are not available at ${branch.name}.`
+        );
+      } else if (err instanceof ApiError && err.isNetworkError) {
         setLastOrder({
           id: `LOCAL-${Date.now()}`,
           branchId: branch.id,
@@ -192,10 +235,44 @@ export default function Checkout() {
               </>
             ) : paymentMethod === "cash" ? (
               t("checkout.confirm")
-            ) : (
+          ) : (
               t("checkout.pay", { amount: formatRWF(DEPOSIT) })
             )}
           </Button>
+          {stockRecommendation && stockRecommendation.branches.length > 0 && (
+            <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+              <div className="font-display text-sm font-bold text-amber-700">
+                {stockRecommendation.productName} is not available at {branch.name}.
+              </div>
+              <p className="mt-1 text-xs text-amber-700/80">
+                Try one of these nearby branches instead:
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {stockRecommendation.branches.map((candidate) => (
+                  <Button
+                    key={candidate.id}
+                    type="button"
+                    variant="outline"
+                    className="rounded-full border-amber-500/30 bg-background text-amber-700 hover:bg-amber-500/10"
+                    onClick={() => {
+                      setDraft({ branchId: candidate.id });
+                      setStockRecommendation(null);
+                    }}
+                  >
+                    {candidate.name}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                type="button"
+                variant="link"
+                className="mt-2 h-auto p-0 text-amber-700"
+                onClick={() => navigate("/branches?next=checkout")}
+              >
+                Pick a branch manually
+              </Button>
+            </div>
+          )}
           <p className="mt-3 text-center text-xs text-muted-foreground">{t("checkout.mockNote")}</p>
         </div>
       </div>

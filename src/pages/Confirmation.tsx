@@ -7,14 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useOrder } from "@/store/order";
 import { useReviews } from "@/store/reviews";
+import { useAuth } from "@/store/auth";
 import { toast } from "sonner";
 
 export default function Confirmation() {
   const { t } = useTranslation();
   const order = useOrder((s) => s.lastOrder);
   const { hasReviewed, addReview } = useReviews();
+  const user = useAuth((s) => s.user);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const canReview =
+    user?.role === "user" || user?.accountType === "user" || user?.role === "customer";
 
   if (!order) return <Navigate to="/" replace />;
 
@@ -42,7 +46,7 @@ export default function Confirmation() {
         </div>
       </div>
 
-      {!hasReviewed ? (
+      {!hasReviewed && canReview ? (
         <div className="mt-8 rounded-2xl border border-border bg-card p-6">
           <h2 className="font-display text-lg font-bold">{t("reviews.formTitle")}</h2>
           <div className="mt-3 flex gap-1">
@@ -69,6 +73,13 @@ export default function Confirmation() {
           >
             {t("reviews.formSubmit")}
           </Button>
+        </div>
+      ) : !canReview ? (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <h2 className="font-display text-lg font-bold">Customer reviews are reserved for customers</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign in with a customer account to submit a review for this order.
+          </p>
         </div>
       ) : null}
 

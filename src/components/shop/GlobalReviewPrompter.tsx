@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useReviews } from "@/store/reviews";
 import { useOrder } from "@/store/order";
+import { useAuth } from "@/store/auth";
 import confetti from "canvas-confetti";
 
 export function GlobalReviewPrompter() {
@@ -27,6 +28,9 @@ export function GlobalReviewPrompter() {
   const resetCardClick = useReviews((s) => s.resetCardClick);
 
   const lastOrder = useOrder((s) => s.lastOrder);
+  const user = useAuth((s) => s.user);
+  const canReview =
+    user?.role === "user" || user?.accountType === "user" || user?.role === "customer";
   
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -41,9 +45,15 @@ export function GlobalReviewPrompter() {
 
   // Reset session flags on mount
   useEffect(() => {
+    if (!canReview) {
+      setPromptOpen(false);
+      setShowThankYou(false);
+      return;
+    }
+
     setDismissedCurrent(false);
     resetCardClick();
-  }, [setDismissedCurrent, resetCardClick]);
+  }, [canReview, setDismissedCurrent, resetCardClick, setPromptOpen, setShowThankYou]);
 
   // Observer for the review section
   useEffect(() => {
@@ -68,7 +78,7 @@ export function GlobalReviewPrompter() {
 
   // Logic 1: 20 seconds in review frame (Cancelled if clicking starts)
   useEffect(() => {
-    if (hasReviewed || isPromptOpen || hasDismissedCurrent || cardClickCount > 0) {
+    if (!canReview || hasReviewed || isPromptOpen || hasDismissedCurrent || cardClickCount > 0) {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
@@ -90,11 +100,11 @@ export function GlobalReviewPrompter() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [isInReviewFrame, hasReviewed, isPromptOpen, hasDismissedCurrent, cardClickCount, setPromptOpen]);
+  }, [canReview, isInReviewFrame, hasReviewed, isPromptOpen, hasDismissedCurrent, cardClickCount, setPromptOpen]);
 
   // Logic 2: After 4 review card clicks (wait 4 seconds)
   useEffect(() => {
-    if (hasReviewed || isPromptOpen || hasDismissedCurrent || hasFiredClickLogic.current) return;
+    if (!canReview || hasReviewed || isPromptOpen || hasDismissedCurrent || hasFiredClickLogic.current) return;
 
     if (cardClickCount >= 4) {
       hasFiredClickLogic.current = true;
@@ -103,12 +113,12 @@ export function GlobalReviewPrompter() {
       }, 4000); // 4 seconds after 4th click
       return () => clearTimeout(timer);
     }
-  }, [cardClickCount, hasReviewed, isPromptOpen, hasDismissedCurrent, setPromptOpen]);
+  }, [canReview, cardClickCount, hasReviewed, isPromptOpen, hasDismissedCurrent, setPromptOpen]);
 
   // Logic 3: Post-checkout trigger (Only on confirmation page)
   useEffect(() => {
     // This logic prompts EVEN IF they dismissed earlier prompts
-    if (hasReviewed || isPromptOpen || hasFiredCheckoutLogic.current) return;
+    if (!canReview || hasReviewed || isPromptOpen || hasFiredCheckoutLogic.current) return;
 
     if (lastOrder && location.pathname === "/confirmation") {
       hasFiredCheckoutLogic.current = true;
@@ -117,7 +127,7 @@ export function GlobalReviewPrompter() {
       }, 3000); // Show prompt 3 seconds after checkout
       return () => clearTimeout(timer);
     }
-  }, [lastOrder, hasReviewed, isPromptOpen, location.pathname, setPromptOpen]);
+  }, [canReview, lastOrder, hasReviewed, isPromptOpen, location.pathname, setPromptOpen]);
 
   // Confetti effect
   useEffect(() => {
@@ -160,12 +170,17 @@ export function GlobalReviewPrompter() {
   }, [showThankYou, setShowThankYou]);
 
   const handleSubmit = () => {
+    if (!canReview) return;
     if (rating === 0 || !name.trim() || !comment.trim()) return;
     addReview({ name, rating, text: comment });
     setRating(0);
     setComment("");
     setName("");
   };
+
+  if (!canReview) {
+    return null;
+  }
 
   return (
     <>

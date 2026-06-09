@@ -4,13 +4,15 @@ import { API_URL } from "./config";
 export class ApiError extends Error {
   status?: number;
   code?: string;
+  details?: unknown;
   isNetworkError: boolean;
 
-  constructor(message: string, options?: { status?: number; code?: string; isNetworkError?: boolean }) {
+  constructor(message: string, options?: { status?: number; code?: string; details?: unknown; isNetworkError?: boolean }) {
     super(message);
     this.name = "ApiError";
     this.status = options?.status;
     this.code = options?.code;
+    this.details = options?.details;
     this.isNetworkError = Boolean(options?.isNetworkError);
   }
 }
@@ -32,6 +34,7 @@ api.interceptors.response.use(
       new ApiError(message, {
         status: error.response?.status,
         code: error.code,
+        details: error.response?.data?.details,
         isNetworkError: !error.response,
       })
     );
