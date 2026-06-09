@@ -177,25 +177,25 @@ export function AiSearchBar() {
           animate={{ opacity: 1, y: 0 }}
           className="fixed inset-x-0 top-[80px] z-[100] flex justify-center p-4 md:top-[85px]"
         >
-          <div className="w-full max-w-6xl max-h-[calc(100vh-120px)] overflow-auto rounded-3xl border border-border bg-card/98 p-4 shadow-2xl backdrop-blur md:p-6">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-                <Sparkles className="h-4 w-4" /> {t("search.response")}
+          <div className="w-full max-w-3xl max-h-[calc(100vh-140px)] overflow-auto rounded-2xl border border-border bg-card/98 p-3 shadow-2xl backdrop-blur md:p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                <Sparkles className="h-3.5 w-3.5" /> {t("search.response")}
               </div>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setResult(null)}
-                className="h-8 rounded-full px-3 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="h-7 rounded-full px-2 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 {t("search.clear")}
               </Button>
             </div>
-            <div className="rounded-2xl border border-border bg-muted/60 p-4 text-sm leading-relaxed text-foreground shadow-sm md:text-base">
+            <div className="rounded-xl border border-border bg-muted/60 p-3 text-xs leading-relaxed text-foreground shadow-sm md:text-sm">
               {result.reply}
             </div>
             {result.products.length > 0 && (
-              <div className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+              <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-3">
                 {result.products.slice(0, 10).map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
