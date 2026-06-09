@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User as UserIcon, LogOut, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings, Truck, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -27,6 +27,17 @@ export function Header() {
     { to: "/browse", label: "Products", icon: Grid },
     { to: "/branches", label: t("nav.branches"), icon: Store },
   ];
+
+  if (user) {
+    const role = (user as any).accountType || user.role;
+    if (role === 'admin') {
+      navLinks.push({ to: "/dashboard", label: "Admin Panel", icon: ShieldCheck });
+    } else if (role === 'manager') {
+      navLinks.push({ to: "/dashboard", label: "Manager", icon: LayoutDashboard });
+    } else if (role === 'supplier') {
+      navLinks.push({ to: "/dashboard", label: "Supplier", icon: Truck });
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[#fd7e14]/20 bg-[#fd7e14] text-white shadow-md">
