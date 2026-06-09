@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CategoryRail } from "@/components/shop/CategoryRail";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { SearchBar } from "@/components/shop/SearchBar";
+import { AiSearchBar } from "@/components/shop/AiSearchBar";
 import { BranchRouteFinder } from "@/components/shop/BranchRouteFinder";
 import { WhyChooseUs } from "@/components/shop/WhyChooseUs";
 import { GetInTouch } from "@/components/shop/GetInTouch";
@@ -142,7 +142,7 @@ export default function Index() {
 
             <div className="w-full max-w-2xl pt-1 md:pt-2">
               <div className="rounded-3xl border border-border bg-card/95 p-4 shadow-xl backdrop-blur">
-                <SearchBar placeholder="Search products..." inputClassName="bg-white/70" />
+                <AiSearchBar />
               </div>
             </div>
           </motion.div>
