@@ -1,7 +1,7 @@
 import type { Dict } from "./en";
 const zh: Dict = {
   brand: { name: "辛巴", tagline: "卢旺达在线超市" },
-  nav: { home: "首页", browse: "浏览", branches: "分店", cart: "购物车", login: "登录", logout: "登出", account: "账户" },
+  nav: { home: "首页", browse: "产品", products: "产品", branches: "分店", cart: "购物车", login: "登录", logout: "登出", account: "账户" },
   hero: {
     title: "新鲜、高品质的杂货。随时为您准备。",
     subtitle: "在家中舒适地体验基加利的高端超市。在线下单，仅需45分钟即可在最近的辛巴分店提货。新鲜、快速、始终值得信赖。",

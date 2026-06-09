@@ -1,7 +1,7 @@
 import type { Dict } from "./en";
 const rw: Dict = {
   brand: { name: "Simba", tagline: "Isupermarket ya Rwanda kuri Internet" },
-  nav: { home: "Ahabanza", browse: "Reba ibicuruzwa", branches: "Amaduka", cart: "Igare", login: "Injira", logout: "Sohoka", account: "Konti" },
+  nav: { home: "Ahabanza", browse: "Ibicuruzwa", products: "Ibicuruzwa", branches: "Amaduka", cart: "Igare", login: "Injira", logout: "Sohoka", account: "Konti" },
   hero: {
     title: "Ibiribwa bishya, by'ubuziranenge. Biteguye igihe cyose.",
     subtitle: "Sogongera isupermarket ya mbere mu Rwanda utavuye mu rugo. Gura kuri internet ufate mu iduka rya hafi mu minota 45 gusa. Bishya, byihuse, kandi byizewe.",

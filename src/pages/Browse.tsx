@@ -72,9 +72,9 @@ export default function Browse() {
 
   return (
     <div className="container py-8">
-      <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{t("nav.browse")}</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{t("nav.products")}</h1>
 
-      <div className="sticky top-16 z-30 -mx-4 mt-4 bg-background/95 px-4 pb-3 pt-2 backdrop-blur shadow-sm border-b">
+      <div className="sticky top-16 z-30 -mx-4 mt-4 bg-white/95 px-4 pb-3 pt-2 backdrop-blur shadow-sm border-b border-slate-200 dark:bg-white/95">
         <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
           {categories.map((c) => {
             const active = c.key === cat;
@@ -85,7 +85,7 @@ export default function Browse() {
                 className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors ${
                   active
                     ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:border-primary/40"
+                    : "border-slate-200 bg-white text-slate-900 hover:border-primary/40"
                 }`}
               >
                 <span className="mr-1.5">{c.emoji}</span>{c.key}

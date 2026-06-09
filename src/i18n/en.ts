@@ -1,6 +1,6 @@
 const en = {
   brand: { name: "Simba", tagline: "Rwanda's Online Supermarket" },
-  nav: { home: "Home", browse: "Browse", branches: "Branches", cart: "Cart", login: "Sign in", logout: "Sign out", account: "Account" },
+  nav: { home: "Home", browse: "Products", products: "Products", branches: "Branches", cart: "Cart", login: "Sign in", logout: "Sign out", account: "Account" },
   hero: {
     title: "Fresh, Quality Groceries. Ready When You Are.",
     subtitle: "Experience Kigali's premium supermarket from the comfort of your home. Shop online and collect at your nearest Simba branch in just 45 minutes. Fresh, fast, and always trusted.",

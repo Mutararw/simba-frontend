@@ -1,7 +1,7 @@
 import type { Dict } from "./en";
 const fr: Dict = {
   brand: { name: "Simba", tagline: "Le supermarché en ligne du Rwanda" },
-  nav: { home: "Accueil", browse: "Parcourir", branches: "Magasins", cart: "Panier", login: "Connexion", logout: "Déconnexion", account: "Compte" },
+  nav: { home: "Accueil", browse: "Produits", products: "Produits", branches: "Magasins", cart: "Panier", login: "Connexion", logout: "Déconnexion", account: "Compte" },
   hero: {
     title: "Produits frais et de qualité. Prêts quand vous l'êtes.",
     subtitle: "Découvrez le supermarché premium de Kigali depuis le confort de votre maison. Achetez en ligne et retirez dans votre magasin Simba en seulement 45 minutes. Frais, rapide et toujours fiable.",
