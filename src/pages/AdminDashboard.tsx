@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area
+  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell
 } from "recharts";
 import { 
   Building2, Users, ShoppingBag, DollarSign, 
@@ -44,7 +44,10 @@ export default function AdminDashboard() {
     totalOrders: 0,
     activeBranches: 0,
     totalUsers: 0,
-    branchStats: [] as any[]
+    branchStats: [] as any[],
+    topProducts: [] as any[],
+    salesByCategory: [] as any[],
+    recentTransactions: [] as any[]
   });
   const [users, setUsers] = useState<UserType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -232,23 +235,89 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="p-8 rounded-[2.5rem] border border-border bg-card shadow-sm flex flex-col">
-                  <h2 className="text-xl font-bold mb-6">Live Branch Feed</h2>
-                  <div className="space-y-4 flex-1">
-                    {(stats?.branchStats || []).map(b => (
-                      <div key={b.id} className="p-4 rounded-2xl bg-muted/50 border border-border flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer" onClick={() => { setSelectedBranch(b.id); setActiveTab("branches"); }}>
-                         <div>
-                           <div className="font-bold text-sm">{b.name}</div>
-                           <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{b.orderCount} orders total</div>
+                  <h2 className="text-xl font-bold mb-6">Sales by Category</h2>
+                  <div className="h-[250px] mb-6">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={stats.salesByCategory || []}
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {(stats.salesByCategory || []).map((entry: any, index: number) => (
+                            <Cell key={`cell-${index}`} fill={['#fd7e14', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'][index % 5]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-3">
+                    {(stats.salesByCategory || []).map((cat: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: ['#fd7e14', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'][i % 5] }} />
+                          <span className="font-medium">{cat.name}</span>
+                        </div>
+                        <span className="font-black text-xs">RWF {(cat.value/1000).toFixed(0)}k</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Top Selling Products */}
+                <div className="p-8 rounded-[2.5rem] border border-border bg-card shadow-sm">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-xl font-bold">Top Selling Products</h2>
+                    <Button variant="ghost" size="sm" className="rounded-xl"><Package className="h-4 w-4 mr-2" /> Global</Button>
+                  </div>
+                  <div className="space-y-6">
+                    {(stats.topProducts || []).map((p: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-4">
+                           <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center font-black text-primary">
+                             {i + 1}
+                           </div>
+                           <div>
+                             <div className="font-bold">{p.name}</div>
+                             <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{p.category}</div>
+                           </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-black">RWF {(p.revenue/1000).toFixed(0)}k</div>
+                          <div className="text-[10px] font-bold text-green-500 uppercase">{p.salesCount} sold</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recent Global Transactions */}
+                <div className="p-8 rounded-[2.5rem] border border-border bg-card shadow-sm">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-xl font-bold">Recent Global Activity</h2>
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-4">
+                    {(stats.recentTransactions || []).map((t: any) => (
+                      <div key={t.id} className="p-4 rounded-2xl bg-muted/30 border border-border/50 flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <div className={`h-2 w-2 rounded-full ${t.status === 'completed' ? 'bg-green-500' : 'bg-amber-500'}`} />
+                            <div>
+                               <div className="text-xs font-bold">{t.customer}</div>
+                               <div className="text-[10px] text-muted-foreground">{t.branch} Branch</div>
+                            </div>
                          </div>
                          <div className="text-right">
-                           <div className="text-sm font-black">RWF {((b.revenue || 0)/1000).toFixed(0)}k</div>
-                           <div className="text-[10px] text-green-500 font-bold uppercase">Active</div>
+                            <div className="text-xs font-black">RWF {t.amount.toLocaleString()}</div>
+                            <div className="text-[10px] font-medium text-muted-foreground">{new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                          </div>
                       </div>
                     ))}
-                    {(stats?.branchStats || []).length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">No branch data available</div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -284,13 +353,22 @@ export default function AdminDashboard() {
                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-8 rounded-[3rem] border border-border bg-card">
                    <div className="flex items-center justify-between mb-8">
                      <h2 className="text-2xl font-black">Detailed Inventory: {(stats?.branchStats || []).find(b => b.id === selectedBranch)?.name}</h2>
-                     <Button variant="outline" className="rounded-xl border-border">Restock Request</Button>
+                     <Button variant="outline" className="rounded-xl border-border" onClick={() => setActiveTab("inventory")}>View Global Stock</Button>
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <InventoryItem name="Premium Rice" stock={45} status="Healthy" />
-                      <InventoryItem name="Milk Powder" stock={12} status="Critical" />
-                      <InventoryItem name="Cooking Oil" stock={8} status="Restock Needed" />
-                      <InventoryItem name="Fresh Fruit" stock={60} status="Healthy" />
+                      {globalInventory.filter(i => i.branchId === selectedBranch).map((item, idx) => (
+                        <InventoryItem 
+                          key={idx}
+                          name={item.name} 
+                          stock={item.stock} 
+                          status={item.stock < 10 ? "Restock Needed" : (item.stock < 25 ? "Critical" : "Healthy")} 
+                        />
+                      ))}
+                      {globalInventory.filter(i => i.branchId === selectedBranch).length === 0 && (
+                        <div className="col-span-full py-10 text-center text-muted-foreground">
+                          No inventory data found for this branch.
+                        </div>
+                      )}
                    </div>
                  </motion.div>
                )}
