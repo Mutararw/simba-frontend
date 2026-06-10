@@ -65,6 +65,8 @@ export default function BranchDashboard() {
   const [loading, setLoading] = useState(true);
   const [isMeetingOpen, setIsMeetingOpen] = useState(false);
 
+  const branchName = BRANCHES.find(b => b.id.toLowerCase() === user?.branchId?.toLowerCase())?.name || user?.branchId || "Branch";
+
   useEffect(() => {
     if (user?.branchId) {
       fetchBranchData();
@@ -102,8 +104,22 @@ export default function BranchDashboard() {
       });
       toast.success(`Order #${orderId} accepted! Customer notified.`);
       fetchBranchData();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Failed to accept order";
+      toast.error(message);
+    }
+  };
+
+  const handleDeclineOrder = async (orderId: string) => {
+    if (!confirm(`Are you sure you want to decline order #${orderId}?`)) return;
+    try {
+      await api.patch(`/api/orders/${orderId}`, { 
+        status: 'declined'
+      });
+      toast.success(`Order #${orderId} declined.`);
+      fetchBranchData();
     } catch (err) {
-      toast.error("Failed to accept order");
+      toast.error("Failed to decline order");
     }
   };
 
@@ -123,9 +139,12 @@ export default function BranchDashboard() {
       {/* Sidebar */}
       <div className="hidden lg:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl">
         <div className="p-6">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-primary/10 text-primary">
-            <Store className="h-5 w-5" />
-            <span className="font-bold text-sm">Branch Manager</span>
+          <div className="flex flex-col gap-1 px-3 py-2 rounded-2xl bg-primary/10 text-primary">
+            <div className="flex items-center gap-2">
+              <Store className="h-4 w-4" />
+              <span className="font-bold text-xs uppercase tracking-wider opacity-70">Branch Manager</span>
+            </div>
+            <span className="font-black text-sm truncate">{branchName}</span>
           </div>
         </div>
         
@@ -145,8 +164,13 @@ export default function BranchDashboard() {
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <header className="mb-8 flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-black tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Managing {user?.branchId || "Branch"} Performance</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="outline" className="rounded-full bg-primary/10 text-primary border-primary/20 font-black px-3 py-1 text-[10px] uppercase tracking-widest">
+                Official Branch Dashboard
+              </Badge>
+            </div>
+            <h1 className="text-4xl font-black tracking-tighter text-foreground">{branchName}</h1>
+            <p className="text-muted-foreground font-medium">Live performance and operations management</p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" className="rounded-xl gap-2 h-11 border-border bg-card" onClick={() => setIsMeetingOpen(true)}>
@@ -287,7 +311,10 @@ export default function BranchDashboard() {
                       {orders.map((order) => (
                         <tr key={order.id} className="hover:bg-muted/10 transition-colors group">
                            <td className="px-6 py-4 font-bold text-sm">#{order.id}</td>
-                           <td className="px-6 py-4 text-sm font-medium">{order.customerName || "Customer"}</td>
+                           <td className="px-6 py-4">
+                             <div className="text-sm font-medium">{order.customerName || "Customer"}</div>
+                             <div className="text-[10px] text-muted-foreground">{order.phone || "No phone"}</div>
+                           </td>
                            <td className="px-6 py-4 capitalize">
                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                                order.orderType === 'pickup' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-cyan-500/10 text-cyan-500'
@@ -296,29 +323,51 @@ export default function BranchDashboard() {
                              </span>
                            </td>
                            <td className="px-6 py-4 capitalize">
-                              <div className="flex items-center gap-2">
-                                {order.status === 'pending' && <Clock className="h-3 w-3 text-amber-500" />}
-                                {order.status === 'accepted' && <CheckCircle2 className="h-3 w-3 text-green-500" />}
-                                <span className={`text-sm font-bold ${
-                                  order.status === 'pending' ? 'text-amber-500' : 'text-green-500'
-                                }`}>{order.status}</span>
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  {order.status === 'pending' && <Clock className="h-3 w-3 text-amber-500" />}
+                                  {order.status === 'accepted' && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                                  {order.status === 'declined' && <XCircle className="h-3 w-3 text-red-500" />}
+                                  <span className={`text-sm font-bold ${
+                                    order.status === 'pending' ? 'text-amber-500' : 
+                                    order.status === 'declined' ? 'text-red-500' : 'text-green-500'
+                                  }`}>{order.status}</span>
+                                </div>
+                                <Badge className={`w-fit rounded-full px-2 py-0 text-[8px] font-black uppercase ${
+                                  order.paymentStatus === 'paid' ? 'bg-green-500/10 text-green-500' : 'bg-amber-500/10 text-amber-500'
+                                }`}>
+                                  {order.paymentStatus || 'pending'}
+                                </Badge>
                               </div>
                            </td>
                            <td className="px-6 py-4 font-black text-sm">RWF {Number(order.totalAmount).toLocaleString()}</td>
                            <td className="px-6 py-4 text-right">
-                             {order.orderType === 'pickup' && order.status === 'pending' ? (
-                               <Button 
-                                 size="sm" 
-                                 className="rounded-xl bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/20"
-                                 onClick={() => handleAcceptPickup(order.id)}
-                               >
-                                 Accept Pickup
-                               </Button>
-                             ) : (
-                               <Button variant="ghost" size="icon" className="rounded-xl">
-                                 <ChevronRight className="h-4 w-4" />
-                               </Button>
-                             )}
+                             <div className="flex items-center justify-end gap-2">
+                               {order.status === 'pending' && (
+                                 <>
+                                   <Button 
+                                     size="sm" 
+                                     className="rounded-xl bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/20"
+                                     onClick={() => handleAcceptPickup(order.id)}
+                                   >
+                                     Accept
+                                   </Button>
+                                   <Button 
+                                     size="sm" 
+                                     variant="outline"
+                                     className="rounded-xl border-red-500 text-red-500 hover:bg-red-50"
+                                     onClick={() => handleDeclineOrder(order.id)}
+                                   >
+                                     Decline
+                                   </Button>
+                                 </>
+                               )}
+                               {order.status !== 'pending' && (
+                                 <Button variant="ghost" size="icon" className="rounded-xl">
+                                   <ChevronRight className="h-4 w-4" />
+                                 </Button>
+                               )}
+                             </div>
                            </td>
                          </tr>
                       ))}

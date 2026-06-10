@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
+import { api } from "@/lib/api";
+import { BRANCHES } from "@/lib/branches";
+
 export function Header() {
   const { t } = useTranslation();
   const count = useCart((s) => s.items.reduce((n, i) => n + i.qty, 0));
@@ -40,7 +43,8 @@ export function Header() {
     if (isAdmin) {
       navLinks.push({ to: "/dashboard", label: "Admin Panel", icon: ShieldCheck });
     } else if (isManager) {
-      navLinks.push({ to: "/dashboard", label: "Manager", icon: Store });
+      const branchName = BRANCHES.find(b => b.id.toLowerCase() === (user as any).branchId?.toLowerCase())?.name || "Manager";
+      navLinks.push({ to: "/dashboard", label: `Manager - ${branchName}`, icon: Store });
     } else if (isSupplier) {
       navLinks.push({ to: "/dashboard", label: "Supplier", icon: Truck });
     }

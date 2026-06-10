@@ -10,10 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { logout } from "@/lib/auth";
+import { BRANCHES } from "@/lib/branches";
 
 export default function Profile() {
   const user = useAuth((s) => s.user);
   const [loading, setLoading] = useState(false);
+
+  const branchName = BRANCHES.find(b => b.id.toLowerCase() === (user as any)?.branchId?.toLowerCase())?.name || (user as any)?.branchId;
 
   const handleDeleteAccount = () => {
     if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
@@ -84,7 +87,7 @@ export default function Profile() {
                     </span>
                     {user.branchId && (
                       <span className="px-2 py-0.5 rounded-md bg-secondary text-muted-foreground text-[10px] font-black uppercase tracking-widest">
-                        {user.branchId} Branch
+                        {branchName} Branch
                       </span>
                     )}
                   </div>
