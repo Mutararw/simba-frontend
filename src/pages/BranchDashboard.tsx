@@ -142,6 +142,57 @@ export default function BranchDashboard() {
     }
   };
 
+  const handleExportData = () => {
+    try {
+      const csvRows = [
+        ["SIMBA BRANCH REPORT"],
+        ["Branch", branchName],
+        ["Manager", user?.name],
+        ["Export Date", new Date().toLocaleString()],
+        [],
+        ["PERFORMANCE SUMMARY"],
+        ["Total Revenue", `RWF ${stats.revenue.toLocaleString()}`],
+        ["Total Orders", stats.ordersCount],
+        ["Active Customers", stats.customersCount],
+        ["Total Stock Items", stats.stockCount],
+        [],
+        ["RECENT ORDERS"],
+        ["Order ID", "Customer", "Amount", "Status", "Payment", "Type", "Date"]
+      ];
+
+      orders.forEach(o => {
+        csvRows.push([
+          `#${o.id}`, 
+          o.customerName || "Customer", 
+          o.totalAmount, 
+          o.status, 
+          o.paymentStatus,
+          o.orderType,
+          new Date(o.createdAt).toLocaleDateString()
+        ]);
+      });
+
+      const csvContent = csvRows.map(e => e.join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Simba_Report_${branchName.replace(/\s+/g, '_')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Dashboard report exported!");
+    } catch (err) {
+      toast.error("Failed to export report");
+    }
+  };
+
+  const handleJoinMeeting = () => {
+    const room = `SimbaGlobal_${branchName.replace(/\s+/g, '_')}`;
+    window.open(`https://meet.jit.si/${room}`, '_blank');
+    setIsMeetingOpen(false);
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-80px)] bg-background">
       {/* Sidebar */}
@@ -185,7 +236,10 @@ export default function BranchDashboard() {
               <Video className="h-4 w-4" />
               Join Meeting
             </Button>
-            <Button className="rounded-xl h-11 gap-2 bg-primary shadow-lg shadow-primary/20">
+            <Button 
+              className="rounded-xl h-11 gap-2 bg-primary shadow-lg shadow-primary/20"
+              onClick={handleExportData}
+            >
               <ArrowUpRight className="h-4 w-4" />
               Export Report
             </Button>
@@ -769,6 +823,12 @@ export default function BranchDashboard() {
                       <Mic className="h-6 w-6" />
                    </Button>
                    <div className="h-8 w-px bg-border mx-2" />
+                   <Button 
+                     className="rounded-2xl h-12 px-8 bg-green-500 hover:bg-green-600 text-white font-bold" 
+                     onClick={handleJoinMeeting}
+                   >
+                      Connect Now
+                   </Button>
                    <Button className="rounded-2xl h-12 px-8 bg-red-500 hover:bg-red-600 text-white font-bold" onClick={() => setIsMeetingOpen(false)}>
                       Leave Meeting
                    </Button>
