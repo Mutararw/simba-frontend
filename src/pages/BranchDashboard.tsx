@@ -51,6 +51,7 @@ export default function BranchDashboard() {
   const [inventory, setInventory] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>(MOCK_SUPPLIERS);
   const [chatUser, setChatUser] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,15 +74,21 @@ export default function BranchDashboard() {
     }
   }, [user?.branchId]);
 
+  const handleOpenChat = (userId: string) => {
+    setChatUser(userId);
+    setActiveTab("chat");
+  };
+
   const fetchBranchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, ordersRes, inventoryRes, usersRes, customersRes] = await Promise.all([
+      const [statsRes, ordersRes, inventoryRes, usersRes, customersRes, paymentsRes] = await Promise.all([
         api.get("/api/branches/stats"),
         api.get("/api/orders/branch"),
         api.get("/api/branches/inventory"),
         api.get("/api/branches/users"),
-        api.get("/api/branches/customers")
+        api.get("/api/branches/customers"),
+        api.get("/api/branches/payments")
       ]);
       
       setStats(statsRes.data);
@@ -89,6 +96,7 @@ export default function BranchDashboard() {
       setInventory(inventoryRes.data);
       setStaff(usersRes.data);
       setCustomers(customersRes.data);
+      setPayments(paymentsRes.data);
     } catch (err) {
       toast.error("Failed to fetch branch data");
     } finally {
@@ -400,33 +408,32 @@ export default function BranchDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {(orders || []).map(order => (
-                        <tr key={order?.id} className="hover:bg-muted/10 transition-colors">
+                      {(payments || []).map(payment => (
+                        <tr key={payment?.id} className="hover:bg-muted/10 transition-colors">
                           <td className="px-8 py-6">
-                            <span className="font-black text-xs text-primary">#{order?.id}</span>
+                            <span className="font-black text-xs text-primary">#{payment?.id}</span>
                           </td>
                           <td className="px-8 py-6">
-                            <div className="font-bold text-sm">{(order as any)?.customerName || "Guest"}</div>
-                            <div className="text-[10px] text-muted-foreground">{(order as any)?.phone || "No phone"}</div>
+                            <div className="font-bold text-sm">{payment?.customerName || "Guest"}</div>
                           </td>
                           <td className="px-8 py-6">
-                            <span className="font-black text-sm">RWF {Number(order?.totalAmount || 0).toLocaleString()}</span>
+                            <span className="font-black text-sm">RWF {Number(payment?.amount || 0).toLocaleString()}</span>
                           </td>
                           <td className="px-8 py-6">
                             <Badge variant="outline" className="rounded-full font-black uppercase text-[9px] border-primary/20 text-primary">
-                              {order?.paymentMethod || "momo"}
+                              {payment?.paymentMethod || "momo"}
                             </Badge>
                           </td>
                           <td className="px-8 py-6">
                             <Badge className={`rounded-full px-3 py-1 text-[10px] font-black uppercase ${
-                              (order as any)?.paymentStatus === 'paid' ? 'bg-green-500/10 text-green-500' :
-                              (order as any)?.paymentStatus === 'failed' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                              payment?.paymentStatus === 'paid' ? 'bg-green-500/10 text-green-500' :
+                              payment?.paymentStatus === 'failed' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
                             }`}>
-                              {(order as any)?.paymentStatus || "pending"}
+                              {payment?.paymentStatus || "pending"}
                             </Badge>
                           </td>
                           <td className="px-8 py-6 text-sm text-muted-foreground font-medium">
-                            {order?.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}
+                            {payment?.createdAt ? new Date(payment.createdAt).toLocaleString() : "N/A"}
                           </td>
                         </tr>
                       ))}
@@ -461,18 +468,24 @@ export default function BranchDashboard() {
                       </Badge>
                     </div>
                     <h3 className="font-bold text-lg mb-1">{item?.name || "Unnamed Product"}</h3>
+                    <p className="text-xs text-muted-foreground mb-4">{item?.category || "General"}</p>
                     
                     <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
                        <div>
                          <div className="text-[10px] font-bold text-muted-foreground uppercase">Status</div>
-                         <div className="font-black text-sm">{(item?.stock || 0) < 10 ? "Critical" : "Healthy"}</div>
+                         <div className="font-black text-sm">{(item?.stock || 0) < 10 ? "Low Stock" : "Healthy"}</div>
                        </div>
                        <div className="flex flex-col items-end gap-2">
                          <div className="text-right">
                            <div className="text-[10px] font-bold text-muted-foreground uppercase">Price</div>
                            <div className="font-black text-primary">RWF {Number(item?.price || 0).toLocaleString()}</div>
                          </div>
-                         <Button size="sm" variant="outline" className="rounded-lg h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5" onClick={() => toast.success(`Restock request sent for ${item?.name || "Product"}`)}>
+                         <Button 
+                           size="sm" 
+                           variant="outline" 
+                           className="rounded-lg h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5" 
+                           onClick={() => handleOpenChat('adm')}
+                         >
                            Restock
                          </Button>
                        </div>
@@ -508,6 +521,14 @@ export default function BranchDashboard() {
                         <Badge className="rounded-full bg-secondary text-secondary-foreground font-black px-4 py-1 uppercase tracking-widest text-[10px]">
                           {s.accountType}
                         </Badge>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="rounded-xl"
+                          onClick={() => handleOpenChat(s.id)}
+                        >
+                          <MessageSquare className="h-5 w-5" />
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -571,9 +592,20 @@ export default function BranchDashboard() {
                             {new Date(c.createdAt).toLocaleDateString()}
                          </td>
                          <td className="px-8 py-6 text-right">
-                           <Button variant="ghost" size="sm" className="rounded-xl hover:bg-primary/10 hover:text-primary">
-                             View Orders
-                           </Button>
+                           <div className="flex items-center justify-end gap-2">
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className="rounded-xl gap-2"
+                               onClick={() => handleOpenChat(c.id)}
+                             >
+                               <MessageSquare className="h-4 w-4" />
+                               Message
+                             </Button>
+                             <Button variant="ghost" size="sm" className="rounded-xl hover:bg-primary/10 hover:text-primary">
+                               View Orders
+                             </Button>
+                           </div>
                          </td>
                        </tr>
                      ))}
@@ -668,7 +700,13 @@ export default function BranchDashboard() {
                            <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">
                              {chatUser[0].toUpperCase()}
                            </div>
-                           <div className="font-bold">Chat with {chatUser === 'adm' ? 'Global Admin' : suppliers.find(s => s.id === chatUser)?.name}</div>
+                           <div className="font-bold">Chat with {
+                             chatUser === 'adm' ? 'Global Admin' : 
+                             suppliers.find(s => s.id === chatUser)?.name || 
+                             staff.find(s => s.id === chatUser)?.name || 
+                             customers.find(c => c.id === chatUser)?.name || 
+                             'User'
+                           }</div>
                          </div>
                          <Button variant="ghost" size="icon" className="rounded-full"><Settings className="h-5 w-5" /></Button>
                       </div>
