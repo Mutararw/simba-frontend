@@ -65,6 +65,15 @@ export default function BranchDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [isMeetingOpen, setIsMeetingOpen] = useState(false);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    imageUrl: "",
+    description: ""
+  });
 
   const branchName = BRANCHES.find(b => b.id.toLowerCase() === user?.branchId?.toLowerCase())?.name || user?.branchId || "Branch";
 
@@ -77,6 +86,23 @@ export default function BranchDashboard() {
   const handleOpenChat = (userId: string) => {
     setChatUser(userId);
     setActiveTab("chat");
+  };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post("/api/products", {
+        ...newProduct,
+        price: Number(newProduct.price),
+        stock: Number(newProduct.stock)
+      });
+      toast.success("Product added successfully");
+      setIsAddProductOpen(false);
+      setNewProduct({ name: "", category: "", price: "", stock: "", imageUrl: "", description: "" });
+      fetchBranchData();
+    } catch (err) {
+      toast.error("Failed to add product");
+    }
   };
 
   const fetchBranchData = async () => {
@@ -232,10 +258,6 @@ export default function BranchDashboard() {
             <p className="text-muted-foreground font-medium">Live performance and operations management</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="rounded-xl gap-2 h-11 border-border bg-card" onClick={() => setIsMeetingOpen(true)}>
-              <Video className="h-4 w-4" />
-              Join Meeting
-            </Button>
             <Button 
               className="rounded-xl h-11 gap-2 bg-primary shadow-lg shadow-primary/20"
               onClick={handleExportData}
@@ -498,13 +520,13 @@ export default function BranchDashboard() {
           )}
 
           {activeTab === "inventory" && (
-            <motion.div key="inventory" className="space-y-6">
+            <motion.div key="inventory" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
               <div className="flex items-center justify-between mb-8">
                 <div className="relative max-w-sm flex-1">
                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                    <Input placeholder="Search stock..." className="pl-12 rounded-2xl h-12 bg-card" />
                 </div>
-                <Button className="rounded-xl gap-2 bg-primary">
+                <Button className="rounded-xl gap-2 bg-primary" onClick={() => setIsAddProductOpen(true)}>
                   <Plus className="h-4 w-4" />
                   Add Product
                 </Button>
@@ -790,51 +812,6 @@ export default function BranchDashboard() {
                  )}
                </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Meeting Modal */}
-        <AnimatePresence>
-          {isMeetingOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                onClick={() => setIsMeetingOpen(false)}
-              />
-              <motion.div 
-                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-4xl aspect-video rounded-[3rem] bg-card border-4 border-primary shadow-2xl overflow-hidden flex flex-col"
-              >
-                <div className="flex-1 bg-neutral-900 relative">
-                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
-                      <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center mb-6 border-2 border-primary/50 animate-bounce">
-                         <Video className="h-10 w-10 text-primary" />
-                      </div>
-                      <h2 className="text-3xl font-black mb-2">Simba Global Meeting</h2>
-                      <p className="text-white/60 font-medium">Connecting to Global Administrator...</p>
-                   </div>
-                </div>
-                <div className="h-24 bg-card border-t border-border flex items-center justify-center gap-4 px-8">
-                   <Button variant="outline" size="icon" className="rounded-full h-12 w-12 hover:bg-red-500 hover:text-white transition-colors" onClick={() => setIsMeetingOpen(false)}>
-                      <XCircle className="h-6 w-6" />
-                   </Button>
-                   <Button variant="outline" size="icon" className="rounded-full h-12 w-12">
-                      <Mic className="h-6 w-6" />
-                   </Button>
-                   <div className="h-8 w-px bg-border mx-2" />
-                   <Button 
-                     className="rounded-2xl h-12 px-8 bg-green-500 hover:bg-green-600 text-white font-bold" 
-                     onClick={handleJoinMeeting}
-                   >
-                      Connect Now
-                   </Button>
-                   <Button className="rounded-2xl h-12 px-8 bg-red-500 hover:bg-red-600 text-white font-bold" onClick={() => setIsMeetingOpen(false)}>
-                      Leave Meeting
-                   </Button>
-                </div>
-              </motion.div>
-            </div>
           )}
         </AnimatePresence>
       </main>

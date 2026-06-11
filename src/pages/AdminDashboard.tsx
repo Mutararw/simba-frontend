@@ -9,7 +9,7 @@ import {
   MessageSquare, Shield, Globe, Search,
   ArrowUpRight, ArrowDownRight, Package, Truck,
   CheckCircle2, AlertCircle, Send, MoreVertical,
-  Filter, Video, Trash2, Edit3, UserCheck, XCircle, Mic
+  Filter, Video, Trash2, Edit3, UserCheck, XCircle, Mic, Plus, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,6 +54,18 @@ export default function AdminDashboard() {
   const [globalInventory, setGlobalInventory] = useState<any[]>([]);
   const [pendingUsers, setPendingUsers] = useState<UserType[]>([]);
   const [isMeetingOpen, setIsMeetingOpen] = useState(false);
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [meetingTitle, setMeetingTitle] = useState("Simba Global Meeting");
+  const [currentMeetingId, setCurrentMeetingId] = useState<string | null>(null);
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    imageUrl: "",
+    description: ""
+  });
 
   useEffect(() => {
     fetchStats();
@@ -61,6 +73,23 @@ export default function AdminDashboard() {
     fetchGlobalInventory();
     fetchPendingUsers();
   }, []);
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post("/api/products", {
+        ...newProduct,
+        price: Number(newProduct.price),
+        stock: Number(newProduct.stock)
+      });
+      toast.success("Product added successfully");
+      setIsAddProductOpen(false);
+      setNewProduct({ name: "", category: "", price: "", stock: "", imageUrl: "", description: "" });
+      fetchGlobalInventory();
+    } catch (err) {
+      toast.error("Failed to add product");
+    }
+  };
 
   const fetchPendingUsers = async () => {
     try {
@@ -148,6 +177,40 @@ export default function AdminDashboard() {
       setMessageText("");
     } catch (err) {
       toast.error("Failed to send broadcast");
+    }
+  };
+
+  const handleStartMeeting = async () => {
+    if (selectedParticipants.length === 0) {
+      toast.error("Please select at least one participant");
+      return;
+    }
+    try {
+      const { data } = await api.post("/api/meetings", {
+        title: meetingTitle,
+        participantIds: selectedParticipants
+      });
+      setCurrentMeetingId(data.id);
+      setIsMeetingOpen(true);
+      toast.success("Meeting started and invitations sent!");
+    } catch (err) {
+      toast.error("Failed to start meeting");
+    }
+  };
+
+  const handleEndMeeting = async () => {
+    if (!currentMeetingId) {
+      setIsMeetingOpen(false);
+      return;
+    }
+    try {
+      await api.post(`/api/meetings/${currentMeetingId}/end`);
+      setIsMeetingOpen(false);
+      setCurrentMeetingId(null);
+      setSelectedParticipants([]);
+      toast.success("Meeting ended");
+    } catch (err) {
+      toast.error("Failed to end meeting");
     }
   };
 
@@ -448,6 +511,9 @@ export default function AdminDashboard() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+                <Button className="rounded-xl h-12 bg-primary gap-2" onClick={() => setIsAddProductOpen(true)}>
+                  <Plus className="h-4 w-4" /> Add New Product
+                </Button>
                 <Button className="rounded-xl h-12 bg-primary gap-2" onClick={fetchGlobalInventory}>
                   <Package className="h-4 w-4" /> Sync Inventory
                 </Button>
@@ -655,6 +721,111 @@ export default function AdminDashboard() {
           )}
         </AnimatePresence>
 
+        {/* Add Product Modal */}
+        <AnimatePresence>
+          {isAddProductOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                onClick={() => setIsAddProductOpen(false)}
+              />
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-lg rounded-[3rem] bg-card border border-border shadow-2xl overflow-hidden"
+              >
+                <div className="p-8 border-b border-border flex items-center justify-between">
+                   <h2 className="text-2xl font-black">Add New Product</h2>
+                   <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsAddProductOpen(false)}>
+                     <XCircle className="h-6 w-6" />
+                   </Button>
+                </div>
+                
+                <form onSubmit={handleAddProduct} className="p-8 space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Product Name</label>
+                      <Input 
+                        required
+                        className="rounded-xl h-12 bg-muted/30 border-none"
+                        placeholder="e.g. Simba Rice"
+                        value={newProduct.name}
+                        onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Category</label>
+                      <select 
+                        required
+                        className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold focus:ring-2 focus:ring-primary appearance-none cursor-pointer"
+                        value={newProduct.category}
+                        onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                      >
+                        <option value="">Select Category</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Bakery">Bakery</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Household">Household</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Price (RWF)</label>
+                      <Input 
+                        required
+                        type="number"
+                        className="rounded-xl h-12 bg-muted/30 border-none"
+                        placeholder="0"
+                        value={newProduct.price}
+                        onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Initial Stock</label>
+                      <Input 
+                        required
+                        type="number"
+                        className="rounded-xl h-12 bg-muted/30 border-none"
+                        placeholder="0"
+                        value={newProduct.stock}
+                        onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Image URL</label>
+                    <Input 
+                      className="rounded-xl h-12 bg-muted/30 border-none"
+                      placeholder="https://example.com/image.jpg"
+                      value={newProduct.imageUrl}
+                      onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Description</label>
+                    <textarea 
+                      className="w-full min-h-[100px] rounded-2xl bg-muted/30 border-none p-4 font-medium focus:ring-2 focus:ring-primary"
+                      placeholder="Product details..."
+                      value={newProduct.description}
+                      onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full h-14 rounded-2xl bg-primary text-base font-bold gap-3 shadow-xl shadow-primary/20">
+                    <Plus className="h-5 w-5" />
+                    Create Product
+                  </Button>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         {/* Meeting Modal */}
         <AnimatePresence>
           {isMeetingOpen && (
@@ -662,39 +833,80 @@ export default function AdminDashboard() {
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                onClick={() => setIsMeetingOpen(false)}
+                onClick={handleEndMeeting}
               />
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
                 className="relative w-full max-w-4xl aspect-video rounded-[3rem] bg-card border-4 border-primary shadow-2xl overflow-hidden flex flex-col"
               >
-                <div className="flex-1 bg-neutral-900 relative">
-                   <div className="absolute inset-0 grid grid-cols-3 gap-2 p-4 opacity-40">
-                      {[1,2,3,4,5,6].map(i => (
-                        <div key={i} className="rounded-2xl bg-neutral-800 flex flex-col items-center justify-center gap-2">
-                           <div className="h-12 w-12 rounded-full bg-neutral-700 animate-pulse" />
-                           <div className="h-2 w-16 bg-neutral-700 rounded-full" />
-                        </div>
-                      ))}
-                   </div>
-                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
-                      <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center mb-6 border-2 border-primary/50 animate-bounce">
-                         <Video className="h-10 w-10 text-primary" />
+                {!currentMeetingId ? (
+                  <div className="flex-1 p-8 flex flex-col overflow-hidden">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-3xl font-black">Prepare Meeting</h2>
+                        <p className="text-muted-foreground">Select participants to invite to the Simba Global Meeting.</p>
                       </div>
-                      <h2 className="text-3xl font-black mb-2">Simba Global Meeting</h2>
-                      <p className="text-white/60 font-medium">Connecting to all branch managers...</p>
-                   </div>
-                </div>
+                      <Button className="rounded-2xl h-12 px-8 bg-primary font-bold" onClick={handleStartMeeting}>
+                        Start Meeting & Notify All
+                      </Button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto pr-4 space-y-2">
+                       {users.filter(u => u.accountType !== 'user').map(u => (
+                         <div 
+                           key={u.id} 
+                           className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                             selectedParticipants.includes(u.id) ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
+                           }`}
+                           onClick={() => {
+                             if (selectedParticipants.includes(u.id)) {
+                               setSelectedParticipants(selectedParticipants.filter(id => id !== u.id));
+                             } else {
+                               setSelectedParticipants([...selectedParticipants, u.id]);
+                             }
+                           }}
+                         >
+                            <div className="flex items-center gap-4">
+                               <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">{u.name ? u.name[0] : "?"}</div>
+                               <div>
+                                 <div className="font-bold">{u.name}</div>
+                                 <div className="text-xs text-muted-foreground">{u.email} - <span className="capitalize">{u.accountType}</span></div>
+                               </div>
+                            </div>
+                            {selectedParticipants.includes(u.id) ? <Check className="text-primary" /> : <Plus className="text-muted-foreground" />}
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 bg-neutral-900 relative">
+                     <div className="absolute inset-0 grid grid-cols-3 gap-2 p-4 opacity-40">
+                        {selectedParticipants.map(i => (
+                          <div key={i} className="rounded-2xl bg-neutral-800 flex flex-col items-center justify-center gap-2">
+                             <div className="h-12 w-12 rounded-full bg-neutral-700 animate-pulse" />
+                             <div className="h-2 w-16 bg-neutral-700 rounded-full" />
+                          </div>
+                        ))}
+                     </div>
+                     <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
+                        <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center mb-6 border-2 border-primary/50 animate-bounce">
+                           <Video className="h-10 w-10 text-primary" />
+                        </div>
+                        <h2 className="text-3xl font-black mb-2">{meetingTitle}</h2>
+                        <p className="text-white/60 font-medium">Meeting is live! Participants are joining...</p>
+                     </div>
+                  </div>
+                )}
                 <div className="h-24 bg-card border-t border-border flex items-center justify-center gap-4 px-8">
-                   <Button variant="outline" size="icon" className="rounded-full h-12 w-12 hover:bg-red-500 hover:text-white transition-colors" onClick={() => setIsMeetingOpen(false)}>
+                   <Button variant="outline" size="icon" className="rounded-full h-12 w-12 hover:bg-red-500 hover:text-white transition-colors" onClick={handleEndMeeting}>
                       <XCircle className="h-6 w-6" />
                    </Button>
                    <Button variant="outline" size="icon" className="rounded-full h-12 w-12">
                       <Mic className="h-6 w-6" />
                    </Button>
                    <div className="h-8 w-px bg-border mx-2" />
-                   <Button className="rounded-2xl h-12 px-8 bg-red-500 hover:bg-red-600 text-white font-bold" onClick={() => setIsMeetingOpen(false)}>
-                      End Meeting for All
+                   <Button className="rounded-2xl h-12 px-8 bg-red-500 hover:bg-red-600 text-white font-bold" onClick={handleEndMeeting}>
+                      {currentMeetingId ? "End Meeting for All" : "Cancel Preparation"}
                    </Button>
                 </div>
               </motion.div>
