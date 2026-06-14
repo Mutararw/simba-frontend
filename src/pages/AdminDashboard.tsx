@@ -67,12 +67,34 @@ export default function AdminDashboard() {
     description: ""
   });
 
+  const [allOrders, setAllOrders] = useState<any[]>([]);
+  
   useEffect(() => {
     fetchStats();
     fetchUsers();
     fetchGlobalInventory();
     fetchPendingUsers();
+    fetchAllOrders();
   }, []);
+
+  const fetchAllOrders = async () => {
+    try {
+      const { data } = await api.get("/api/admin/orders");
+      if (data) setAllOrders(data);
+    } catch (err) {
+      console.error("Failed to fetch orders");
+    }
+  };
+
+  const updateOrderStatus = async (orderId: number, status: string) => {
+    try {
+      await api.patch(`/api/orders/${orderId}`, { status });
+      toast.success(`Order #${orderId} marked as ${status}`);
+      fetchAllOrders();
+    } catch (err) {
+      toast.error("Failed to update order status");
+    }
+  };
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,6 +251,7 @@ export default function AdminDashboard() {
           <SidebarLink icon={<Globe />} label="Overview" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
           <SidebarLink icon={<Building2 />} label="Branches" active={activeTab === "branches"} onClick={() => setActiveTab("branches")} />
           <SidebarLink icon={<Package />} label="Inventory" active={activeTab === "inventory"} onClick={() => setActiveTab("inventory")} />
+          <SidebarLink icon={<ShoppingBag />} label="Orders" active={activeTab === "orders"} onClick={() => setActiveTab("orders")} />
           <SidebarLink icon={<UserCheck />} label="Requests" active={activeTab === "requests"} onClick={() => setActiveTab("requests")} count={(pendingUsers || []).length} />
           <SidebarLink icon={<Users />} label="Users" active={activeTab === "users"} onClick={() => setActiveTab("users")} />
           <SidebarLink icon={<Truck />} label="Suppliers" active={activeTab === "suppliers"} onClick={() => setActiveTab("suppliers")} />
@@ -550,6 +573,99 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === "orders" && (
+            <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black">Order Management</h2>
+                <Button className="rounded-xl h-12 bg-primary gap-2" onClick={fetchAllOrders}>
+                  <RotateCcw className="h-4 w-4" /> Refresh Orders
+                </Button>
+              </div>
+
+              <div className="grid gap-6">
+                {allOrders.map(order => (
+                  <div key={order.id} className="p-6 rounded-[2rem] border border-border bg-card shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                      <div className="flex items-center gap-4">
+                         <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center">
+                           <ShoppingBag className="h-6 w-6 text-primary" />
+                         </div>
+                         <div>
+                           <div className="font-bold text-lg">Order #{order.id}</div>
+                           <div className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleString()}</div>
+                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${
+                          order.status === 'Delivered' ? 'bg-green-500' : 'bg-amber-500'
+                        } rounded-full`}>
+                          {order.status}
+                        </Badge>
+                        <Badge variant="outline" className="rounded-full">
+                          {order.orderType}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 gap-6 mb-6">
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Customer</div>
+                        <div className="font-bold text-sm">{order.userId}</div>
+                        <div className="text-xs text-muted-foreground">{order.phone}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Amount</div>
+                        <div className="font-black text-primary text-lg">RWF {Number(order.totalAmount).toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Delivery Info</div>
+                        <div className="text-sm font-medium">{order.address || order.branchId || "N/A"}</div>
+                        <div className="text-xs text-muted-foreground">{order.zone || order.pickupTime}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
+                      <Button 
+                        disabled={order.status === 'Confirmed'}
+                        className="rounded-xl h-11 bg-blue-600 hover:bg-blue-700 gap-2"
+                        onClick={() => updateOrderStatus(order.id, 'Confirmed')}
+                      >
+                        <Check className="h-4 w-4" /> Confirm Order
+                      </Button>
+                      <Button 
+                        disabled={order.status === 'Packed'}
+                        className="rounded-xl h-11 bg-orange-500 hover:bg-orange-600 gap-2"
+                        onClick={() => updateOrderStatus(order.id, 'Packed')}
+                      >
+                        <Package className="h-4 w-4" /> Mark as Packed
+                      </Button>
+                      <Button 
+                        disabled={order.status === 'Out for Delivery'}
+                        className="rounded-xl h-11 bg-indigo-600 hover:bg-indigo-700 gap-2"
+                        onClick={() => updateOrderStatus(order.id, 'Out for Delivery')}
+                      >
+                        <Truck className="h-4 w-4" /> Out for Delivery
+                      </Button>
+                      <Button 
+                        disabled={order.status === 'Delivered'}
+                        className="rounded-xl h-11 bg-green-600 hover:bg-green-700 gap-2"
+                        onClick={() => updateOrderStatus(order.id, 'Delivered')}
+                      >
+                        <CheckCircle2 className="h-4 w-4" /> Mark Delivered
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {allOrders.length === 0 && (
+                  <div className="py-20 text-center border-2 border-dashed border-border rounded-[3rem]">
+                    <ShoppingBag className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                    <h3 className="text-xl font-bold">No Orders Found</h3>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

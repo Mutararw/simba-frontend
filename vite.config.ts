@@ -26,4 +26,22 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
+  build: {
+    reportCompressedSize: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("lucide-react") || id.includes("framer-motion")) {
+              return "vendor-icons";
+            }
+            if (id.includes("@radix-ui") || id.includes("recharts")) {
+              return "vendor-ui";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
 }));

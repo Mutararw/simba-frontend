@@ -22,6 +22,8 @@ import Dashboard from "@/pages/Dashboard";
 import BranchDashboard from "@/pages/BranchDashboard";
 import Profile from "@/pages/Profile";
 import Notifications from "@/pages/Notifications";
+import Promotions from "@/pages/Promotions";
+import Wishlist from "@/pages/Wishlist";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ROUTER_MODE } from "@/lib/config";
 import { SessionManager } from "@/lib/SessionManager";
@@ -52,6 +54,8 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/forgot" element={<Forgot />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/promotions" element={<Promotions />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/notifications" element={<Notifications />} />

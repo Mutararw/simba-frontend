@@ -5,8 +5,11 @@ export interface Product {
   category: string;
   subcategoryId: number;
   inStock: boolean;
+  stock?: number;
+  rating?: number;
   image: string;
   unit: string;
+  description?: string;
 }
 
 export interface CartItem {

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/cart";
-import { formatRWF } from "@/lib/products";
+import { formatRWF, PRODUCTS } from "@/lib/products";
+import { ProductCard } from "@/components/shop/ProductCard";
+import { useMemo } from "react";
 
 const DEPOSIT = 500;
 
@@ -14,6 +16,17 @@ export default function Cart() {
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const subtotal = useCart((s) => s.items.reduce((n, i) => n + i.qty * i.product.price, 0));
+
+  const upsellProducts = useMemo(() => {
+    if (items.length === 0) return [];
+    const categoriesInCart = new Set(items.map(i => i.product.category));
+    const itemIdsInCart = new Set(items.map(i => i.product.id));
+    
+    return PRODUCTS
+      .filter(p => categoriesInCart.has(p.category) && !itemIdsInCart.has(p.id))
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4);
+  }, [items]);
 
   if (items.length === 0) {
     return (
@@ -52,6 +65,20 @@ export default function Cart() {
             </li>
           ))}
         </ul>
+
+        {upsellProducts.length > 0 && (
+          <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="font-display text-xl font-bold">{t("cart.upsell", { defaultValue: "Customers also bought" })}</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {upsellProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <aside className="h-fit rounded-2xl border border-border bg-card p-5 md:sticky md:top-20">
         <h2 className="mb-4 font-display text-lg font-bold">{t("checkout.summary")}</h2>

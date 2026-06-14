@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 import { ApiError, api } from "@/lib/api";
 import { formatRWF } from "@/lib/products";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Calendar, MapPin } from "lucide-react";
+import { Loader2, Package, Calendar, MapPin, RotateCcw } from "lucide-react";
+import { useCart } from "@/store/cart";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { useOrder } from "@/store/order";
 
 interface OrderItem {
@@ -25,8 +28,11 @@ interface Order {
   items: OrderItem[];
 }
 
+const STATUS_STEPS = ["Placed", "Confirmed", "Packed", "Out for Delivery", "Delivered"];
+
 export default function Orders() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const lastOrder = useOrder((s) => s.lastOrder);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,6 +129,26 @@ export default function Orders() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 gap-1.5 rounded-full text-xs"
+                    onClick={() => {
+                      order.items.forEach(item => {
+                        useCart.getState().addItem({
+                          id: item.productId,
+                          name: item.productName,
+                          price: item.unitPrice,
+                          image: item.imageUrl,
+                          category: "Reorder"
+                        });
+                      });
+                      toast.success("Order items added to cart!");
+                      navigate("/cart");
+                    }}
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Buy Again
+                  </Button>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       order.status === "completed"
@@ -136,6 +162,35 @@ export default function Orders() {
               </div>
 
               <div className="p-6">
+                {/* Status Timeline */}
+                <div className="mb-8 px-2">
+                  <div className="relative flex justify-between">
+                    <div className="absolute top-1/2 left-0 h-0.5 w-full -translate-y-1/2 bg-muted" />
+                    <div 
+                      className="absolute top-1/2 left-0 h-0.5 -translate-y-1/2 bg-primary transition-all duration-500" 
+                      style={{ 
+                        width: `${Math.max(0, (STATUS_STEPS.indexOf(order.status) / (STATUS_STEPS.length - 1)) * 100)}%` 
+                      }}
+                    />
+                    {STATUS_STEPS.map((step, idx) => (
+                      <div key={step} className="relative z-10 flex flex-col items-center">
+                        <div 
+                          className={`grid h-6 w-6 place-items-center rounded-full text-[10px] font-bold transition-colors ${
+                            idx <= STATUS_STEPS.indexOf(order.status) ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {idx + 1}
+                        </div>
+                        <div className={`mt-2 text-[10px] font-semibold uppercase tracking-tighter ${
+                          idx <= STATUS_STEPS.indexOf(order.status) ? "text-primary" : "text-muted-foreground"
+                        }`}>
+                          {step}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {order.branchId ? (
                   <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />

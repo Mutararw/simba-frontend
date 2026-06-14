@@ -102,20 +102,29 @@ export function getCategoryMeta(products: Product[]): CategoryMeta[] {
 export const CATEGORIES: CategoryMeta[] = getCategoryMeta(PRODUCTS);
 
 export const formatRWF = (n: number) => {
+  const rwf = `RWF ${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   const lang = i18n.language.split("-")[0];
 
+  if (lang === "rw") return rwf;
+
+  // For other languages, show RWF first then converted (optional)
+  // But requirement says "show a running RWF total", so RWF must be prominent.
+  let converted = "";
   switch (lang) {
     case "en":
-      return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n / 1300);
+      converted = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n / 1300);
+      return `${rwf} (${converted})`;
     case "fr":
-      return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(n / 1400);
+      converted = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 }).format(n / 1400);
+      return `${rwf} (${converted})`;
     case "ar":
-      return new Intl.NumberFormat("ar-AE", { style: "currency", currency: "AED", maximumFractionDigits: 2 }).format(n / 350);
+      converted = new Intl.NumberFormat("ar-AE", { style: "currency", currency: "AED", maximumFractionDigits: 2 }).format(n / 350);
+      return `${rwf} (${converted})`;
     case "zh":
-      return new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(n / 180);
-    case "rw":
+      converted = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 2 }).format(n / 180);
+      return `${rwf} (${converted})`;
     default:
-      return `RWF ${n.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+      return rwf;
   }
 };
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, User as UserIcon, LogOut, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings, Truck, ShieldCheck } from "lucide-react";
+import { ShoppingCart, User as UserIcon, LogOut, Grid, Store, Menu, X, Bell, LayoutDashboard, Settings, Truck, ShieldCheck, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
@@ -28,6 +28,7 @@ export function Header() {
 
   const navLinks = [
     { to: "/browse", label: "Products", icon: Grid },
+    { to: "/promotions", label: "Deals", icon: Truck },
     { to: "/branches", label: t("nav.branches"), icon: Store },
   ];
 
@@ -117,6 +118,9 @@ export function Header() {
           </div>
           <LanguageSwitcher />
           <ThemeToggle />
+          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/wishlist")} aria-label="Wishlist">
+            <Heart className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/notifications")} aria-label="Notifications">
             <Bell className="h-5 w-5" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-white ring-2 ring-[#fd7e14]" />
