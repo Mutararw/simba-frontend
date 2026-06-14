@@ -6,11 +6,13 @@ import { useCart } from "@/store/cart";
 import { formatRWF, PRODUCTS } from "@/lib/products";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useMemo } from "react";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
 const DEPOSIT = 500;
 
 export default function Cart() {
   const { t } = useTranslation();
+  const { translateProduct } = useDynamicTranslation();
   const navigate = useNavigate();
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
@@ -44,11 +46,11 @@ export default function Cart() {
         <h1 className="mb-4 font-display text-3xl font-bold">{t("cart.title")}</h1>
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
           {items.map((i) => (
-            <li key={i.product.id} className="flex gap-3 p-4">
-              <img src={i.product.image} alt={i.product.name} className="h-20 w-20 rounded-xl bg-muted object-cover" />
+            <li key={i.product.id} className="flex gap-4 p-4 first:pt-0">
+              <img src={i.product.image} alt={translateProduct(i.product.name)} className="h-20 w-20 rounded-xl bg-muted object-cover" />
               <div className="flex flex-1 flex-col">
                 <div className="flex justify-between gap-2">
-                  <Link to={`/product/${i.product.id}`} className="line-clamp-2 text-sm font-semibold hover:text-primary">{i.product.name}</Link>
+                  <Link to={`/product/${i.product.id}`} className="line-clamp-2 text-sm font-semibold hover:text-primary">{translateProduct(i.product.name)}</Link>
                   <button onClick={() => remove(i.product.id)} className="text-muted-foreground hover:text-destructive" aria-label="Remove">
                     <Trash2 className="h-4 w-4" />
                   </button>

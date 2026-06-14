@@ -6,10 +6,12 @@ import { formatRWF } from "@/lib/products";
 import type { Product } from "@/lib/types";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
 export function ProductCard({ product }: { product: Product }) {
   const add = useCart((s) => s.add);
   const { t } = useTranslation();
+  const { translateProduct, translateCategory } = useDynamicTranslation();
 
   const isLowStock = product.inStock && product.stock !== undefined && product.stock > 0 && product.stock < 10;
   
@@ -39,15 +41,15 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="premium-card__image-container">
             <img
               src={product.image}
-              alt={product.name}
+              alt={translateProduct(product.name)}
               loading="lazy"
               className="premium-card__image-img"
               onError={(e) => ((e.currentTarget as HTMLImageElement).style.opacity = "0.3")}
             />
           </div>
           <div className="premium-card__text">
-            <p className="premium-card__title line-clamp-2">{product.name}</p>
-            <p className="premium-card__description">{product.category}</p>
+            <p className="premium-card__title line-clamp-2">{translateProduct(product.name)}</p>
+            <p className="premium-card__description">{translateCategory(product.category)}</p>
           </div>
           <div className="premium-card__footer">
             <div className="premium-card__price">{formatRWF(product.price)}</div>

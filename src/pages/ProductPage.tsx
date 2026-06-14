@@ -10,10 +10,12 @@ import { useWishlist } from "@/store/wishlist";
 import { ProductCard } from "@/components/shop/ProductCard";
 import type { Product } from "@/lib/types";
 import { toast } from "sonner";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
 export default function ProductPage() {
   const { id } = useParams();
   const { t } = useTranslation();
+  const { translateProduct, translateCategory, translateDescription } = useDynamicTranslation();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
@@ -82,19 +84,19 @@ export default function ProductPage() {
       {/* Breadcrumbs */}
       <nav className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
         <Link to="/" className="flex items-center gap-1 hover:text-primary">
-          <Home className="h-3 w-3" /> Home
+          <Home className="h-3 w-3" /> {t("nav.home")}
         </Link>
         <ChevronRight className="h-3 w-3" />
-        <Link to="/browse" className="hover:text-primary">Products</Link>
+        <Link to="/browse" className="hover:text-primary">{t("nav.products")}</Link>
         <ChevronRight className="h-3 w-3" />
-        <Link to={`/browse?cat=${product.category}`} className="hover:text-primary">{product.category}</Link>
+        <Link to={`/browse?cat=${product.category}`} className="hover:text-primary">{translateCategory(product.category)}</Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="font-bold text-foreground truncate max-w-[150px]">{product.name}</span>
+        <span className="font-bold text-foreground truncate max-w-[150px]">{translateProduct(product.name)}</span>
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2">
         <div className="overflow-hidden rounded-3xl bg-muted aspect-square relative">
-          <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          <img src={product.image} alt={translateProduct(product.name)} className="h-full w-full object-cover" />
           <Button 
             variant="ghost" 
             size="icon" 
@@ -105,8 +107,8 @@ export default function ProductPage() {
           </Button>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="text-sm font-semibold uppercase tracking-wider text-primary">{product.category}</div>
-          <h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">{product.name}</h1>
+          <div className="text-sm font-semibold uppercase tracking-wider text-primary">{translateCategory(product.category)}</div>
+          <h1 className="font-display text-3xl font-bold leading-tight md:text-4xl">{translateProduct(product.name)}</h1>
           <div className="flex items-center gap-3">
             <span className="font-display text-3xl font-extrabold">{formatRWF(product.price)}</span>
             <span className="text-sm text-muted-foreground">/ {product.unit || "Pcs"}</span>
@@ -120,7 +122,7 @@ export default function ProductPage() {
 
           <div className="mt-6 flex flex-col gap-4">
             <div className="flex items-center gap-4">
-              <Label className="font-bold">Quantity</Label>
+              <Label className="font-bold">{t("product.quantity")}</Label>
               <div className="flex items-center gap-1 p-1 bg-secondary rounded-full">
                 <Button 
                   variant="ghost" 
@@ -156,15 +158,15 @@ export default function ProductPage() {
           </div>
 
           <div className="mt-4 border-t border-border pt-4">
-            <h3 className="font-bold mb-2">Product Description</h3>
+            <h3 className="font-bold mb-2">{t("product.description")}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {product.description || `Premium ${product.name} from our ${product.category} section. High quality guaranteed and fresh daily.`}
+              {translateDescription(product.description || "", product.name)}
             </p>
           </div>
 
           <div className="mt-8 border-t border-border pt-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">Customer Reviews</h3>
+              <h3 className="font-bold text-lg">{t("product.reviews")}</h3>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="font-bold">{product.rating || "5.0"}</span>
@@ -189,7 +191,7 @@ export default function ProductPage() {
                   <p className="text-xs text-muted-foreground">{rev.comment}</p>
                 </div>
               ))}
-              <Button variant="outline" className="w-full rounded-xl text-xs font-bold h-10">Write a Review</Button>
+              <Button variant="outline" className="w-full rounded-xl text-xs font-bold h-10">{t("product.writeReview")}</Button>
             </div>
           </div>
         </div>

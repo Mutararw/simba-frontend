@@ -14,9 +14,11 @@ import { useProducts } from "@/hooks/use-products";
 import { ProductFilters, type FilterState } from "@/components/shop/ProductFilters";
 import hero from "@/assets/hero-groceries.jpg";
 import { useEffect, useMemo, useState } from "react";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
 export default function Index() {
   const { t } = useTranslation();
+  const { translateCategory } = useDynamicTranslation();
   const { products, categories, loading } = useProducts();
 
   const maxPrice = useMemo(() => {

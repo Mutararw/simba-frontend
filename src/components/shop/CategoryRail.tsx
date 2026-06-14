@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useProducts } from "@/hooks/use-products";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
 const TILE_BG = ["bg-tile-1", "bg-tile-2", "bg-tile-3", "bg-tile-4", "bg-tile-5", "bg-tile-6", "bg-tile-7", "bg-tile-8"];
 
 export function CategoryRail() {
   const { t } = useTranslation();
+  const { translateCategory } = useDynamicTranslation();
   const { categories } = useProducts();
   return (
     <section className="container py-8">
@@ -32,7 +34,7 @@ export function CategoryRail() {
               {c.emoji}
             </div>
             <div className="z-20 mt-auto w-full">
-              <h3 className="font-display text-sm font-bold leading-tight text-foreground md:text-base">{c.key}</h3>
+              <h3 className="font-display text-sm font-bold leading-tight text-foreground md:text-base">{translateCategory(c.key)}</h3>
               <p className="mt-1 text-xs text-foreground/60">
                 {t("categories.count", { count: c.count })}
               </p>
