@@ -22,7 +22,7 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [related, setRelated] = useState<Product[]>([]);
   
-  const addItem = useCart((s) => s.addItem);
+  const addItem = useCart((s) => s.add);
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
@@ -51,15 +51,7 @@ export default function ProductPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    for (let i = 0; i < qty; i++) {
-      addItem({ 
-        id: product.id, 
-        name: product.name, 
-        price: product.price, 
-        image: product.image, 
-        category: product.category 
-      });
-    }
+    addItem(product, qty);
     toast.success(`${qty}x ${product.name} added to cart!`);
   };
 
