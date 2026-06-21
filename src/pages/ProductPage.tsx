@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, ShoppingCart, Loader2, Heart, Plus, Minus, Home, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { fetchProduct, formatRWF, PRODUCTS } from "@/lib/products";
 import { useCart } from "@/store/cart";
 import { useWishlist } from "@/store/wishlist";
@@ -115,7 +114,7 @@ export default function ProductPage() {
 
           <div className="mt-6 flex flex-col gap-4">
             <div className="flex items-center gap-4">
-              <Label className="font-bold">{t("product.quantity")}</Label>
+              <label className="font-bold">{t("product.quantity")}</label>
               <div className="flex items-center gap-1 p-1 bg-secondary rounded-full">
                 <Button 
                   variant="ghost" 
