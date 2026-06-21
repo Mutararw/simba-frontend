@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script>
+      (function () {
+        var current = window.location;
+        var redirect =
+          current.origin +
+          "/?spa-path=" +
+          encodeURIComponent(current.pathname) +
+          "&spa-search=" +
+          encodeURIComponent(current.search.slice(1)) +
+          current.hash;
+
+        window.location.replace(redirect);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
