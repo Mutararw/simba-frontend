@@ -11,11 +11,15 @@ interface ApiProduct {
   name: string;
   price: string | number;
   category: string;
-  subcategoryId: number;
-  stock: number;
+  subcategoryId?: string | number;
+  stock?: string | number;
+  inStock?: boolean;
   imageUrl?: string;
   image_url?: string;
+  image?: string;
   unit: string;
+  description?: string | null;
+  rating?: string | number | null;
 }
 
 export interface CategoryMeta {
@@ -39,13 +43,50 @@ const TILE_MAP: Record<string, { tile: number; emoji: string }> = {
   "Sports & Wellness": { tile: 2, emoji: "⚽" },
 };
 
-function mapApiProduct(product: ApiProduct): Product {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function parseFiniteNumber(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function mapApiProduct(product: unknown): Product {
+  if (!isRecord(product)) {
+    throw new Error("Invalid product response");
+  }
+
+  const id = parseFiniteNumber(product.id);
+  const price = parseFiniteNumber(product.price);
+  const name = typeof product.name === "string" ? product.name : "";
+  const category = typeof product.category === "string" ? product.category : "";
+
+  if (id === null || price === null || !name || !category) {
+    throw new Error("Invalid product response");
+  }
+
+  const stock = parseFiniteNumber(product.stock);
+  const subcategoryId = parseFiniteNumber(product.subcategoryId) ?? 0;
+  const image =
+    (typeof product.imageUrl === "string" && product.imageUrl) ||
+    (typeof product.image_url === "string" && product.image_url) ||
+    (typeof product.image === "string" && product.image) ||
+    "";
+  const rating = parseFiniteNumber(product.rating);
+
   return {
-    ...product,
-    id: typeof product.id === "string" ? parseInt(product.id, 10) : Number(product.id),
-    price: Number(product.price),
-    inStock: product.stock > 0,
-    image: product.imageUrl || product.image_url || "",
+    id,
+    name,
+    price,
+    category,
+    subcategoryId,
+    inStock: typeof product.inStock === "boolean" ? product.inStock : (stock ?? 0) > 0,
+    stock: stock ?? undefined,
+    rating: rating ?? undefined,
+    image,
+    unit: typeof product.unit === "string" && product.unit ? product.unit : "Pcs",
+    description: typeof product.description === "string" ? product.description : undefined,
   };
 }
 
@@ -144,6 +185,9 @@ export function searchProducts(q: string): Product[] {
 export async function fetchProducts(): Promise<Product[]> {
   try {
     const { data } = await api.get<ApiProduct[]>("/api/products");
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid products response");
+    }
     return data.map(mapApiProduct);
   } catch (error) {
     console.error("Failed to fetch products, falling back to static data", error);
