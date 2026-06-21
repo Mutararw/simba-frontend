@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus, Star, Bell, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/cart";
@@ -22,12 +22,27 @@ export function ProductCard({ product }: { product: Product }) {
   const { t } = useTranslation();
   const { translateProduct, translateCategory } = useDynamicTranslation();
   const [showQuickView, setShowQuickView] = useState(false);
+  const navigate = useNavigate();
 
   const isLowStock = product.inStock && product.stock !== undefined && product.stock > 0 && product.stock < 10;
-  
+
+  const handleCardClick = () => {
+    if (!showQuickView) {
+      navigate(`/product/${product.id}`);
+    }
+  };
+
   return (
     <>
-      <Link to={`/product/${product.id}`} className="block h-full group">
+      {/* Card — uses div + programmatic navigation so Dialog doesn't conflict with Link */}
+      <div
+        className="block h-full group cursor-pointer"
+        onClick={handleCardClick}
+        role="link"
+        aria-label={`View ${translateProduct(product.name)}`}
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(); }}
+      >
         <div className="premium-card relative">
           <div className="premium-card__shine"></div>
           <div className="premium-card__glow"></div>
@@ -49,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
               </div>
             )}
 
-            <div className="premium-card__image-container text-foreground">
+            <div className="premium-card__image-container">
               <img
                 src={product.image}
                 alt={translateProduct(product.name)}
@@ -74,18 +89,21 @@ export function ProductCard({ product }: { product: Product }) {
                 </Button>
               </div>
             </div>
+
             <div className="premium-card__text">
               <p className="premium-card__title line-clamp-2">{translateProduct(product.name)}</p>
               <p className="premium-card__description">{translateCategory(product.category)}</p>
             </div>
+
             <div className="premium-card__footer">
               <div className="premium-card__price">{formatRWF(product.price)}</div>
               {product.inStock ? (
-                <div 
+                <div
                   className="premium-card__button"
-                  onClick={(e) => { 
-                    e.preventDefault(); 
-                    add(product); 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    add(product);
                     toast.success(`${product.name} added to cart!`);
                   }}
                   aria-label={t("product.add")}
@@ -93,10 +111,11 @@ export function ProductCard({ product }: { product: Product }) {
                   <Plus className="h-4 w-4" />
                 </div>
               ) : (
-                <div 
+                <div
                   className="premium-card__button bg-secondary text-muted-foreground"
-                  onClick={(e) => { 
-                    e.preventDefault(); 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     toast.info(`We will notify you when ${product.name} is back in stock!`);
                   }}
                   title="Notify Me"
@@ -107,8 +126,9 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
+      {/* Quick View Dialog — rendered as sibling, NOT inside the card div */}
       <Dialog open={showQuickView} onOpenChange={setShowQuickView}>
         <DialogContent className="sm:max-w-[500px] rounded-3xl p-6 overflow-hidden">
           <DialogHeader>
@@ -156,18 +176,30 @@ export function ProductCard({ product }: { product: Product }) {
                 </p>
               </div>
 
-              <Button
-                disabled={!product.inStock}
-                className="w-full gap-2 rounded-full font-bold shadow-md h-10 mt-auto"
-                onClick={() => {
-                  add(product);
-                  toast.success(`${product.name} added to cart!`);
-                  setShowQuickView(false);
-                }}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Add to Cart
-              </Button>
+              <div className="flex flex-col gap-2 mt-auto">
+                <Button
+                  disabled={!product.inStock}
+                  className="w-full gap-2 rounded-full font-bold shadow-md h-10"
+                  onClick={() => {
+                    add(product);
+                    toast.success(`${product.name} added to cart!`);
+                    setShowQuickView(false);
+                  }}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Add to Cart
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full h-9 text-xs font-semibold"
+                  onClick={() => {
+                    setShowQuickView(false);
+                    navigate(`/product/${product.id}`);
+                  }}
+                >
+                  View Full Details
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
