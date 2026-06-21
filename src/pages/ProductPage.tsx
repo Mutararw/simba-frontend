@@ -26,15 +26,31 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (!id) return;
+    let active = true;
+
     setLoading(true);
     fetchProduct(id).then((p) => {
+      if (!active) return;
       setProduct(p);
       if (p) {
         const rel = PRODUCTS.filter((r) => r.category === p.category && r.id !== p.id).slice(0, 5);
         setRelated(rel);
+      } else {
+        setRelated([]);
       }
+    }).catch((error) => {
+      console.error(`Failed to load product ${id}`, error);
+      if (!active) return;
+      setProduct(null);
+      setRelated([]);
+    }).finally(() => {
+      if (!active) return;
       setLoading(false);
     });
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const toggleWishlist = () => {
