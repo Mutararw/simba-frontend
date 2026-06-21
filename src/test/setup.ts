@@ -13,3 +13,30 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+const storage = (() => {
+  let data: Record<string, string> = {};
+
+  return {
+    getItem: (key: string) => data[key] ?? null,
+    setItem: (key: string, value: string) => {
+      data[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete data[key];
+    },
+    clear: () => {
+      data = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, "localStorage", {
+  writable: true,
+  value: storage,
+});
+
+Object.defineProperty(globalThis, "localStorage", {
+  writable: true,
+  value: storage,
+});

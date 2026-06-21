@@ -20,7 +20,7 @@ import { BRANCHES } from "@/lib/branches";
 
 export function Header() {
   const { t } = useTranslation();
-  const count = useCart((s) => s.items.reduce((n, i) => n + i.qty, 0));
+  const count = useCart((s) => (Array.isArray(s.items) ? s.items : []).reduce((n, i) => n + i.qty, 0));
   const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
   const navigate = useNavigate();
