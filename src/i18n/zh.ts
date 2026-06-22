@@ -1,5 +1,5 @@
-import type { Dict } from "./en";
-const zh: Dict = {
+import en from "./en";
+const zh: typeof en = {
   brand: { name: "辛巴", tagline: "卢旺达在线超市" },
   nav: { home: "首页", browse: "产品", products: "产品", branches: "分店", cart: "购物车", login: "登录", logout: "登出", account: "账户", deals: "Deals", wishlist: "Wishlist", notifications: "Notifications", dashboard: "Dashboard", orders: "My Orders", profile: "My Profile" },
   hero: {

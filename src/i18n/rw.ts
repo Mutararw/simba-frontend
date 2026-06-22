@@ -1,5 +1,5 @@
-import type { Dict } from "./en";
-const rw: Dict = {
+import en from "./en";
+const rw: typeof en = {
   brand: { name: "Simba", tagline: "Isupermarket ya Rwanda kuri Internet" },
   branch: {
     title: "Hitamo Aho Gufata",

@@ -1,5 +1,5 @@
-import type { Dict } from "./en";
-const ar: Dict = {
+import en from "./en";
+const ar: typeof en = {
   brand: { name: "سيمبا", tagline: "سوبر ماركت رواندا عبر الإنترنت" },
   nav: { home: "الرئيسية", browse: "المنتجات", products: "المنتجات", branches: "الفروع", cart: "السلة", login: "تسجيل الدخول", logout: "تسجيل الخروج", account: "الحساب", deals: "Deals", wishlist: "Wishlist", notifications: "Notifications", dashboard: "Dashboard", orders: "My Orders", profile: "My Profile" },
   hero: {
