@@ -1819,7 +1819,7 @@ const zh: typeof en = {
     resetSent: "如果账户存在，我们已发送重置链接。",
     googleNote: "导出时，Google 登录将与 Better Auth 关联。",
   },
-  reviews: { title: "评价您的提货", placeholder: "您的体验如何？", submit: "提交评价", thanks: "感谢您的反馈！", whyChooseUs: "为什么选择我们" },
+  reviews: { formTitle: "评价您的提货", formPlaceholder: "您的体验如何？", formSubmit: "提交评价", thanks: "感谢您的反馈！", whyChooseUs: "为什么选择我们" },
   contact: {
     badge: "联系我们",
     title: "我们很想听到您的声音",

@@ -1819,7 +1819,7 @@ const ar: typeof en = {
     resetSent: "إذا كان الحساب موجوداً، فقد أرسلنا رابط إعادة التعيين.",
     googleNote: "سيتم ربط تسجيل الدخول بجوجل مع Better Auth عند التصدير.",
   },
-  reviews: { title: "قيم استلامك", placeholder: "كيف كانت تجربتك؟", submit: "إرسال التقييم", thanks: "شكراً لتعليقاتك!", whyChooseUs: "لماذا تختارنا" },
+  reviews: { formTitle: "قيم استلامك", formPlaceholder: "كيف كانت تجربتك؟", formSubmit: "إرسال التقييم", thanks: "شكراً لتعليقاتك!", whyChooseUs: "لماذا تختارنا" },
   contact: {
     badge: "اتصل بنا",
     title: "يسعدنا أن نسمع منك",
