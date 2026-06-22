@@ -215,8 +215,9 @@ export default function AdminDashboard() {
       setCurrentMeetingId(data.id);
       setIsMeetingOpen(true);
       toast.success("Meeting started and invitations sent!");
-    } catch (err) {
-      toast.error("Failed to start meeting");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Failed to start meeting";
+      toast.error(msg);
     }
   };
 

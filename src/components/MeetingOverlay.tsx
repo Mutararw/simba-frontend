@@ -46,8 +46,8 @@ export function MeetingOverlay() {
                 <Video className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h3 className="font-black text-lg leading-tight">Active Company Meeting</h3>
-                <p className="text-white/80 text-sm font-medium">Started by {meeting.creator.name}</p>
+                <h3 className="font-black text-lg leading-tight">{meeting.title || "Active Company Meeting"}</h3>
+                <p className="text-white/80 text-sm font-medium">Started by {meeting.creator?.name || "Unknown"}</p>
                 <div className="mt-3 flex gap-2">
                   <Button 
                     className="rounded-xl bg-white text-primary hover:bg-white/90 font-bold h-10 px-6"
