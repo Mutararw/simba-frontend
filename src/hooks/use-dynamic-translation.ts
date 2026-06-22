@@ -9,20 +9,24 @@ import i18n from "@/i18n";
 export function useDynamicTranslation() {
   const { t } = useTranslation();
 
-  const translateProduct = (name: string) => {
+  const translateProduct = (name: string | undefined | null) => {
+    if (!name) return "";
     // Check if we have a direct translation key for this product name
     const key = `products.names.${name.toLowerCase().replace(/\s+/g, '_')}`;
     const translated = t(key, { defaultValue: name });
     return translated;
   };
 
-  const translateCategory = (category: string) => {
+  const translateCategory = (category: string | undefined | null) => {
+    if (!category) return "";
     const key = `categories.names.${category.toLowerCase().replace(/\s+/g, '_').replace(/&/g, 'and')}`;
     return t(key, { defaultValue: category });
   };
 
-  const translateDescription = (description: string, productName: string) => {
-    const key = `products.descriptions.${productName.toLowerCase().replace(/\s+/g, '_')}`;
+  const translateDescription = (description: string | undefined | null, productName: string | undefined | null) => {
+    if (!description) return "";
+    const nameKey = productName ? productName.toLowerCase().replace(/\s+/g, '_') : 'default';
+    const key = `products.descriptions.${nameKey}`;
     return t(key, { defaultValue: description });
   };
 

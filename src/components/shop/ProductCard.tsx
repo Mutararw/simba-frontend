@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Plus, Star, Bell, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/cart";
@@ -26,22 +26,16 @@ export function ProductCard({ product }: { product: Product }) {
 
   const isLowStock = product.inStock && product.stock !== undefined && product.stock > 0 && product.stock < 10;
 
-  const handleCardClick = () => {
-    if (!showQuickView) {
-      navigate(`/product/${product.id}`);
-    }
-  };
-
   return (
     <>
-      {/* Card — uses div + programmatic navigation so Dialog doesn't conflict with Link */}
-      <div
+      {/* Card — uses Link for navigation */}
+      <Link
+        to={`/product/${product.id}`}
         className="block h-full group cursor-pointer"
-        onClick={handleCardClick}
         role="link"
         aria-label={`View ${translateProduct(product.name)}`}
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCardClick(); }}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.currentTarget.click(); }}
       >
         <div className="premium-card relative">
           <div className="premium-card__shine"></div>
@@ -126,7 +120,7 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Quick View Dialog — rendered as sibling, NOT inside the card div */}
       <Dialog open={showQuickView} onOpenChange={setShowQuickView}>
