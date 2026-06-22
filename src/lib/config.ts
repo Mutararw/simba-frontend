@@ -1,10 +1,9 @@
 const rawApiUrl =
   import.meta.env.VITE_API_URL?.trim() ||
   import.meta.env.VITE_AUTH_URL?.trim() ||
-  "";
+  (typeof window !== "undefined" ? window.location.origin : "");
 
-export const API_URL =
-  rawApiUrl || (typeof window !== "undefined" ? window.location.origin : "");
+export const API_URL = rawApiUrl;
 
 export const ROUTER_MODE =
   import.meta.env.VITE_ROUTER_MODE === "hash" ? "hash" : "browser";
