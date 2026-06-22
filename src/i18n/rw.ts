@@ -1763,7 +1763,7 @@ const rw: Dict = {
       simba_umbrella: "",
       simba_backpack: "",
     },
-  },,
+  },
   cart: {
     title: "Igare ryawe",
     empty: "Igare ryawe ntakintu kirimo.",

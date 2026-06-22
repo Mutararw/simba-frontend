@@ -1738,7 +1738,7 @@ const zh: Dict = {
       simba_umbrella: "",
       simba_backpack: "",
     },
-  },,
+  },
   cart: {
     title: "您的购物车",
     empty: "您的购物车是空的。",

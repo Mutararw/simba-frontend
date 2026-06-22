@@ -1738,7 +1738,7 @@ const ar: Dict = {
       simba_umbrella: "",
       simba_backpack: "",
     },
-  },,
+  },
   cart: {
     title: "سلتك",
     empty: "سلتك فارغة.",
