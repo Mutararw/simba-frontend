@@ -6,10 +6,12 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
+import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 import { ProductFilters, type FilterState } from "@/components/shop/ProductFilters";
 
 export default function Browse() {
   const { t } = useTranslation();
+  const { translateCategory } = useDynamicTranslation();
   const { products, categories, loading } = useProducts();
   const [params, setParams] = useSearchParams();
   const cat = params.get("cat") || (categories.length > 0 ? categories[0].key : "");
@@ -88,7 +90,7 @@ export default function Browse() {
                     : "border-slate-200 bg-white text-slate-900 hover:border-primary/40"
                 }`}
               >
-                <span className="mr-1.5">{c.emoji}</span>{c.key}
+                <span className="mr-1.5">{c.emoji}</span>{translateCategory(c.key)}
               </button>
             );
           })}

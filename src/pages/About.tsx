@@ -20,7 +20,7 @@ export default function About() {
           transition={{ duration: 0.5 }}
           className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary shadow-sm"
         >
-          Established in 2007
+          {t("about.hero.badge")}
         </motion.span>
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
@@ -28,7 +28,7 @@ export default function About() {
           transition={{ delay: 0.1, duration: 0.6 }}
           className="mt-4 font-display text-4xl font-black tracking-tight text-foreground sm:text-5xl md:text-6xl"
         >
-          Our Story & <span className="bg-gradient-to-r from-primary to-[#fd7e14] bg-clip-text text-transparent">Values</span>
+          {t("about.hero.title")} <span className="bg-gradient-to-r from-primary to-[#fd7e14] bg-clip-text text-transparent">{t("about.hero.titleHighlight")}</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -36,7 +36,7 @@ export default function About() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mt-6 text-lg text-muted-foreground leading-relaxed"
         >
-          Simba Supermarket has been a cornerstone of Kigali's community since 2007, pioneering the modern retail experience in Rwanda. We are dedicated to bringing you the freshest ingredients, premium products, and exceptional customer service.
+          {t("about.hero.description")}
         </motion.p>
       </div>
 
@@ -51,9 +51,9 @@ export default function About() {
         >
           <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 transition-transform group-hover:scale-150 duration-500" />
           <Calendar className="h-10 w-10 text-primary mb-6" />
-          <h2 className="font-display text-2xl font-bold mb-4">Our History</h2>
+          <h2 className="font-display text-2xl font-bold mb-4">{t("about.history.title")}</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Founded in 2007 as a single, family-oriented supermarket in Nyarugenge, Simba Supermarket set out with a vision to deliver a standardized, hygienic, and affordable grocery shopping environment. Over the last two decades, Simba has grown to become the largest and most trusted retail supermarket network in Kigali, operating multiple branches equipped to serve thousands of families daily.
+            {t("about.history.description")}
           </p>
         </motion.div>
 
@@ -66,9 +66,9 @@ export default function About() {
         >
           <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#fd7e14]/5 transition-transform group-hover:scale-150 duration-500" />
           <Award className="h-10 w-10 text-[#fd7e14] mb-6" />
-          <h2 className="font-display text-2xl font-bold mb-4">Our Commitment</h2>
+          <h2 className="font-display text-2xl font-bold mb-4">{t("about.commitment.title")}</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            We are committed to empowering local farmers and manufacturers across Rwanda. By sourcing fresh agricultural produce directly from Kigali's rural cooperatives, we guarantee the shortest time from field to store shelves. Quality assurance, strict hygiene practices, and customer-first service form the core DNA of Simba.
+            {t("about.commitment.description")}
           </p>
         </motion.div>
       </div>
@@ -76,28 +76,28 @@ export default function About() {
       {/* Contact Section */}
       <section className="mb-20">
         <div className="text-center mb-10">
-          <h2 className="font-display text-3xl font-bold">Get In Touch</h2>
-          <p className="mt-2 text-muted-foreground">We are here to help you 24/7. Reach out through our official support lines.</p>
+          <h2 className="font-display text-3xl font-bold">{t("about.contact.title")}</h2>
+          <p className="mt-2 text-muted-foreground">{t("about.contact.subtitle")}</p>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
           <ContactCard
             icon={<Phone className="h-6 w-6 text-primary" />}
-            title="Local Phone Lines"
-            content="+250 788 000 000"
-            subtitle="Available: 07:00 AM – 10:00 PM"
+            title={t("about.contact.phone.title")}
+            content={t("about.contact.phone.content")}
+            subtitle={t("about.contact.phone.subtitle")}
           />
           <ContactCard
             icon={<Mail className="h-6 w-6 text-primary" />}
-            title="Customer Support Email"
-            content="info@Simbasupermarket.rw"
-            subtitle="Response within 24 hours"
+            title={t("about.contact.email.title")}
+            content={t("about.contact.email.content")}
+            subtitle={t("about.contact.email.subtitle")}
           />
           <ContactCard
             icon={<MapPin className="h-6 w-6 text-primary" />}
-            title="Headquarters Office"
-            content="Centenary House, Kiyovu"
-            subtitle="Kigali, Rwanda"
+            title={t("about.contact.address.title")}
+            content={t("about.contact.address.content")}
+            subtitle={t("about.contact.address.subtitle")}
           />
         </div>
       </section>
@@ -105,53 +105,53 @@ export default function About() {
       {/* FAQ Section */}
       <section className="max-w-3xl mx-auto mb-12">
         <div className="text-center mb-10">
-          <h2 className="font-display text-3xl font-bold">Frequently Asked Questions</h2>
-          <p className="mt-2 text-muted-foreground">Find quick answers to common questions about our services.</p>
+          <h2 className="font-display text-3xl font-bold">{t("about.faq.title")}</h2>
+          <p className="mt-2 text-muted-foreground">{t("about.faq.subtitle")}</p>
         </div>
 
         <Accordion type="single" collapsible className="w-full space-y-4">
           <AccordionItem value="faq-1" className="border border-border bg-card rounded-2xl px-6">
             <AccordionTrigger className="hover:no-underline font-bold text-foreground">
-              Do you deliver on public holidays?
+              {t("about.faq.q1.question")}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-              Yes, we deliver 365 days a year, including public holidays. Delivery schedules on public holidays typically run between 09:00 AM and 06:00 PM. Any specific holiday updates are posted via our in-app notification center.
+              {t("about.faq.q1.answer")}
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="faq-2" className="border border-border bg-card rounded-2xl px-6">
             <AccordionTrigger className="hover:no-underline font-bold text-foreground">
-              Can I return fresh vegetables or dairy?
+              {t("about.faq.q2.question")}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-              To guarantee the highest food safety and hygiene standard, fresh vegetables, fruits, meat, and dairy items cannot be returned after delivery. For shelf-stable packaged goods, returns are accepted within 48 hours with original receipt proof.
+              {t("about.faq.q2.answer")}
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="faq-3" className="border border-border bg-card rounded-2xl px-6">
             <AccordionTrigger className="hover:no-underline font-bold text-foreground">
-              What are the delivery areas and charges?
+              {t("about.faq.q3.question")}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-              We deliver to all districts of Kigali (Gasabo, Kicukiro, Nyarugenge). Delivery fees range from 1,000 RWF to 2,000 RWF depending on your exact neighborhood. You can view the exact shipping fee breakdown in the delivery selector during checkout.
+              {t("about.faq.q3.answer")}
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="faq-4" className="border border-border bg-card rounded-2xl px-6">
             <AccordionTrigger className="hover:no-underline font-bold text-foreground">
-              What payment methods do you support?
+              {t("about.faq.q4.question")}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-              We support MTN Mobile Money (MoMo), credit/debit card payments, and Cash on Delivery (CoD). You can choose your preferred method at the final checkout screen.
+              {t("about.faq.q4.answer")}
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="faq-5" className="border border-border bg-card rounded-2xl px-6">
             <AccordionTrigger className="hover:no-underline font-bold text-foreground">
-              How long does pickup collection take?
+              {t("about.faq.q5.question")}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-              Pickup orders are generally prepared and ready for collection within 45 minutes of placement. You will receive an SMS and email notification when your package is ready at your selected Simba branch.
+              {t("about.faq.q5.answer")}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

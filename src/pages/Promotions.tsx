@@ -39,7 +39,7 @@ const PROMOTIONS = [
 
 export default function Promotions() {
   const { t } = useTranslation();
-  const addItem = useCart((s) => s.addItem);
+  const addItem = useCart((s) => s.add);
 
   return (
     <div className="container py-8">
