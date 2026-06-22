@@ -43,28 +43,30 @@ export default function Login() {
       // DB stores "user" but UI shows "customer" — normalize
       const accountType = (u as any).accountType || "user";
 
-      // Role verification
-      if (role === "manager" && accountType !== "manager" && accountType !== "admin") {
-        throw new Error("You do not have manager privileges.");
+      // Role verification - map frontend roles to backend account types
+      const backendAccountType = role === "customer" ? "user" : role;
+      
+      if (backendAccountType === "manager" && accountType !== "manager" && accountType !== "admin") {
+        throw new Error("You do not have manager privileges. Contact your branch administrator for access.");
       }
-      if (role === "admin" && accountType !== "admin") {
-        throw new Error("Access denied. Admin privileges required.");
+      if (backendAccountType === "admin" && accountType !== "admin") {
+        throw new Error("Access denied. Admin privileges required. Please contact system administrator.");
       }
-      if (role === "supplier" && accountType !== "supplier" && accountType !== "admin") {
-        throw new Error("Access denied. Supplier privileges required.");
+      if (backendAccountType === "supplier" && accountType !== "supplier" && accountType !== "admin") {
+        throw new Error("Access denied. Supplier privileges required. Please contact your manager.");
       }
 
-      const isApproved = (u as any).isApproved ?? true;
+      const isApproved = (u as any).isApproved ?? (accountType === "user");
       if (!isApproved && accountType !== "user") {
-        throw new Error("Your account is pending administrator approval.");
+        throw new Error("Your account is pending administrator approval. Please contact support if this issue persists.");
       }
 
       const finalUser = { 
         ...u, 
-        role: accountType,
+        role: role,
         accountType,
         isApproved,
-        branchId: role === "manager" ? selectedBranch : (u as any).branchId 
+        branchId: role === "manager" || role === "admin" ? selectedBranch : (u as any).branchId 
       };
       
       setUser(finalUser);
