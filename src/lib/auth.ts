@@ -10,6 +10,18 @@ function getAuthErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function normalizeRole(accountType?: string) {
+  return accountType === "user" ? "customer" : accountType ?? "customer";
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function normalizePassword(password: string) {
+  return password.trim();
+}
+
 export async function signUp(
   email: string,
   password: string,
@@ -19,9 +31,11 @@ export async function signUp(
   branchId?: string
 ): Promise<User> {
   try {
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
     const { data, error } = await authClient.signUp.email({
-      email,
-      password,
+      email: normalizedEmail,
+      password: normalizedPassword,
       name,
       accountType,
       adminRole,
@@ -38,7 +52,7 @@ export async function signUp(
       name: data.user.name,
       accountType: (data.user as any).accountType,
       branchId: (data.user as any).branchId,
-      role: (data.user as any).accountType,
+      role: normalizeRole((data.user as any).accountType),
     };
   } catch (error) {
     throw new Error(getAuthErrorMessage(error, "An error occurred during sign up."));
@@ -47,9 +61,11 @@ export async function signUp(
 
 export async function signIn(email: string, password: string): Promise<User> {
   try {
+    const normalizedEmail = normalizeEmail(email);
+    const normalizedPassword = normalizePassword(password);
     const { data, error } = await authClient.signIn.email({
-      email,
-      password,
+      email: normalizedEmail,
+      password: normalizedPassword,
     });
 
     if (error) {
@@ -63,7 +79,7 @@ export async function signIn(email: string, password: string): Promise<User> {
       name: data.user.name,
       accountType: (data.user as any).accountType,
       branchId: (data.user as any).branchId,
-      role: (data.user as any).accountType,
+      role: normalizeRole((data.user as any).accountType),
     };
   } catch (error) {
     throw new Error(getAuthErrorMessage(error, "Invalid credentials."));

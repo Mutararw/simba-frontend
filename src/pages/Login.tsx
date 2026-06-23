@@ -40,12 +40,13 @@ export default function Login() {
     try {
       const u = await signIn(email, password);
       
-      // DB stores "user" but UI shows "customer" — normalize
       const accountType = (u as any).accountType || "user";
-
-      // Role verification - map frontend roles to backend account types
+      const isCustomer = accountType === "user" || accountType === "customer";
       const backendAccountType = role === "customer" ? "user" : role;
-      
+
+      if (role === "customer" && !isCustomer) {
+        throw new Error("You do not have customer access. Please use the correct portal for your account.");
+      }
       if (backendAccountType === "manager" && accountType !== "manager" && accountType !== "admin") {
         throw new Error("You do not have manager privileges. Contact your branch administrator for access.");
       }
@@ -56,14 +57,15 @@ export default function Login() {
         throw new Error("Access denied. Supplier privileges required. Please contact your manager.");
       }
 
-      const isApproved = (u as any).isApproved ?? (accountType === "user");
-      if (!isApproved && accountType !== "user") {
+      const isApproved = (u as any).isApproved ?? isCustomer;
+      if (!isApproved && !isCustomer) {
         throw new Error("Your account is pending administrator approval. Please contact support if this issue persists.");
       }
 
+      const finalRole = accountType === "user" ? "customer" : accountType;
       const finalUser = { 
         ...u, 
-        role: role,
+        role: finalRole,
         accountType,
         isApproved,
         branchId: role === "manager" || role === "admin" ? selectedBranch : (u as any).branchId 
@@ -72,8 +74,7 @@ export default function Login() {
       setUser(finalUser);
       toast.success(`Welcome back, ${u.name}!`);
 
-      // "user" = regular customer → go home. Everything else → dashboard
-      if (accountType === "user") {
+      if (isCustomer) {
         navigate("/");
       } else {
         navigate("/dashboard");
