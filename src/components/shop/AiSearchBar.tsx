@@ -41,14 +41,25 @@ declare global {
 }
 
 export function AiSearchBar() {
-  const dropdownMode = true;
   const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AiSearchResult | null>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const add = useCart((s) => s.add);
+
+  useEffect(() => {
+    if (!result) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setResult(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [result]);
 
   const askWithQuery = useCallback(
     async (query: string) => {
@@ -129,7 +140,7 @@ export function AiSearchBar() {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" ref={containerRef}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -173,11 +184,11 @@ export function AiSearchBar() {
 
       {result && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed inset-x-0 top-[80px] z-[100] flex justify-center p-4 md:top-[85px]"
+          className="absolute left-0 right-0 top-full z-[100] mt-2"
         >
-          <div className="w-full max-w-3xl max-h-[calc(100vh-140px)] overflow-auto rounded-2xl border border-border bg-card/98 p-3 shadow-2xl backdrop-blur md:p-4">
+          <div className="w-full max-h-[calc(100vh-200px)] overflow-auto rounded-2xl border border-border bg-card/98 p-3 shadow-2xl backdrop-blur md:p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                 <Sparkles className="h-3.5 w-3.5" /> {t("search.response")}

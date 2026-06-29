@@ -9,7 +9,7 @@ import {
   MessageSquare, Shield, Globe, Search,
   ArrowUpRight, ArrowDownRight, Package, Truck,
   CheckCircle2, AlertCircle, Send, MoreVertical,
-  Filter, Video, Trash2, Edit3, UserCheck, XCircle, Mic, Plus, Check
+  Filter, Video, Trash2, Edit3, UserCheck, XCircle, Mic, Plus, Check, RotateCcw, ExternalLink, Copy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,18 @@ export default function AdminDashboard() {
   });
 
   const [allOrders, setAllOrders] = useState<any[]>([]);
+  const [suppliersList, setSuppliersList] = useState<any[]>([]);
+  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatMessageText, setChatMessageText] = useState("");
+  const [branchInventory, setBranchInventory] = useState<any[]>([]);
+  const [branchProductSearch, setBranchProductSearch] = useState("");
+  const [updateStockValues, setUpdateStockValues] = useState<Record<string, number>>({});
+  const [supplierProducts, setSupplierProducts] = useState<any[]>([]);
+  const [showSupplierProducts, setShowSupplierProducts] = useState(false);
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [orderFormProduct, setOrderFormProduct] = useState("");
+  const [orderFormQty, setOrderFormQty] = useState("");
   
   useEffect(() => {
     fetchStats();
@@ -75,7 +87,12 @@ export default function AdminDashboard() {
     fetchGlobalInventory();
     fetchPendingUsers();
     fetchAllOrders();
+          fetchSuppliers();
   }, []);
+
+  useEffect(() => {
+    if (selectedBranch) fetchBranchInventory(selectedBranch);
+  }, [selectedBranch]);
 
   const fetchAllOrders = async () => {
     try {
@@ -188,6 +205,84 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchSuppliers = async () => {
+    try {
+      const { data } = await api.get("/api/chat/suppliers/all");
+      if (data) setSuppliersList(data);
+    } catch (err) {
+      console.error("Failed to fetch suppliers");
+    }
+  };
+
+  const fetchBranchInventory = async (branchId: string) => {
+    try {
+      const { data } = await api.get(`/api/branches/inventory/${branchId}`);
+      if (data) setBranchInventory(data);
+    } catch (err) {
+      toast.error("Failed to fetch branch inventory");
+    }
+  };
+
+  const updateBranchStock = async (productId: string, stock: number) => {
+    try {
+      await api.patch(`/api/branches/inventory/${productId}`, { stock });
+      toast.success("Stock updated");
+      if (selectedBranch) fetchBranchInventory(selectedBranch);
+    } catch (err) {
+      toast.error("Failed to update stock");
+    }
+  };
+
+  const addProductToBranch = async (productId: string) => {
+    try {
+      await api.post(`/api/branches/inventory/${productId}`, { branchId: selectedBranch });
+      toast.success("Product added to branch");
+      if (selectedBranch) fetchBranchInventory(selectedBranch);
+    } catch (err) {
+      toast.error("Failed to add product");
+    }
+  };
+
+  const removeFromBranch = async (productId: string) => {
+    if (!confirm("Remove this product from the branch?")) return;
+    try {
+      await api.delete(`/api/branches/inventory/${productId}`);
+      toast.success("Product removed from branch");
+      if (selectedBranch) fetchBranchInventory(selectedBranch);
+    } catch (err) {
+      toast.error("Failed to remove product");
+    }
+  };
+
+  const fetchChatMessages = async (otherUserId: string) => {
+    try {
+      const { data } = await api.get(`/api/chat/${otherUserId}`);
+      if (data) setChatMessages(data);
+    } catch (err) {
+      console.error("Failed to fetch chat messages");
+    }
+  };
+
+  const sendSupplierChat = async (receiverId: string) => {
+    if (!chatMessageText) return;
+    try {
+      await api.post("/api/chat", { receiverId, content: chatMessageText });
+      setChatMessageText("");
+      fetchChatMessages(receiverId);
+    } catch (err) {
+      toast.error("Failed to send message");
+    }
+  };
+
+  const fetchSupplierProducts = async (supplierName: string) => {
+    try {
+      const { data } = await api.get(`/api/stock-history/supplier/${encodeURIComponent(supplierName)}`);
+      if (data) setSupplierProducts(data);
+    } catch (err) {
+      console.error("Failed to fetch supplier products");
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!messageText) return;
     try {
@@ -268,8 +363,8 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground mt-1">Real-time oversight of all Simba Supermarket operations.</p>
           </div>
           <div className="flex items-center gap-3">
-             <Button variant="outline" className="rounded-xl h-12 gap-2 border-border" onClick={() => setIsMeetingOpen(true)}>
-               <Video className="h-4 w-4" /> Full Meeting
+<Button variant="outline" className="rounded-xl h-12 gap-2 border-border" onClick={() => { setIsMeetingOpen(true); fetchUsers(); }}>
+                <Video className="h-4 w-4" /> Full Meeting
              </Button>
              <Button className="rounded-xl h-12 px-6 bg-primary shadow-lg shadow-primary/20">
                Generate Global Report
@@ -437,28 +532,72 @@ export default function AdminDashboard() {
                </div>
 
                {selectedBranch && (
-                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-8 rounded-[3rem] border border-border bg-card">
-                   <div className="flex items-center justify-between mb-8">
-                     <h2 className="text-2xl font-black">Detailed Inventory: {(stats?.branchStats || []).find(b => b.id === selectedBranch)?.name}</h2>
-                     <Button variant="outline" className="rounded-xl border-border" onClick={() => setActiveTab("inventory")}>View Global Stock</Button>
-                   </div>
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {globalInventory.filter(i => i.branchId === selectedBranch).map((item, idx) => (
-                        <InventoryItem 
-                          key={idx}
-                          name={item.name} 
-                          stock={item.stock} 
-                          status={item.stock < 10 ? "Restock Needed" : (item.stock < 25 ? "Critical" : "Healthy")} 
-                        />
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-8 rounded-[3rem] border border-border bg-card">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-2xl font-black">Detailed Inventory: {(stats?.branchStats || []).find(b => b.id === selectedBranch)?.name}</h2>
+                      <div className="flex items-center gap-3">
+                        <div className="relative max-w-xs">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search products..."
+                            className="pl-10 rounded-xl h-10 bg-muted/30 border-none"
+                            value={branchProductSearch}
+                            onChange={(e) => setBranchProductSearch(e.target.value)}
+                          />
+                        </div>
+                        <Button variant="outline" className="rounded-xl border-border" onClick={() => setActiveTab("inventory")}>View Global Stock</Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {branchInventory.filter((item: any) => item.name.toLowerCase().includes(branchProductSearch.toLowerCase())).map((item: any, idx: number) => (
+                        <div key={idx} className="p-6 rounded-3xl bg-muted/30 border border-border/50">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="h-10 w-10 rounded-xl bg-background border border-border grid place-items-center">
+                              <Package className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={`rounded-full ${item.stock < 10 ? 'text-red-500 bg-red-500/10' : item.stock < 25 ? 'text-amber-500 bg-amber-500/10' : 'text-green-500 bg-green-500/10'}`}>
+                                {item.stock < 10 ? "Restock Needed" : item.stock < 25 ? "Critical" : "Healthy"}
+                              </Badge>
+                              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 text-red-500 hover:bg-red-500/10" onClick={() => removeFromBranch(item.productId || item.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="font-bold">{item.name}</div>
+                          <div className="text-xs text-muted-foreground mb-2">{item.category}</div>
+                          <div className="text-lg font-black mt-1">{item.stock} <span className="text-xs font-normal text-muted-foreground">units</span></div>
+                          <div className="text-xs text-muted-foreground mb-3">RWF {Number(item.price || 0).toLocaleString()}</div>
+                          <div className="flex items-center gap-2 pt-3 border-t border-border/50">
+                            <Input
+                              type="number"
+                              className="rounded-lg h-8 text-xs bg-muted/30 border-none flex-1"
+                              placeholder="Update stock"
+                              value={updateStockValues[item.productId || item.id] ?? ""}
+                              onChange={(e) => setUpdateStockValues({...updateStockValues, [item.productId || item.id]: Number(e.target.value)})}
+                            />
+                            <Button size="sm" className="rounded-lg h-8 text-xs" onClick={() => {
+                              const val = updateStockValues[item.productId || item.id];
+                              if (val !== undefined && !isNaN(val)) {
+                                updateBranchStock(item.productId || item.id, val);
+                                const newValues = {...updateStockValues};
+                                delete newValues[item.productId || item.id];
+                                setUpdateStockValues(newValues);
+                              }
+                            }}>
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
                       ))}
-                      {globalInventory.filter(i => i.branchId === selectedBranch).length === 0 && (
+                      {branchInventory.length === 0 && (
                         <div className="col-span-full py-10 text-center text-muted-foreground">
                           No inventory data found for this branch.
                         </div>
                       )}
-                   </div>
-                 </motion.div>
-               )}
+                    </div>
+                  </motion.div>
+                )}
             </motion.div>
           )}
 
@@ -600,34 +739,56 @@ export default function AdminDashboard() {
                            <div className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleString()}</div>
                          </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={`${
-                          order.status === 'Delivered' ? 'bg-green-500' : 'bg-amber-500'
-                        } rounded-full`}>
-                          {order.status}
-                        </Badge>
-                        <Badge variant="outline" className="rounded-full">
-                          {order.orderType}
-                        </Badge>
-                      </div>
-                    </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                         <Badge className={`${
+                           order.status === 'Delivered' ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'
+                         } rounded-full`}>
+                           {order.status}
+                         </Badge>
+                         <Badge variant="outline" className={`rounded-full ${
+                           order.orderType === 'pickup' ? 'border-purple-500 text-purple-500' :
+                           order.orderType === 'delivery' ? 'border-blue-500 text-blue-500' :
+                           order.orderType === 'onsite' ? 'border-orange-500 text-orange-500' :
+                           'border-cyan-500 text-cyan-500'
+                         }`}>
+                           {order.orderType}
+                         </Badge>
+                         {order.paymentStatus === 'paid' && (
+                           <Badge className="rounded-full bg-green-500 text-white gap-1">
+                             <CheckCircle2 className="h-3 w-3" /> Payment Received
+                           </Badge>
+                         )}
+                         {order.paymentReference && (
+                           <Badge variant="outline" className="rounded-full text-xs">
+                             Ref: {order.paymentReference}
+                           </Badge>
+                         )}
+                       </div>
+                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 mb-6">
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Customer</div>
-                        <div className="font-bold text-sm">{order.userId}</div>
-                        <div className="text-xs text-muted-foreground">{order.phone}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Amount</div>
-                        <div className="font-black text-primary text-lg">RWF {Number(order.totalAmount).toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Delivery Info</div>
-                        <div className="text-sm font-medium">{order.address || order.branchId || "N/A"}</div>
-                        <div className="text-xs text-muted-foreground">{order.zone || order.pickupTime}</div>
-                      </div>
-                    </div>
+                     <div className="grid md:grid-cols-4 gap-6 mb-6">
+                       <div>
+                         <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Customer</div>
+                         <div className="font-bold text-sm">{order.customerName || order.userId}</div>
+                         <div className="text-xs text-muted-foreground">{order.phone}</div>
+                       </div>
+                       <div>
+                         <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Amount</div>
+                         <div className="font-black text-primary text-lg">RWF {Number(order.totalAmount).toLocaleString()}</div>
+                       </div>
+                       <div>
+                         <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Payment</div>
+                         <div className="font-bold text-sm capitalize">{order.paymentMethod || "N/A"}</div>
+                         <div className={`text-xs font-bold ${order.paymentStatus === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
+                           {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus || 'Pending'}
+                         </div>
+                       </div>
+                       <div>
+                         <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Delivery Info</div>
+                         <div className="text-sm font-medium">{order.address || order.branchId || "N/A"}</div>
+                         <div className="text-xs text-muted-foreground">{order.zone || order.pickupTime}</div>
+                       </div>
+                     </div>
 
                     <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
                       <Button 
@@ -769,31 +930,34 @@ export default function AdminDashboard() {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { name: "Inyange Industries", contact: "inyange@rw.com", category: "Dairy", branch: "All" },
-                  { name: "Bakhresa Group", contact: "bakhresa@group.com", category: "Grains", branch: "Remera" },
-                  { name: "Sulfo Rwanda", contact: "sulfo@rw.com", category: "Hygiene", branch: "Kacyiru" },
-                ].map((sup, i) => (
-                  <div key={i} className="p-8 rounded-[2.5rem] border border-border bg-card shadow-sm hover:border-primary/50 transition-all">
+                {suppliersList.map((sup, i) => (
+                  <div key={sup.id || i} className="p-8 rounded-[2.5rem] border border-border bg-card shadow-sm hover:border-primary/50 transition-all">
                     <div className="flex items-center justify-between mb-6">
                       <div className="h-16 w-16 rounded-3xl bg-primary/5 grid place-items-center">
                         <Truck className="h-8 w-8 text-primary" />
                       </div>
-                      <Badge className="rounded-full bg-secondary text-secondary-foreground">{sup.branch} Branch</Badge>
+                      <Badge className="rounded-full bg-secondary text-secondary-foreground">{sup.branch || 'All'} Branch</Badge>
                     </div>
                     <h3 className="text-xl font-bold mb-1">{sup.name}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{sup.contact}</p>
+                    <p className="text-muted-foreground text-sm mb-4">{sup.email}</p>
                     <div className="flex items-center gap-2 mb-6">
-                      <Badge variant="outline" className="rounded-full border-primary/20 text-primary">{sup.category}</Badge>
+                      <Badge variant="outline" className="rounded-full border-primary/20 text-primary">{sup.category || "General"}</Badge>
                     </div>
                     <div className="pt-6 border-t border-border flex gap-3">
-                      <Button className="flex-1 rounded-xl gap-2" onClick={() => toast.success(`Chatting with ${sup.name}...`)}>
+                      <Button className="flex-1 rounded-xl gap-2" onClick={() => { setSelectedSupplier(sup); fetchChatMessages(sup.id); }}>
                         <MessageSquare className="h-4 w-4" /> Chat
                       </Button>
                       <Button variant="outline" className="flex-1 rounded-xl">Details</Button>
                     </div>
                   </div>
                 ))}
+                {suppliersList.length === 0 && (
+                  <div className="col-span-full py-20 text-center border-2 border-dashed border-border rounded-[3rem]">
+                    <Truck className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                    <h3 className="text-xl font-bold">No Suppliers Registered</h3>
+                    <p className="text-muted-foreground">Add suppliers to start managing your supply chain.</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -968,51 +1132,88 @@ export default function AdminDashboard() {
                       </Button>
                     </div>
 
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Participants ({users.filter(u => u.accountType !== 'user').length})</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="rounded-xl text-xs"
+                        onClick={() => {
+                          const nonCustomerUsers = users.filter(u => u.accountType !== 'user');
+                          if (selectedParticipants.length === nonCustomerUsers.length && nonCustomerUsers.length > 0) {
+                            setSelectedParticipants([]);
+                          } else {
+                            setSelectedParticipants(nonCustomerUsers.map(u => u.id));
+                          }
+                        }}
+                      >
+                        {selectedParticipants.length === users.filter(u => u.accountType !== 'user').length && users.filter(u => u.accountType !== 'user').length > 0 ? 'Deselect All' : 'Select All'}
+                      </Button>
+                    </div>
                     <div className="flex-1 overflow-y-auto pr-4 space-y-2">
-                       {users.filter(u => u.accountType !== 'user').map(u => (
-                         <div 
-                           key={u.id} 
-                           className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
-                             selectedParticipants.includes(u.id) ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
-                           }`}
-                           onClick={() => {
-                             if (selectedParticipants.includes(u.id)) {
-                               setSelectedParticipants(selectedParticipants.filter(id => id !== u.id));
-                             } else {
-                               setSelectedParticipants([...selectedParticipants, u.id]);
-                             }
-                           }}
-                         >
-                            <div className="flex items-center gap-4">
-                               <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">{u.name ? u.name[0] : "?"}</div>
-                               <div>
-                                 <div className="font-bold">{u.name}</div>
-                                 <div className="text-xs text-muted-foreground">{u.email} - <span className="capitalize">{u.accountType}</span></div>
-                               </div>
-                            </div>
-                            {selectedParticipants.includes(u.id) ? <Check className="text-primary" /> : <Plus className="text-muted-foreground" />}
-                         </div>
-                       ))}
+                      {users.filter(u => u.accountType !== 'user').length === 0 ? (
+                        <div className="text-center py-10 text-muted-foreground">
+                          <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                          <p>No available participants. Make sure users exist with manager/admin/supplier roles.</p>
+                        </div>
+                      ) : (
+                        users.filter(u => u.accountType !== 'user').map(u => (
+                          <div 
+                            key={u.id} 
+                            className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                              selectedParticipants.includes(u.id) ? 'border-primary bg-primary/5' : 'border-border bg-muted/20'
+                            }`}
+                            onClick={() => {
+                              if (selectedParticipants.includes(u.id)) {
+                                setSelectedParticipants(selectedParticipants.filter(id => id !== u.id));
+                              } else {
+                                setSelectedParticipants([...selectedParticipants, u.id]);
+                              }
+                            }}
+                          >
+                             <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">{u.name ? u.name[0] : "?"}</div>
+                                <div>
+                                  <div className="font-bold">{u.name}</div>
+                                  <div className="text-xs text-muted-foreground">{u.email} - <span className="capitalize">{u.accountType}</span></div>
+                                </div>
+                             </div>
+                             {selectedParticipants.includes(u.id) ? <Check className="text-primary" /> : <Plus className="text-muted-foreground" />}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className="flex-1 bg-neutral-900 relative">
-                     <div className="absolute inset-0 grid grid-cols-3 gap-2 p-4 opacity-40">
-                        {selectedParticipants.map(i => (
-                          <div key={i} className="rounded-2xl bg-neutral-800 flex flex-col items-center justify-center gap-2">
-                             <div className="h-12 w-12 rounded-full bg-neutral-700 animate-pulse" />
-                             <div className="h-2 w-16 bg-neutral-700 rounded-full" />
-                          </div>
-                        ))}
-                     </div>
-                     <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
-                        <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center mb-6 border-2 border-primary/50 animate-bounce">
-                           <Video className="h-10 w-10 text-primary" />
-                        </div>
-                        <h2 className="text-3xl font-black mb-2">{meetingTitle}</h2>
-                        <p className="text-white/60 font-medium">Meeting is live! Participants are joining...</p>
-                     </div>
-                  </div>
+                  <div className="flex-1 bg-neutral-900 relative flex flex-col items-center justify-center gap-6 p-8">
+                      <h3 className="text-white text-2xl font-black">Meeting: {meetingTitle}</h3>
+                      <p className="text-white/60 text-sm text-center">Choose how to join the meeting</p>
+                      <div className="flex gap-4">
+                        <Button
+                          className="rounded-2xl h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-3 text-base"
+                          onClick={() => window.open('https://meet.google.com/new', '_blank')}
+                        >
+                          <ExternalLink className="h-5 w-5" /> Join via Google Meet
+                        </Button>
+                        <Button
+                          className="rounded-2xl h-14 px-8 bg-neutral-700 hover:bg-neutral-600 text-white font-bold gap-3 text-base"
+                          onClick={() => window.open(`https://meet.jit.si/${encodeURIComponent(meetingTitle.replace(/\s+/g, '_'))}`, '_blank')}
+                        >
+                          <Video className="h-5 w-5" /> Join via Jitsi
+                        </Button>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="rounded-2xl gap-2 border-white/20 text-white hover:bg-white/10"
+                        onClick={() => {
+                          const link = `https://meet.google.com/new`;
+                          navigator.clipboard.writeText(link);
+                          toast.success("Meeting link copied!");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" /> Copy Meeting Link
+                      </Button>
+                    </div>
                 )}
                 <div className="h-24 bg-card border-t border-border flex items-center justify-center gap-4 px-8">
                    <Button variant="outline" size="icon" className="rounded-full h-12 w-12 hover:bg-red-500 hover:text-white transition-colors" onClick={handleEndMeeting}>
@@ -1025,6 +1226,129 @@ export default function AdminDashboard() {
                    <Button className="rounded-2xl h-12 px-8 bg-red-500 hover:bg-red-600 text-white font-bold" onClick={handleEndMeeting}>
                       {currentMeetingId ? "End Meeting for All" : "Cancel Preparation"}
                    </Button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Supplier Chat Modal */}
+        <AnimatePresence>
+          {selectedSupplier && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+                onClick={() => { setSelectedSupplier(null); setShowSupplierProducts(false); setShowOrderForm(false); }}
+              />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-2xl max-h-[90vh] rounded-[3rem] bg-card border border-border shadow-2xl overflow-hidden flex flex-col"
+              >
+                <div className="p-6 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Truck className="h-6 w-6 text-primary" />
+                    <div>
+                      <h3 className="font-bold text-lg">{selectedSupplier.name}</h3>
+                      <p className="text-xs text-muted-foreground">{selectedSupplier.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="rounded-xl text-xs" onClick={() => {
+                      setShowSupplierProducts(!showSupplierProducts);
+                      if (!showSupplierProducts) {
+                        fetchSupplierProducts(selectedSupplier.name);
+                      }
+                    }}>
+                      <Package className="h-3 w-3 mr-1" /> {showSupplierProducts ? 'Hide' : 'View'} Products
+                    </Button>
+                    <Button variant="outline" size="sm" className="rounded-xl text-xs" onClick={() => setShowOrderForm(!showOrderForm)}>
+                      <ShoppingBag className="h-3 w-3 mr-1" /> {showOrderForm ? 'Cancel' : 'Place Order'}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => { setSelectedSupplier(null); setShowSupplierProducts(false); setShowOrderForm(false); }}>
+                      <XCircle className="h-6 w-6" />
+                    </Button>
+                  </div>
+                </div>
+
+                {showSupplierProducts && (
+                  <div className="p-6 border-b border-border bg-muted/20">
+                    <h4 className="text-sm font-bold mb-3">Products Supplied</h4>
+                    {supplierProducts.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No products found for this supplier.</p>
+                    ) : (
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {supplierProducts.map((p: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-background/50">
+                            <span className="text-sm font-medium">{p.productName || p.name}</span>
+                            <span className="text-xs text-muted-foreground">Qty: {p.quantity || p.stock}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {showOrderForm && (
+                  <div className="p-6 border-b border-border bg-muted/20">
+                    <h4 className="text-sm font-bold mb-3">Order Supplies</h4>
+                    <div className="flex gap-3">
+                      <Input
+                        className="rounded-xl h-10 bg-background border-none flex-1"
+                        placeholder="Product name"
+                        value={orderFormProduct}
+                        onChange={(e) => setOrderFormProduct(e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        className="rounded-xl h-10 bg-background border-none w-24"
+                        placeholder="Qty"
+                        value={orderFormQty}
+                        onChange={(e) => setOrderFormQty(e.target.value)}
+                      />
+                      <Button className="rounded-xl h-10" onClick={() => {
+                        if (!orderFormProduct || !orderFormQty) {
+                          toast.error("Please fill in product name and quantity");
+                          return;
+                        }
+                        toast.success(`Order request sent to ${selectedSupplier.name}`);
+                        setOrderFormProduct("");
+                        setOrderFormQty("");
+                        setShowOrderForm(false);
+                      }}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-[250px]">
+                  {chatMessages.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-10">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p>No messages yet. Start a conversation.</p>
+                    </div>
+                  ) : (
+                    chatMessages.map((msg: any, i: number) => (
+                      <div key={i} className={`p-4 rounded-2xl max-w-[80%] ${msg.senderId === selectedSupplier.id ? 'bg-muted/30' : 'bg-primary/5 ml-auto'}`}>
+                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{new Date(msg.createdAt).toLocaleString()}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="p-6 border-t border-border flex gap-3">
+                  <Input
+                    className="rounded-2xl h-12 bg-muted/30 border-none flex-1"
+                    placeholder="Type your message..."
+                    value={chatMessageText}
+                    onChange={(e) => setChatMessageText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && sendSupplierChat(selectedSupplier.id)}
+                  />
+                  <Button className="rounded-2xl h-12" onClick={() => sendSupplierChat(selectedSupplier.id)}>
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
               </motion.div>
             </div>

@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import { 
   ShoppingBag, Users, Package, Truck, MessageSquare, 
-  Search, CheckCircle2, XCircle, Clock, Plus, 
+  Search, CheckCircle2, XCircle, Clock, Plus, Save, 
   Settings, UserPlus, TrendingUp, DollarSign,
   ChevronRight, ArrowUpRight, ArrowDownRight, Store, Trash2, Video, Mic, Filter
 } from "lucide-react";
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import { BRANCHES } from "@/lib/branches";
+import { PRODUCTS } from "@/lib/products";
 
 // Mock data for the branch manager experience
 const MOCK_ORDERS = [
@@ -75,6 +76,13 @@ export default function BranchDashboard() {
     description: ""
   });
 
+  const [editingStock, setEditingStock] = useState<string | null>(null);
+  const [newStockQty, setNewStockQty] = useState<number>(0);
+  const [addProductQuery, setAddProductQuery] = useState("");
+  const [addProductQty, setAddProductQty] = useState("");
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [selectedAddProduct, setSelectedAddProduct] = useState<any>(null);
+
   const branchName = BRANCHES.find(b => b.id.toLowerCase() === user?.branchId?.toLowerCase())?.name || user?.branchId || "Branch";
 
   useEffect(() => {
@@ -102,6 +110,59 @@ export default function BranchDashboard() {
       fetchBranchData();
     } catch (err) {
       toast.error("Failed to add product");
+    }
+  };
+
+  const handleUpdateStock = async (productId: string, quantity: number) => {
+    try {
+      await api.put("/api/branches/inventory", {
+        branchId: user?.branchId,
+        productId,
+        quantity
+      });
+      toast.success("Stock updated successfully");
+      setEditingStock(null);
+      fetchBranchData();
+    } catch (err) {
+      toast.error("Failed to update stock");
+    }
+  };
+
+  const handleRemoveFromBranch = async (productId: string) => {
+    if (!confirm("Remove this product from branch stock?")) return;
+    try {
+      await api.delete(`/api/branches/inventory/${productId}`);
+      toast.success("Product removed from branch");
+      fetchBranchData();
+    } catch (err) {
+      toast.error("Failed to remove product");
+    }
+  };
+
+  const handleSearchProducts = (query: string) => {
+    setAddProductQuery(query);
+    setShowProductPicker(query.length > 0);
+  };
+
+  const handleAddToBranchStock = async () => {
+    if (!selectedAddProduct || !addProductQty) {
+      toast.error("Select a product and set quantity");
+      return;
+    }
+    try {
+      await api.put("/api/branches/inventory", {
+        branchId: user?.branchId,
+        productId: selectedAddProduct.id,
+        quantity: Number(addProductQty)
+      });
+      toast.success("Product added to branch stock");
+      setAddProductQuery("");
+      setAddProductQty("");
+      setSelectedAddProduct(null);
+      setShowProductPicker(false);
+      fetchBranchData();
+    } catch (err) {
+      toast.error("Failed to add product to branch");
     }
   };
 
@@ -532,8 +593,53 @@ export default function BranchDashboard() {
                 </Button>
               </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                 {(inventory || []).map(item => (
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Input 
+                    placeholder="Search product to add..." 
+                    className="rounded-xl h-10 bg-card" 
+                    value={addProductQuery}
+                    onChange={(e) => { handleSearchProducts(e.target.value); }}
+                  />
+                  {showProductPicker && (
+                    <div className="absolute z-10 mt-1 w-full bg-card border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                      {(PRODUCTS || []).filter(p => 
+                        p.name.toLowerCase().includes(addProductQuery.toLowerCase())
+                      ).map(p => (
+                        <button
+                          key={p.id}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-muted transition-colors ${selectedAddProduct?.id === p.id ? 'bg-primary/10 font-bold' : ''}`}
+                          onClick={() => {
+                            setSelectedAddProduct(p);
+                            setAddProductQuery(p.name);
+                            setShowProductPicker(false);
+                          }}
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                      {(PRODUCTS || []).filter(p => 
+                        p.name.toLowerCase().includes(addProductQuery.toLowerCase())
+                      ).length === 0 && (
+                        <div className="px-4 py-2 text-sm text-muted-foreground">No products found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Input 
+                  type="number" 
+                  placeholder="Qty" 
+                  className="w-20 rounded-xl h-10 bg-card" 
+                  value={addProductQty}
+                  onChange={(e) => setAddProductQty(e.target.value)}
+                />
+                <Button className="rounded-xl h-10" onClick={handleAddToBranchStock}>
+                  <Plus className="h-4 w-4" /> Add Stock
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {(inventory || []).map(item => (
                   <div key={item?.productId} className="p-6 rounded-[2rem] border border-border bg-card shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-start justify-between mb-4">
                       <div className="h-12 w-12 rounded-2xl bg-primary/5 grid place-items-center text-primary overflow-hidden">
@@ -547,24 +653,57 @@ export default function BranchDashboard() {
                     <p className="text-xs text-muted-foreground mb-4">{item?.category || "General"}</p>
                     
                     <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
-                       <div>
-                         <div className="text-[10px] font-bold text-muted-foreground uppercase">Status</div>
-                         <div className="font-black text-sm">{(item?.stock || 0) < 10 ? "Low Stock" : "Healthy"}</div>
-                       </div>
-                       <div className="flex flex-col items-end gap-2">
-                         <div className="text-right">
-                           <div className="text-[10px] font-bold text-muted-foreground uppercase">Price</div>
-                           <div className="font-black text-primary">RWF {Number(item?.price || 0).toLocaleString()}</div>
-                         </div>
-                         <Button 
-                           size="sm" 
-                           variant="outline" 
-                           className="rounded-lg h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5" 
-                           onClick={() => handleOpenChat('adm')}
-                         >
-                           Restock
-                         </Button>
-                       </div>
+                      <div>
+                        <div className="text-[10px] font-bold text-muted-foreground uppercase">Status</div>
+                        <div className="font-black text-sm">{(item?.stock || 0) < 10 ? "Low Stock" : "Healthy"}</div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-right">
+                          <div className="text-[10px] font-bold text-muted-foreground uppercase">Price</div>
+                          <div className="font-black text-primary">RWF {Number(item?.price || 0).toLocaleString()}</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {editingStock === item?.productId ? (
+                            <>
+                              <Input
+                                type="number"
+                                className="w-16 h-8 text-xs rounded-lg"
+                                value={newStockQty}
+                                onChange={(e) => setNewStockQty(Number(e.target.value))}
+                              />
+                              <Button
+                                size="sm"
+                                className="rounded-lg h-8 w-8 p-0"
+                                onClick={() => handleUpdateStock(item?.productId, newStockQty)}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="rounded-lg h-8 text-[10px] font-bold border-primary/20 text-primary hover:bg-primary/5" 
+                                onClick={() => {
+                                  setEditingStock(item?.productId);
+                                  setNewStockQty(item?.stock || 0);
+                                }}
+                              >
+                                Update Stock
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="rounded-lg h-8 w-8 p-0 text-red-500 hover:bg-red-500/10"
+                                onClick={() => handleRemoveFromBranch(item?.productId)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
