@@ -309,10 +309,13 @@ export default function AdminDashboard() {
         title: meetingTitle,
         participantIds: selectedParticipants
       });
+      const link = data.meetingLink || `https://meet.jit.si/Simba_${data.id}`;
       setCurrentMeetingId(data.id);
-      setMeetingLink(data.meetingLink || `https://meet.jit.si/Simba_${data.id}`);
-      setIsMeetingOpen(true);
-      toast.success("Meeting started and invitations sent!");
+      setMeetingLink(link);
+      setIsMeetingOpen(false);
+      setSelectedParticipants([]);
+      toast.success("Meeting started! Opening room...");
+      window.open(link, '_blank');
     } catch (err: any) {
       toast.error(err?.message || "Failed to start meeting");
     }
