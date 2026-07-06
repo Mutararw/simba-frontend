@@ -26,17 +26,27 @@ export const api = axios.create({
   },
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const message = error.response?.data?.message || error.message || "An unexpected error occurred";
-    return Promise.reject(
-      new ApiError(message, {
-        status: error.response?.status,
-        code: error.code,
-        details: error.response?.data?.details,
-        isNetworkError: !error.response,
-      })
-    );
-  }
-);
+export const apiLong = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  timeout: 60000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+function errorInterceptor(error: unknown) {
+  const axiosErr = error as any;
+  const message = axiosErr?.response?.data?.message || axiosErr?.message || "An unexpected error occurred";
+  return Promise.reject(
+    new ApiError(message, {
+      status: axiosErr?.response?.status,
+      code: axiosErr?.code,
+      details: axiosErr?.response?.data?.details,
+      isNetworkError: !axiosErr?.response,
+    })
+  );
+}
+
+api.interceptors.response.use((r) => r, errorInterceptor);
+apiLong.interceptors.response.use((r) => r, errorInterceptor);

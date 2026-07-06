@@ -17,7 +17,7 @@
  */
 import { PRODUCTS, searchProducts } from "./products";
 import type { Product } from "./types";
-import { api } from "./api";
+import { apiLong } from "./api";
 
 export interface AiSearchResult {
   reply: string;
@@ -42,7 +42,7 @@ interface AiSearchApiResponse {
 
 export async function aiSearch(query: string): Promise<AiSearchResult> {
   try {
-    const { data } = await api.post<AiSearchApiResponse>("/api/ai/chat", { query });
+    const { data } = await apiLong.post<AiSearchApiResponse>("/api/ai/chat", { query });
 
     const recommendedIds = (data.productIds || []).map(String);
 
@@ -84,7 +84,7 @@ export interface AiAssistantResult {
 
 export async function aiAssistantChat(query: string): Promise<AiAssistantResult> {
   try {
-    const { data } = await api.post<AiSearchApiResponse>("/api/ai/assistant", { query });
+    const { data } = await apiLong.post<AiSearchApiResponse>("/api/ai/assistant", { query });
 
     const matchedProducts = data.products
       ? data.products.map((product) => ({
