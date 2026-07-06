@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   const [emailInput, setEmailInput] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("Simba Global Meeting");
   const [currentMeetingId, setCurrentMeetingId] = useState<string | null>(null);
+  const [meetingLink, setMeetingLink] = useState("");
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -309,11 +310,11 @@ export default function AdminDashboard() {
         participantIds: selectedParticipants
       });
       setCurrentMeetingId(data.id);
+      setMeetingLink(data.meetingLink || `https://meet.jit.si/Simba_${data.id}`);
       setIsMeetingOpen(true);
       toast.success("Meeting started and invitations sent!");
     } catch (err: any) {
-      const msg = err?.response?.data?.message || "Failed to start meeting";
-      toast.error(msg);
+      toast.error(err?.message || "Failed to start meeting");
     }
   };
 
@@ -330,10 +331,10 @@ export default function AdminDashboard() {
       }
       setEmailInput("");
     } catch (err: any) {
-      if (err?.response?.status === 404) {
+      if (err?.status === 404) {
         toast.error(`No user found with email "${email}"`);
       } else {
-        toast.error("Failed to look up email");
+        toast.error(err?.message || "Failed to look up email");
       }
     }
   };
@@ -1244,25 +1245,24 @@ export default function AdminDashboard() {
                       <p className="text-white/60 text-sm text-center">Choose how to join the meeting</p>
                       <div className="flex gap-4">
                         <Button
+                          className="rounded-2xl h-14 px-8 bg-green-600 hover:bg-green-700 text-white font-bold gap-3 text-base shadow-lg shadow-green-600/30"
+                          onClick={() => { window.open(meetingLink, '_blank'); toast.success("Meeting room opened — share the link with others!"); }}
+                        >
+                          <Video className="h-5 w-5" /> Join Meeting Room
+                        </Button>
+                        <Button
                           className="rounded-2xl h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold gap-3 text-base"
                           onClick={() => window.open('https://meet.google.com/new', '_blank')}
                         >
-                          <ExternalLink className="h-5 w-5" /> Join via Google Meet
-                        </Button>
-                        <Button
-                          className="rounded-2xl h-14 px-8 bg-neutral-700 hover:bg-neutral-600 text-white font-bold gap-3 text-base"
-                          onClick={() => window.open(`https://meet.jit.si/${encodeURIComponent(meetingTitle.replace(/\s+/g, '_'))}`, '_blank')}
-                        >
-                          <Video className="h-5 w-5" /> Join via Jitsi
+                          <ExternalLink className="h-5 w-5" /> Google Meet
                         </Button>
                       </div>
                       <Button
                         variant="outline"
                         className="rounded-2xl gap-2 border-white/20 text-white hover:bg-white/10"
                         onClick={() => {
-                          const link = `https://meet.google.com/new`;
-                          navigator.clipboard.writeText(link);
-                          toast.success("Meeting link copied!");
+                          navigator.clipboard.writeText(meetingLink);
+                          toast.success("Meeting link copied! Share with participants.");
                         }}
                       >
                         <Copy className="h-4 w-4" /> Copy Meeting Link
