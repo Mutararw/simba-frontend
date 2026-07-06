@@ -55,6 +55,7 @@ export default function AdminDashboard() {
   const [pendingUsers, setPendingUsers] = useState<UserType[]>([]);
   const [isMeetingOpen, setIsMeetingOpen] = useState(false);
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [emailInput, setEmailInput] = useState("");
   const [meetingTitle, setMeetingTitle] = useState("Simba Global Meeting");
   const [currentMeetingId, setCurrentMeetingId] = useState<string | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -313,6 +314,27 @@ export default function AdminDashboard() {
     } catch (err: any) {
       const msg = err?.response?.data?.message || "Failed to start meeting";
       toast.error(msg);
+    }
+  };
+
+  const handleAddByEmail = async () => {
+    const email = emailInput.trim().toLowerCase();
+    if (!email) return;
+    try {
+      const { data } = await api.get(`/api/meetings/lookup-email?email=${encodeURIComponent(email)}`);
+      if (selectedParticipants.includes(data.id)) {
+        toast.info(`${data.name} is already selected`);
+      } else {
+        setSelectedParticipants(prev => [...prev, data.id]);
+        toast.success(`${data.name} added to participants`);
+      }
+      setEmailInput("");
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        toast.error(`No user found with email "${email}"`);
+      } else {
+        toast.error("Failed to look up email");
+      }
     }
   };
 
@@ -1122,42 +1144,74 @@ export default function AdminDashboard() {
               >
                 {!currentMeetingId ? (
                   <div className="flex-1 p-8 flex flex-col overflow-hidden">
-                    <div className="flex items-center justify-between mb-6">
-                      <div>
-                        <h2 className="text-3xl font-black">Prepare Meeting</h2>
-                        <p className="text-muted-foreground">Select participants to invite to the Simba Global Meeting.</p>
+                    <div className="flex items-start justify-between mb-6 gap-6">
+                      <div className="flex-1">
+                        <h2 className="text-3xl font-black mb-3">Prepare Meeting</h2>
+                        <Input
+                          className="rounded-xl h-12 bg-muted/30 border-none text-lg font-bold max-w-md"
+                          placeholder="Meeting title..."
+                          value={meetingTitle}
+                          onChange={(e) => setMeetingTitle(e.target.value)}
+                        />
                       </div>
-                      <Button className="rounded-2xl h-12 px-8 bg-primary font-bold" onClick={handleStartMeeting}>
+                      <Button className="rounded-2xl h-12 px-8 bg-primary font-bold shrink-0" onClick={handleStartMeeting}>
                         Start Meeting & Notify All
                       </Button>
                     </div>
 
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Participants ({users.filter(u => u.accountType !== 'user').length})</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-xl text-xs"
-                        onClick={() => {
-                          const nonCustomerUsers = users.filter(u => u.accountType !== 'user');
-                          if (selectedParticipants.length === nonCustomerUsers.length && nonCustomerUsers.length > 0) {
-                            setSelectedParticipants([]);
-                          } else {
-                            setSelectedParticipants(nonCustomerUsers.map(u => u.id));
-                          }
-                        }}
-                      >
-                        {selectedParticipants.length === users.filter(u => u.accountType !== 'user').length && users.filter(u => u.accountType !== 'user').length > 0 ? 'Deselect All' : 'Select All'}
-                      </Button>
+                    <div className="mb-4 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Input
+                          placeholder="Search by name or email..."
+                          className="flex-1 rounded-xl h-10 bg-muted/30 border-none"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl h-10 text-xs whitespace-nowrap"
+                          onClick={() => {
+                            if (selectedParticipants.length === users.length && users.length > 0) {
+                              setSelectedParticipants([]);
+                            } else {
+                              setSelectedParticipants(users.map(u => u.id));
+                            }
+                          }}
+                        >
+                          {selectedParticipants.length === users.length && users.length > 0 ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          placeholder="Invite by email..."
+                          className="flex-1 rounded-xl h-10 bg-muted/30 border-none text-sm"
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddByEmail()}
+                        />
+                        <Button
+                          size="sm"
+                          className="rounded-xl h-10 gap-1 whitespace-nowrap"
+                          onClick={handleAddByEmail}
+                          disabled={!emailInput.trim()}
+                        >
+                          <Plus className="h-4 w-4" /> Add
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">All Users ({users.length})</h3>
+                      <span className="text-xs text-muted-foreground">{selectedParticipants.length} selected</span>
                     </div>
                     <div className="flex-1 overflow-y-auto pr-4 space-y-2">
-                      {users.filter(u => u.accountType !== 'user').length === 0 ? (
+                      {filteredUsers.length === 0 ? (
                         <div className="text-center py-10 text-muted-foreground">
                           <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                          <p>No available participants. Make sure users exist with manager/admin/supplier roles.</p>
+                          <p>No users found.</p>
                         </div>
                       ) : (
-                        users.filter(u => u.accountType !== 'user').map(u => (
+                        filteredUsers.map(u => (
                           <div 
                             key={u.id} 
                             className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${
@@ -1175,7 +1229,7 @@ export default function AdminDashboard() {
                                 <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center font-bold text-primary">{u.name ? u.name[0] : "?"}</div>
                                 <div>
                                   <div className="font-bold">{u.name}</div>
-                                  <div className="text-xs text-muted-foreground">{u.email} - <span className="capitalize">{u.accountType}</span></div>
+                                  <div className="text-xs text-muted-foreground">{u.email} - <span className="capitalize">{u.accountType || 'user'}</span></div>
                                 </div>
                              </div>
                              {selectedParticipants.includes(u.id) ? <Check className="text-primary" /> : <Plus className="text-muted-foreground" />}

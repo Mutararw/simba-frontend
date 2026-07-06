@@ -35,4 +35,5 @@ export interface User {
   accountType?: string;
   adminRole?: string;
   branchId?: string;
+  isApproved?: boolean;
 }

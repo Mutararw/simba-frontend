@@ -51,7 +51,9 @@ export async function signUp(
       email: data.user.email,
       name: data.user.name,
       accountType: (data.user as any).accountType,
+      adminRole: (data.user as any).adminRole,
       branchId: (data.user as any).branchId,
+      isApproved: (data.user as any).isApproved,
       role: normalizeRole((data.user as any).accountType),
     };
   } catch (error) {
@@ -72,13 +74,14 @@ export async function signIn(email: string, password: string): Promise<User> {
       throw new Error(error.message || "Invalid credentials.");
     }
 
-    // Return ALL fields from the server including accountType and branchId
     return {
       id: data.user.id,
       email: data.user.email,
       name: data.user.name,
       accountType: (data.user as any).accountType,
+      adminRole: (data.user as any).adminRole,
       branchId: (data.user as any).branchId,
+      isApproved: (data.user as any).isApproved,
       role: normalizeRole((data.user as any).accountType),
     };
   } catch (error) {

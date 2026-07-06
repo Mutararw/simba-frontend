@@ -78,16 +78,8 @@ export function AiAssistant() {
 
         if (result.addToCartIds && result.addToCartIds.length > 0) {
           const cartIds = result.addToCartIds.map(String);
-          const itemsToAdd = (result.products || []).filter((p) => cartIds.includes(String(p.id)));
-          itemsToAdd.forEach((p) => {
-            add({
-              ...p,
-              id: Number(p.id),
-              price: Number(p.price),
-              inStock: p.stock > 0 || p.inStock,
-              image: p.imageUrl || p.image || ""
-            });
-          });
+          const itemsToAdd = PRODUCTS.filter((p) => cartIds.includes(String(p.id)));
+          itemsToAdd.forEach((p) => { if (p.inStock) add(p); });
           if (itemsToAdd.length > 0) {
             toast.success(`Added ${itemsToAdd.length} item(s) to your cart!`, { icon: "🛒" });
           }
@@ -223,22 +215,18 @@ export function AiAssistant() {
                               <div className="text-[11px] font-medium line-clamp-1 mb-1">{p.name}</div>
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-bold text-primary">{formatRWF(Number(p.price))}</span>
-                                <Button 
-                                  size="sm" 
-                                  className="h-6 px-2 text-[9px] rounded-full"
-                                  onClick={() => {
-                                    add({
-                                      ...p,
-                                      id: Number(p.id),
-                                      price: Number(p.price),
-                                      inStock: p.stock > 0 || p.inStock,
-                                      image: p.imageUrl || p.image || ""
-                                    });
-                                    toast.success("Added to cart");
-                                  }}
-                                >
-                                  Add
-                                </Button>
+                                  <Button 
+                                    size="sm" 
+                                    className="h-6 px-2 text-[9px] rounded-full"
+                                    onClick={() => {
+                                      const full = PRODUCTS.find(pp => String(pp.id) === String(p.id));
+                                      if (full) add(full);
+                                      else add({ ...p, id: Number(p.id), price: Number(p.price), inStock: true, image: p.imageUrl || p.image || "" });
+                                      toast.success("Added to cart");
+                                    }}
+                                  >
+                                    Add
+                                  </Button>
                               </div>
                             </div>
                           ))}
