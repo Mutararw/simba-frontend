@@ -109,7 +109,7 @@ export function Header() {
         </nav>
 
         {/* Global Navbar Search - Hidden on Smallest Mobile */}
-        <div className="hidden sm:flex flex-1 max-w-xl mx-2">
+        <div className="hidden sm:flex flex-1 max-w-2xl mx-2">
           <AiSearchBar />
         </div>
 

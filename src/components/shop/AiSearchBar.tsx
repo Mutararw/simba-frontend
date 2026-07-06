@@ -46,6 +46,7 @@ export function AiSearchBar() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AiSearchResult | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<{ id: number; name: string; category: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionRef = useRef<HTMLDivElement>(null);
@@ -174,15 +175,22 @@ export function AiSearchBar() {
           e.preventDefault();
           void ask();
         }}
-        className={`flex items-center gap-2 rounded-2xl border bg-background/95 p-3 shadow-sm backdrop-blur transition-all duration-300 ${isListening ? "border-primary ring-2 ring-primary/30 shadow-[0_0_15px_rgba(16,185,129,0.18)]" : "border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring"}`}
+        className={`flex items-center gap-3 rounded-2xl border-2 p-4 shadow-lg transition-all duration-300 ${
+          isListening
+            ? "border-primary bg-primary/5 ring-2 ring-primary/30 shadow-[0_0_25px_rgba(16,185,129,0.25)]"
+            : isFocused || q
+              ? "border-primary bg-white shadow-[0_4px_20px_rgba(0,0,0,0.12)] dark:bg-gray-900"
+              : "border-border bg-white/90 dark:bg-gray-900/90 hover:border-primary/40 hover:shadow-md"
+        }`}
       >
-        <Search className={`ml-2 h-6 w-6 shrink-0 ${isListening ? "text-primary" : "text-muted-foreground"}`} />
+        <Search className={`ml-1 h-7 w-7 shrink-0 ${isListening ? "text-primary" : isFocused || q ? "text-primary" : "text-muted-foreground"}`} />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+          onFocus={() => { setIsFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
+          onBlur={() => setIsFocused(false)}
           placeholder={isListening ? t("search.listening") : t("search.placeholder")}
-          className="flex-1 border-0 bg-transparent text-lg text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+          className="flex-1 border-0 bg-transparent text-xl font-medium text-foreground shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0 h-12"
         />
 
         {q && (
@@ -191,9 +199,9 @@ export function AiSearchBar() {
             size="icon"
             variant="ghost"
             onClick={() => { setQ(""); setSuggestions([]); setShowSuggestions(false); }}
-            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         )}
 
@@ -202,7 +210,11 @@ export function AiSearchBar() {
           size="icon"
           variant="ghost"
           onClick={toggleListen}
-          className={`rounded-full transition-colors shrink-0 ${isListening ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          className={`rounded-full transition-colors shrink-0 h-10 w-10 ${
+            isListening
+              ? "bg-primary/15 text-primary hover:bg-primary/25 hover:text-primary ring-2 ring-primary/30"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          }`}
         >
           {isListening ? (
             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
@@ -216,10 +228,10 @@ export function AiSearchBar() {
         <Button
           type="submit"
           disabled={loading || !q.trim()}
-          className="gap-1.5 rounded-xl bg-primary text-primary-foreground shadow-md transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg shrink-0"
+          className="gap-2 rounded-xl bg-primary text-primary-foreground shadow-md transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg shrink-0 px-5 h-11"
         >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          <span className="hidden sm:inline">{t("search.askButton")}</span>
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+          <span className="hidden sm:inline text-base font-semibold">{t("search.askButton")}</span>
         </Button>
       </form>
 
