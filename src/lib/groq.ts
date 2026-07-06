@@ -78,18 +78,34 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
 
 export interface AiAssistantResult {
   reply: string;
+  products?: Product[];
+  addToCartIds?: string[];
 }
 
 export async function aiAssistantChat(query: string): Promise<AiAssistantResult> {
   try {
-    const { data } = await api.post<{ reply?: string }>("/api/ai/assistant", { query });
+    const { data } = await api.post<AiSearchApiResponse>("/api/ai/assistant", { query });
+
+    const matchedProducts = data.products
+      ? data.products.map((product) => ({
+          ...product,
+          id: typeof product.id === "string" ? parseInt(product.id, 10) : Number(product.id),
+          price: Number(product.price),
+          inStock: product.stock > 0,
+          image: product.imageUrl || product.image_url || "",
+        }))
+      : [];
+
     return {
       reply: data.reply || "I'm sorry, I'm having trouble processing your request right now.",
+      products: matchedProducts,
+      addToCartIds: (data.addToCartIds || []).map(String),
     };
   } catch (error) {
     console.error("AI assistant via backend failed, using fallback", error);
     return {
       reply: "I'm sorry, I'm having trouble connecting to the customer service helper. Please contact our support team at info@Simbasupermarket.rw or +250 788 000 000.",
+      products: [],
     };
   }
 }

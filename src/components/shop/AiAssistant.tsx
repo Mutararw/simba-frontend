@@ -71,9 +71,27 @@ export function AiAssistant() {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: result.reply,
+          products: result.products,
         };
 
         setMessages((prev) => [...prev, assistantMsg]);
+
+        if (result.addToCartIds && result.addToCartIds.length > 0) {
+          const cartIds = result.addToCartIds.map(String);
+          const itemsToAdd = (result.products || []).filter((p) => cartIds.includes(String(p.id)));
+          itemsToAdd.forEach((p) => {
+            add({
+              ...p,
+              id: Number(p.id),
+              price: Number(p.price),
+              inStock: p.stock > 0 || p.inStock,
+              image: p.imageUrl || p.image || ""
+            });
+          });
+          if (itemsToAdd.length > 0) {
+            toast.success(`Added ${itemsToAdd.length} item(s) to your cart!`, { icon: "🛒" });
+          }
+        }
       } catch {
         toast.error("Failed to connect to AI Assistant.");
       } finally {
