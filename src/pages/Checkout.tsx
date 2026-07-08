@@ -178,7 +178,8 @@ export default function Checkout() {
       navigate("/confirmation");
     } catch (err) {
       console.error("Payment failed", err);
-      toast.error(err instanceof Error ? err.message : "Failed to place order.");
+      const msg = err instanceof ApiError ? err.message : (err instanceof Error ? err.message : "Failed to place order.");
+      toast.error(msg);
     } finally {
       setPaying(false);
     }

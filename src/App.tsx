@@ -28,7 +28,6 @@ import About from "@/pages/About";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ROUTER_MODE } from "@/lib/config";
 import { SessionManager } from "@/lib/SessionManager";
-import { MeetingOverlay } from "@/components/MeetingOverlay";
 
 const queryClient = new QueryClient();
 const Router = ROUTER_MODE === "hash" ? HashRouter : BrowserRouter;
@@ -37,7 +36,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SessionManager />
-      <MeetingOverlay />
       <Toaster />
       <Sonner />
       <Router>
