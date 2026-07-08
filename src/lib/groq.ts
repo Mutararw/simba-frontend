@@ -45,6 +45,8 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
     const { data } = await apiLong.post<AiSearchApiResponse>("/api/ai/chat", { query });
 
     const recommendedIds = (data.productIds || []).map(String);
+    const addToCartIds = (data.addToCartIds || []).map(String);
+    const allIds = [...new Set([...recommendedIds, ...addToCartIds])];
 
     const matchedProducts = data.products
       ? data.products.map((product) => ({
@@ -54,16 +56,16 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
           inStock: product.stock > 0,
           image: product.imageUrl || product.image_url || "",
         }))
-      : recommendedIds.length > 0
+      : allIds.length > 0
         ? PRODUCTS.filter(
-            (product) => recommendedIds.includes(String(product.id))
+            (product) => allIds.includes(String(product.id))
           )
         : [];
 
     return {
       reply: data.reply || "I've found some products that might interest you.",
       products: matchedProducts,
-      addToCartIds: (data.addToCartIds || []).map(String),
+      addToCartIds,
     };
   } catch (error) {
     console.error("AI search via backend failed, using fallback", error);
@@ -96,17 +98,26 @@ export async function aiAssistantChat(query: string): Promise<AiAssistantResult>
         }))
       : [];
 
+    const addToCartIds = (data.addToCartIds || []).map(String);
+
+    const allProducts = matchedProducts.length > 0
+      ? matchedProducts
+      : addToCartIds.length > 0
+        ? PRODUCTS.filter((product) => addToCartIds.includes(String(product.id)))
+        : [];
+
     return {
       reply: data.reply || "I'm sorry, I'm having trouble processing your request right now.",
-      products: matchedProducts,
-      addToCartIds: (data.addToCartIds || []).map(String),
+      products: allProducts,
+      addToCartIds,
     };
   } catch (error) {
     console.error("AI assistant via backend failed, using fallback", error);
-    return {
-      reply: "I'm sorry, I'm having trouble connecting to the customer service helper. Please contact our support team at info@Simbasupermarket.rw or +250 788 000 000.",
-      products: [],
-    };
+    const products = searchProducts(query);
+    const reply = products.length
+      ? `I found ${products.length} item${products.length > 1 ? "s" : ""} that match "${query}".`
+      : "I'm sorry, I'm having trouble connecting. Please contact our support team at info@Simbasupermarket.rw or +250 788 000 000.";
+    return { reply, products };
   }
 }
 
