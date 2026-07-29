@@ -218,7 +218,7 @@ export function AiAssistant() {
                               className="w-48 shrink-0 rounded-xl border border-border bg-card p-2 shadow-sm"
                             >
                               <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted mb-2">
-                                <img src={p.imageUrl || p.image} alt={p.name} className="h-full w-full object-cover" />
+                                <img src={p.imageUrl || p.image || "/placeholder.svg"} alt={p.name} className="h-full w-full object-cover" />
                               </div>
                               <div className="text-[11px] font-medium line-clamp-1 mb-1">{p.name}</div>
                               <div className="flex items-center justify-between">
@@ -232,7 +232,7 @@ export function AiAssistant() {
                                       id: Number(p.id),
                                       price: Number(p.price),
                                       inStock: p.stock > 0 || p.inStock,
-                                      image: p.imageUrl || p.image || ""
+                                      image: p.imageUrl || p.image || "/placeholder.svg"
                                     });
                                     toast.success("Added to cart");
                                   }}

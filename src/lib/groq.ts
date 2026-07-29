@@ -52,7 +52,7 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
           id: typeof product.id === "string" ? parseInt(product.id, 10) : Number(product.id),
           price: Number(product.price),
           inStock: product.stock > 0,
-          image: product.imageUrl || product.image_url || "",
+          image: product.imageUrl || product.image_url || "/placeholder.svg",
         }))
       : recommendedIds.length > 0
         ? PRODUCTS.filter(

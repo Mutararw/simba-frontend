@@ -17,6 +17,16 @@ export class ApiError extends Error {
   }
 }
 
+function getGuestId(): string {
+  const key = 'simba_guest_id'
+  let id = localStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(key, id)
+  }
+  return id
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   withCredentials: true,
@@ -25,6 +35,11 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+api.interceptors.request.use((config) => {
+  config.headers['x-guest-id'] = getGuestId()
+  return config
+})
 
 api.interceptors.response.use(
   (response) => response,

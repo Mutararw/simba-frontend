@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { ApiError, api } from "@/lib/api";
 import { formatRWF } from "@/lib/products";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Calendar, MapPin, RotateCcw } from "lucide-react";
+import { Loader2, Package, Calendar, MapPin, RotateCcw, WifiOff } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useOrder } from "@/store/order";
 
 interface OrderItem {
   orderItemId: number;
+  productId: number;
   productName: string;
   imageUrl: string;
   quantity: number;
@@ -33,10 +33,9 @@ const STATUS_STEPS = ["Placed", "Confirmed", "Packed", "Out for Delivery", "Deli
 export default function Orders() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const lastOrder = useOrder((s) => s.lastOrder);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     api
@@ -44,39 +43,14 @@ export default function Orders() {
       .then((res) => setOrders(res.data))
       .catch((err) => {
         console.error("Failed to fetch orders", err);
-
         if (err instanceof ApiError && err.isNetworkError) {
-          setNotice("Backend unavailable. Showing locally saved orders only.");
-        } else {
-          setNotice("Could not load your full order history right now.");
+          setIsOffline(true);
         }
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const localOrders = useMemo(() => {
-    if (!lastOrder) return [];
-
-    return [
-      {
-        orderId: Number(lastOrder.id.replace(/\D/g, "").slice(-9) || Date.now()),
-        totalAmount: lastOrder.total,
-        status: "saved",
-        createdAt: lastOrder.createdAt,
-        branchId: lastOrder.branchName,
-        pickupTime: lastOrder.pickupTime,
-        items: lastOrder.items.map((item, index) => ({
-          orderItemId: index + 1,
-          productName: item.product.name,
-          imageUrl: item.product.image,
-          quantity: item.qty,
-          unitPrice: item.product.price,
-        })),
-      },
-    ] satisfies Order[];
-  }, [lastOrder]);
-
-  const displayOrders = orders.length > 0 ? orders : localOrders;
+  const displayOrders = orders;
 
   if (loading) {
     return (
@@ -90,9 +64,10 @@ export default function Orders() {
     <div className="container py-8">
       <h1 className="font-display text-3xl font-bold">{t("nav.orders", { defaultValue: "My Orders" })}</h1>
 
-      {notice ? (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          {notice}
+      {isOffline ? (
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
+          <WifiOff className="h-4 w-4" />
+          Backend unavailable. Sign in or try again later.
         </div>
       ) : null}
 
