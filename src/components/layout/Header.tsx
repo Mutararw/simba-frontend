@@ -135,14 +135,16 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 md:gap-2">
-          <div className="hidden md:block mr-2">
-             <OrderCountdown />
-          </div>
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => setAiOpen(true)} aria-label="AI Assistant">
+          <Button variant="ghost" size="icon" className="relative text-yellow-300 hover:text-yellow-200 hover:bg-white/20" onClick={() => setAiOpen(true)} aria-label="AI Assistant">
             <Sparkles className="h-5 w-5" />
           </Button>
+          {user && (
+            <div className="hidden md:block mr-2">
+               <OrderCountdown />
+            </div>
+          )}
+          <LanguageSwitcher />
+          <ThemeToggle />
           <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/wishlist")} aria-label="Wishlist">
             <Heart className="h-5 w-5" />
           </Button>
