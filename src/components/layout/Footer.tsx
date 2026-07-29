@@ -40,24 +40,20 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-border bg-[#0a0f0d] text-slate-200 pt-16 pb-8 overflow-hidden">
-      {/* Decorative background element */}
-      <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-      
+    <footer className="relative bg-[#fd7e14] text-white pt-16 pb-8 overflow-hidden shadow-md">
       <div className="container relative z-10">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 lg:gap-8">
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-lg transition-transform group-hover:rotate-12">
-                <span className="font-display text-xl font-bold italic">S</span>
-              </div>
-              <span className="font-display text-2xl font-bold tracking-tight text-white">
-                {t("brand.name")}
-              </span>
+              <img
+                src="https://www.simbaonlineshopping.com/images/simbaheaderM.png"
+                alt="Simba Logo"
+                className="h-10 md:h-12 object-contain brightness-0 invert"
+              />
             </Link>
             
-            <p className="text-sm leading-relaxed text-slate-400 max-w-xs">
+            <p className="text-sm leading-relaxed text-white/70 max-w-xs">
               {t("footer.description")}
             </p>
 
@@ -121,7 +117,7 @@ export function Footer() {
 
           {/* Shop Column */}
           <div className="flex flex-col gap-6">
-            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-slate-200">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-white/90">
               {t("footer.sections.shop.title")}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -135,9 +131,9 @@ export function Footer() {
                 <li key={key}>
                   <Link 
                     to={to} 
-                    className="text-sm text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group"
+                    className="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-2 group"
                   >
-                    <span className="h-1 w-1 rounded-full bg-slate-800 group-hover:bg-primary transition-colors" />
+                    <span className="h-1 w-1 rounded-full bg-white/30 group-hover:bg-white transition-colors" />
                     {t(`footer.sections.shop.categories.${key}`)}
                   </Link>
                 </li>
@@ -147,7 +143,7 @@ export function Footer() {
 
           {/* Company Column */}
           <div className="flex flex-col gap-6">
-            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-slate-200">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-white/90">
               {t("footer.sections.company.title")}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -155,7 +151,7 @@ export function Footer() {
                 <li key={key}>
                   <Link 
                     to={key === "branches" ? "/branches" : "#"} 
-                    className="text-sm text-slate-400 hover:text-primary transition-colors"
+                    className="text-sm text-white/70 hover:text-white transition-colors"
                   >
                     {t(`footer.sections.company.${key}`)}
                   </Link>
@@ -166,10 +162,10 @@ export function Footer() {
 
           {/* Newsletter Column */}
           <div className="flex flex-col gap-6">
-            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-slate-200">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-white/90">
               {t("footer.sections.newsletter.title")}
             </h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-white/70">
               {t("footer.sections.newsletter.subtitle")}
             </p>
             <div className="flex flex-col gap-3">
@@ -179,7 +175,7 @@ export function Footer() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2 text-green-500 font-medium"
+                    className="flex items-center gap-2 text-white font-medium"
                   >
                     <CheckCircle2 className="h-5 w-5" />
                     {t("footer.sections.newsletter.success")}
@@ -194,7 +190,7 @@ export function Footer() {
                   >
                     <Input 
                       placeholder={t("footer.sections.newsletter.placeholder")}
-                      className="rounded-xl border-slate-800 bg-slate-900 text-white pr-12 focus-visible:ring-primary/20"
+                      className="rounded-xl border-white/20 bg-white/10 text-white placeholder:text-white/50 pr-12 focus-visible:ring-white/30"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -202,7 +198,7 @@ export function Footer() {
                       type="submit"
                       size="icon" 
                       variant="ghost" 
-                      className="absolute right-1 top-1 h-8 w-8 rounded-lg text-primary hover:bg-primary/10"
+                      className="absolute right-1 top-1 h-8 w-8 rounded-lg text-white hover:bg-white/20"
                     >
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -212,7 +208,7 @@ export function Footer() {
               
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <motion.div whileHover={{ scale: 1.05 }} className="cursor-pointer">
-                  <div className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-white shadow-lg transition-colors hover:bg-slate-700 border border-slate-700">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-white shadow-lg transition-colors hover:bg-white/20 border border-white/20">
                     <Apple className="h-4 w-4" />
                     <div className="flex flex-col leading-none">
                       <span className="text-[10px] opacity-70">{t("footer.sections.apps.download")}</span>
@@ -221,7 +217,7 @@ export function Footer() {
                   </div>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} className="cursor-pointer">
-                  <div className="flex items-center gap-2 rounded-xl bg-slate-800 px-4 py-2 text-white shadow-lg transition-colors hover:bg-slate-700 border border-slate-700">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-white shadow-lg transition-colors hover:bg-white/20 border border-white/20">
                     <Smartphone className="h-4 w-4" />
                     <div className="flex flex-col leading-none">
                       <span className="text-[10px] opacity-70">{t("footer.sections.apps.get")}</span>

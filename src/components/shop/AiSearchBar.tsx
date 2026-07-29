@@ -137,7 +137,7 @@ export function AiSearchBar() {
         }}
         className={`flex items-center gap-2 rounded-2xl border bg-background/95 p-2 shadow-sm backdrop-blur transition-all duration-300 ${isListening ? "border-primary ring-2 ring-primary/30 shadow-[0_0_15px_rgba(16,185,129,0.18)]" : "border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring"}`}
       >
-        <Search className={`ml-2 h-5 w-5 ${isListening ? "text-primary" : "text-muted-foreground"}`} />
+        <Sparkles className={`ml-2 h-5 w-5 ${isListening ? "text-primary" : "text-primary"}`} />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
