@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useProducts } from "@/hooks/use-products";
 import { useDynamicTranslation } from "@/hooks/use-dynamic-translation";
 
-const TILE_BG = ["bg-tile-1", "bg-tile-2", "bg-tile-3", "bg-tile-4", "bg-tile-5", "bg-tile-6", "bg-tile-7", "bg-tile-8"];
-
 export function CategoryRail() {
   const { t } = useTranslation();
   const { translateCategory } = useDynamicTranslation();
@@ -19,10 +17,10 @@ export function CategoryRail() {
           <Link
             key={c.key}
             to={`/browse?cat=${encodeURIComponent(c.key)}`}
-            className={`category-tile ${TILE_BG[c.tile - 1]} min-w-[140px] md:min-w-0 group overflow-hidden relative`}
+            className={`category-tile min-w-[140px] md:min-w-0 group overflow-hidden relative bg-background`}
           >
             {c.image && (
-              <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity">
+              <div className="absolute inset-0">
                 <img 
                   src={c.image} 
                   alt="" 
@@ -33,9 +31,10 @@ export function CategoryRail() {
             <div className="absolute right-3 top-3 text-3xl drop-shadow-sm group-hover:scale-110 transition-transform z-20">
               {c.emoji}
             </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
             <div className="z-20 mt-auto w-full">
-              <h3 className="font-display text-sm font-bold leading-tight text-foreground md:text-base">{translateCategory(c.key)}</h3>
-              <p className="mt-1 text-xs text-foreground/60">
+              <h3 className="font-display text-sm font-bold leading-tight text-white md:text-base drop-shadow-lg">{translateCategory(c.key)}</h3>
+              <p className="mt-1 text-xs text-white/80 drop-shadow-lg">
                 {t("categories.count", { count: c.count })}
               </p>
             </div>

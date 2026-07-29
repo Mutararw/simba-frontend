@@ -41,7 +41,7 @@ export function LanguageSwitcher() {
             onClick={() => i18n.changeLanguage(l.code)}
             className={i18n.language.startsWith(l.code) ? "font-semibold text-primary" : ""}
           >
-            {t(`lang.${l.code}`)}
+            {l.label === "EN" ? "English" : l.label === "RW" ? "Kinyarwanda" : l.label === "FR" ? "Français" : l.label === "AR" ? "العربية" : "中文"}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
