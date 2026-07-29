@@ -40,7 +40,11 @@ declare global {
   }
 }
 
-export function AiSearchBar() {
+interface AiSearchBarProps {
+  inline?: boolean;
+}
+
+export function AiSearchBar({ inline }: AiSearchBarProps) {
   const dropdownMode = true;
   const { t } = useTranslation();
   const [q, setQ] = useState("");
@@ -175,7 +179,7 @@ export function AiSearchBar() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed inset-x-0 top-[80px] z-[100] flex justify-center p-4 md:top-[85px]"
+          className={inline ? "mt-4" : "fixed inset-x-0 top-[80px] z-[100] flex justify-center p-4 md:top-[85px]"}
         >
           <div className="w-full max-w-3xl max-h-[calc(100vh-140px)] overflow-auto rounded-2xl border border-border bg-card/98 p-3 shadow-2xl backdrop-blur md:p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
