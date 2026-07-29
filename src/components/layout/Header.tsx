@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { OrderCountdown } from "../shop/OrderCountdown";
-import { AiSearchBar } from "../shop/AiSearchBar";
 import { useCart } from "@/store/cart";
 import { useAuth } from "@/store/auth";
 import {
@@ -106,11 +105,6 @@ export function Header() {
             </NavLink>
           ))}
         </nav>
-
-        {/* Global Navbar Search - Hidden on Smallest Mobile */}
-        <div className="hidden sm:flex flex-1 max-w-xl mx-2">
-          <AiSearchBar />
-        </div>
 
         <div className="flex items-center gap-1 md:gap-2">
           <div className="hidden md:block mr-2">

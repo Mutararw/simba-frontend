@@ -39,39 +39,40 @@ export function GetInTouch() {
   };
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background" />
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
-
+    <section className="relative overflow-hidden bg-[#fd7e14] py-20 md:py-28 text-white shadow-md">
       <div className="container relative z-10 flex flex-col items-center text-center">
-        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mb-4"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary mb-6">
-            <MessageCircle className="h-3.5 w-3.5" />
-            {t("contact.badge")}
-          </span>
+          <img
+            src="https://www.simbaonlineshopping.com/images/simbaheaderM.png"
+            alt="Simba Logo"
+            className="h-12 md:h-16 object-contain mx-auto mb-6 brightness-0 invert"
+          />
         </motion.div>
+
+        <motion.span
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-bold mb-4"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          {t("contact.badge")}
+        </motion.span>
 
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-display text-3xl font-extrabold tracking-tight md:text-5xl lg:text-6xl mb-6"
+          className="font-display text-3xl font-extrabold tracking-tight md:text-5xl lg:text-6xl mb-4"
         >
-          <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            {t("contact.title").split(" ").slice(0, 3).join(" ")}{" "}
-          </span>
-          <span className="bg-gradient-to-r from-primary to-[#fd7e14] bg-clip-text text-transparent">
-            {t("contact.title").split(" ").slice(3).join(" ")}
-          </span>
+          {t("contact.title")}
         </motion.h2>
 
         <motion.p
@@ -79,12 +80,11 @@ export function GetInTouch() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed mb-12"
+          className="max-w-2xl text-base md:text-lg text-white/80 leading-relaxed mb-10"
         >
           {t("contact.subtitle")}
         </motion.p>
 
-        {/* The Surprise Box / Form / Thank You */}
         <motion.div
           ref={formRef}
           initial={{ opacity: 0, y: 30 }}
@@ -94,7 +94,6 @@ export function GetInTouch() {
           className="w-full max-w-xl"
         >
           <AnimatePresence mode="wait">
-            {/* ── SURPRISE BOX ── */}
             {state === "box" && (
               <motion.div
                 key="surprise-box"
@@ -105,50 +104,36 @@ export function GetInTouch() {
                 onClick={() => setState("form")}
                 className="group relative cursor-pointer"
               >
-                {/* Outer glow ring */}
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/40 via-[#fd7e14]/30 to-primary/40 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-700" />
-
-                <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-card via-card to-primary/[0.04] p-10 md:p-14 transition-all duration-500 group-hover:border-primary/60 group-hover:shadow-[0_0_60px_-15px_hsl(var(--primary)/0.3)]">
-                  {/* Floating sparkles */}
-                  <div className="absolute top-4 right-6 text-primary/20 group-hover:text-primary/50 transition-colors duration-500">
+                <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-white/30 bg-white/10 p-10 md:p-14 transition-all duration-500 hover:bg-white/20">
+                  <div className="absolute top-4 right-6 text-white/40">
                     <Sparkles className="h-6 w-6 animate-pulse" />
                   </div>
-                  <div className="absolute bottom-4 left-6 text-[#fd7e14]/20 group-hover:text-[#fd7e14]/50 transition-colors duration-500">
+                  <div className="absolute bottom-4 left-6 text-white/40">
                     <Heart className="h-5 w-5 animate-pulse" style={{ animationDelay: "0.5s" }} />
                   </div>
 
-                  {/* Gift icon */}
                   <motion.div
-                    animate={{
-                      y: [0, -8, 0],
-                      rotate: [0, -3, 3, 0],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
+                    animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     className="mb-6 inline-flex"
                   >
-                    <div className="grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg shadow-primary/25 group-hover:shadow-primary/40 transition-shadow duration-500">
+                    <div className="grid h-20 w-20 place-items-center rounded-2xl bg-white text-[#fd7e14] shadow-lg">
                       <Gift className="h-10 w-10" />
                     </div>
                   </motion.div>
 
-                  <h3 className="font-display text-xl md:text-2xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                  <h3 className="font-display text-xl md:text-2xl font-bold mb-2">
                     {t("contact.boxTitle")}
                   </h3>
-                  <p className="text-sm text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
+                  <p className="text-sm text-white/70">
                     {t("contact.boxSubtitle")}
                   </p>
 
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                 </div>
               </motion.div>
             )}
 
-            {/* ── CONTACT FORM ── */}
             {state === "form" && (
               <motion.div
                 key="contact-form"
@@ -158,69 +143,61 @@ export function GetInTouch() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="relative"
               >
-                {/* Glow background */}
-                <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-r from-primary/20 via-[#fd7e14]/10 to-primary/20 blur-2xl opacity-50" />
-
-                <div className="relative overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-primary/5">
-                  {/* Header bar */}
-                  <div className="flex items-center justify-between border-b border-border bg-primary/[0.03] px-6 py-4">
+                <div className="relative overflow-hidden rounded-3xl bg-white text-[#fd7e14] shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-[#fd7e14]/10 bg-[#fd7e14]/5 px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-white">
+                      <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#fd7e14] text-white">
                         <MessageSquare className="h-4.5 w-4.5" />
                       </div>
                       <div className="text-left">
-                        <p className="font-display text-sm font-bold text-foreground">{t("contact.formTitle")}</p>
-                        <p className="text-xs text-muted-foreground">{t("contact.formSubtitle")}</p>
+                        <p className="font-display text-sm font-bold text-[#fd7e14]">{t("contact.formTitle")}</p>
+                        <p className="text-xs text-[#fd7e14]/60">{t("contact.formSubtitle")}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setState("box")}
-                      className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      className="grid h-8 w-8 place-items-center rounded-lg text-[#fd7e14]/50 hover:text-[#fd7e14] hover:bg-[#fd7e14]/10 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
 
-                  {/* Form body */}
                   <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6 md:p-8">
-                    {/* Name */}
                     <div className="relative group">
-                      <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <label className="mb-1.5 block text-left text-xs font-semibold text-[#fd7e14]/70 uppercase tracking-wider">
                         {t("contact.nameLabel")}
                       </label>
                       <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#fd7e14]/30 group-focus-within:text-[#fd7e14] transition-colors" />
                         <input
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="e.g. Jean Pierre"
                           required
-                          className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="w-full rounded-xl border border-[#fd7e14]/20 bg-[#fd7e14]/5 py-3 pl-10 pr-4 text-sm text-[#fd7e14] placeholder:text-[#fd7e14]/30 focus:outline-none focus:ring-2 focus:ring-[#fd7e14]/30 focus:border-[#fd7e14] transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* Email (optional) */}
                     <div className="relative group">
-                      <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <label className="mb-1.5 block text-left text-xs font-semibold text-[#fd7e14]/70 uppercase tracking-wider">
                         {t("contact.emailLabel")}
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-primary transition-colors" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#fd7e14]/30 group-focus-within:text-[#fd7e14] transition-colors" />
                         <input
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@email.com"
-                          className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="w-full rounded-xl border border-[#fd7e14]/20 bg-[#fd7e14]/5 py-3 pl-10 pr-4 text-sm text-[#fd7e14] placeholder:text-[#fd7e14]/30 focus:outline-none focus:ring-2 focus:ring-[#fd7e14]/30 focus:border-[#fd7e14] transition-all"
                         />
                       </div>
                     </div>
 
-                    {/* Message */}
                     <div className="relative group">
-                      <label className="mb-1.5 block text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <label className="mb-1.5 block text-left text-xs font-semibold text-[#fd7e14]/70 uppercase tracking-wider">
                         {t("contact.messageLabel")}
                       </label>
                       <textarea
@@ -229,30 +206,27 @@ export function GetInTouch() {
                         placeholder="Share your experience, suggestions, or feedback..."
                         required
                         rows={4}
-                        className="w-full resize-none rounded-xl border border-border bg-background py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full resize-none rounded-xl border border-[#fd7e14]/20 bg-[#fd7e14]/5 py-3 px-4 text-sm text-[#fd7e14] placeholder:text-[#fd7e14]/30 focus:outline-none focus:ring-2 focus:ring-[#fd7e14]/30 focus:border-[#fd7e14] transition-all"
                       />
                     </div>
 
-                    {/* Submit */}
                     <motion.button
                       type="submit"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="relative flex items-center justify-center gap-2 rounded-xl bg-primary py-3.5 px-6 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow overflow-hidden group"
+                      className="relative flex items-center justify-center gap-2 rounded-xl bg-[#fd7e14] py-3.5 px-6 text-sm font-bold text-white shadow-lg hover:shadow-xl transition-shadow overflow-hidden group"
                     >
                       <span className="relative z-10 flex items-center gap-2">
                         <Send className="h-4 w-4" />
                         {t("contact.submit")}
                       </span>
-                      {/* Hover shimmer */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                     </motion.button>
                   </form>
                 </div>
               </motion.div>
             )}
 
-            {/* ── THANK YOU ── */}
             {state === "thanks" && (
               <motion.div
                 key="thank-you"
@@ -262,34 +236,20 @@ export function GetInTouch() {
                 transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                 className="relative"
               >
-                <div className="absolute -inset-2 rounded-[2rem] bg-gradient-to-r from-primary/30 via-[#fd7e14]/20 to-primary/30 blur-2xl opacity-60" />
-
-                <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card p-12 md:p-16">
-                  {/* Confetti-like dots */}
+                <div className="relative overflow-hidden rounded-3xl bg-white/10 border border-white/20 p-12 md:p-16">
                   {[...Array(12)].map((_, i) => (
                     <motion.div
                       key={i}
-                      initial={{
-                        opacity: 0,
-                        scale: 0,
-                        x: 0,
-                        y: 0,
-                      }}
+                      initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                       animate={{
                         opacity: [0, 1, 0],
                         scale: [0, 1.5, 0],
                         x: (Math.random() - 0.5) * 200,
                         y: (Math.random() - 0.5) * 200,
                       }}
-                      transition={{
-                        duration: 1.5,
-                        delay: i * 0.08,
-                        ease: "easeOut",
-                      }}
+                      transition={{ duration: 1.5, delay: i * 0.08, ease: "easeOut" }}
                       className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
-                      style={{
-                        background: i % 3 === 0 ? "hsl(152, 72%, 25%)" : i % 3 === 1 ? "#fd7e14" : "#fbbf24",
-                      }}
+                      style={{ background: i % 3 === 0 ? "white" : i % 3 === 1 ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.3)" }}
                     />
                   ))}
 
@@ -299,7 +259,7 @@ export function GetInTouch() {
                     transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
                     className="mb-6 inline-flex"
                   >
-                    <div className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-xl shadow-primary/30">
+                    <div className="grid h-20 w-20 place-items-center rounded-full bg-white text-[#fd7e14] shadow-xl">
                       <CheckCircle2 className="h-10 w-10" />
                     </div>
                   </motion.div>
@@ -308,7 +268,7 @@ export function GetInTouch() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="font-display text-2xl md:text-3xl font-extrabold text-foreground mb-3"
+                    className="font-display text-2xl md:text-3xl font-extrabold mb-3"
                   >
                     {t("contact.thanksTitle")}
                   </motion.h3>
@@ -316,7 +276,7 @@ export function GetInTouch() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="text-muted-foreground text-sm md:text-base"
+                    className="text-white/70 text-sm md:text-base"
                   >
                     {t("contact.thanksSubtitle")}
                   </motion.p>
