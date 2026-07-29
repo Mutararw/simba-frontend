@@ -45,6 +45,8 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
     const { data } = await api.post<AiSearchApiResponse>("/api/ai/chat", { query });
 
     const recommendedIds = (data.productIds || []).map(String);
+    const addToCartIds = (data.addToCartIds || []).map(String);
+    const allIds = [...new Set([...recommendedIds, ...addToCartIds])];
 
     const matchedProducts = data.products
       ? data.products.map((product) => ({
@@ -54,16 +56,16 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
           inStock: product.stock > 0,
           image: product.imageUrl || product.image_url || "/placeholder.svg",
         }))
-      : recommendedIds.length > 0
+      : allIds.length > 0
         ? PRODUCTS.filter(
-            (product) => recommendedIds.includes(String(product.id))
+            (product) => allIds.includes(String(product.id))
           )
         : [];
 
     return {
       reply: data.reply || "I've found some products that might interest you.",
       products: matchedProducts,
-      addToCartIds: (data.addToCartIds || []).map(String),
+      addToCartIds,
     };
   } catch (error) {
     console.error("AI search via backend failed, using fallback", error);

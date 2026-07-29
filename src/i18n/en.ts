@@ -112,6 +112,38 @@ const en = {
     total: "Total",
     track: "Track Order"
   },
+  about: {
+    hero: {
+      badge: "Established in 2007",
+      title: "Our Story &",
+      titleHighlight: "Values",
+      description: "Simba Supermarket has been a cornerstone of Kigali's community since 2007, pioneering the modern retail experience in Rwanda. We are dedicated to bringing you the freshest ingredients, premium products, and exceptional customer service.",
+    },
+    history: {
+      title: "Our History",
+      description: "Founded in 2007 as a single, family-oriented supermarket in Nyarugenge, Simba Supermarket set out with a vision to deliver a standardized, hygienic, and affordable grocery shopping environment. Over the last two decades, Simba has grown to become the largest and most trusted retail supermarket network in Kigali, operating multiple branches equipped to serve thousands of families daily.",
+    },
+    commitment: {
+      title: "Our Commitment",
+      description: "We are committed to empowering local farmers and manufacturers across Rwanda. By sourcing fresh agricultural produce directly from Kigali's rural cooperatives, we guarantee the shortest time from field to store shelves. Quality assurance, strict hygiene practices, and customer-first service form the core DNA of Simba.",
+    },
+    contact: {
+      title: "Get In Touch",
+      subtitle: "We are here to help you 24/7. Reach out through our official support lines.",
+      phone: { title: "Local Phone Lines", content: "+250 788 000 000", subtitle: "Available: 07:00 AM – 10:00 PM" },
+      email: { title: "Customer Support Email", content: "info@Simbasupermarket.rw", subtitle: "Response within 24 hours" },
+      address: { title: "Headquarters Office", content: "Centenary House, Kiyovu", subtitle: "Kigali, Rwanda" },
+    },
+    faq: {
+      title: "Frequently Asked Questions",
+      subtitle: "Find quick answers to common questions about our services.",
+      q1: { question: "Do you deliver on public holidays?", answer: "Yes, we operate and deliver on most public holidays. However, hours may be reduced. Check our holiday schedule on the Branches page or contact support." },
+      q2: { question: "Can I return fresh vegetables or dairy?", answer: "For hygiene reasons, fresh produce and dairy cannot be returned once collected. Please inspect your items at pickup. If there's a quality issue, contact us immediately." },
+      q3: { question: "What are the delivery areas and charges?", answer: "We currently deliver within Kigali city limits. Delivery fees depend on your location and order size. Exact fees are calculated at checkout." },
+      q4: { question: "What payment methods do you support?", answer: "We support Mobile Money (MoMo) and cash on delivery. A small deposit via MoMo is required to confirm your order." },
+      q5: { question: "How long does pickup collection take?", answer: "Pickup orders are typically ready within 45 minutes. You'll receive a notification when your order is ready for collection at your chosen branch." },
+    },
+  },
   contact: {
     badge: "Get in touch",
     title: "We'd love to hear from you",

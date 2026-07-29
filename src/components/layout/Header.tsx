@@ -135,7 +135,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 md:gap-2">
-          <Button variant="ghost" size="icon" className="relative text-yellow-300 hover:text-yellow-200 hover:bg-white/20" onClick={() => setAiOpen(true)} aria-label="AI Assistant">
+          <Button variant="ghost" size="icon" className="relative text-green-300 hover:text-green-200 hover:bg-white/20" onClick={() => setAiOpen(true)} aria-label="AI Assistant">
             <Sparkles className="h-5 w-5" />
           </Button>
           {user && (
