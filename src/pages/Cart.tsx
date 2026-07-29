@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Minus, Plus, ShoppingBag, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/store/cart";
+import { useAuth } from "@/store/auth";
 import { formatRWF, PRODUCTS } from "@/lib/products";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useMemo } from "react";
@@ -14,6 +15,7 @@ export default function Cart() {
   const { t } = useTranslation();
   const { translateProduct } = useDynamicTranslation();
   const navigate = useNavigate();
+  const user = useAuth((s) => s.user);
   const items = useCart((s) => s.items);
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
@@ -91,7 +93,7 @@ export default function Cart() {
           <div className="flex justify-between text-base"><span className="font-semibold">{t("cart.total")}</span><span className="font-display text-lg font-extrabold">{formatRWF(DEPOSIT)}</span></div>
           <p className="pt-1 text-xs text-muted-foreground">Pay {formatRWF(subtotal - DEPOSIT)} on pick-up.</p>
         </div>
-        <Button size="lg" className="mt-5 w-full rounded-full" onClick={() => navigate("/branches?next=checkout")}>
+        <Button size="lg" className="mt-5 w-full rounded-full" onClick={() => user ? navigate("/branches?next=checkout") : navigate("/login?redirect=/cart")}>
           {t("cart.checkout")}
         </Button>
       </aside>

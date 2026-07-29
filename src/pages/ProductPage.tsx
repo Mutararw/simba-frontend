@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ShoppingCart, Loader2, Heart, Plus, Minus, Home, ChevronRight } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Loader2, Heart, Plus, Minus, Home, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { fetchProduct, formatRWF, PRODUCTS } from "@/lib/products";
 import { useCart } from "@/store/cart";

@@ -16,7 +16,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Forgot from "./pages/Forgot";
 import Orders from "./pages/Orders";
-import { AiAssistant } from "@/components/shop/AiAssistant";
 import { GlobalReviewPrompter } from "@/components/shop/GlobalReviewPrompter";
 import Dashboard from "@/pages/Dashboard";
 import BranchDashboard from "@/pages/BranchDashboard";
@@ -64,7 +63,6 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-        <AiAssistant />
         <GlobalReviewPrompter />
       </Router>
     </TooltipProvider>

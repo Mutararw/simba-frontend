@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2, Smartphone, CreditCard, Banknote, MapPin, Truck } from "lucide-react";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCart } from "@/store/cart";
 import { useOrder } from "@/store/order";
+import { useAuth } from "@/store/auth";
 import { BRANCHES, getNearbyBranches } from "@/lib/branches";
 import { formatRWF } from "@/lib/products";
 import { ApiError, api } from "@/lib/api";
@@ -55,7 +56,12 @@ const TIME_SLOTS = [
 export default function Checkout() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const user = useAuth((s) => s.user);
   const items = useCart((s) => s.items);
+
+  useEffect(() => {
+    if (!user) navigate("/login?redirect=/checkout", { replace: true });
+  }, [user, navigate]);
   const subtotal = useCart((s) => s.items.reduce((n, i) => n + i.qty * i.product.price, 0));
   const clear = useCart((s) => s.clear);
   const draft = useOrder((s) => s.pendingDraft);

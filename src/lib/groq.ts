@@ -18,6 +18,7 @@
 import { PRODUCTS, searchProducts } from "./products";
 import type { Product } from "./types";
 import { api } from "./api";
+import i18n from "@/i18n";
 
 export interface AiSearchResult {
   reply: string;
@@ -42,7 +43,8 @@ interface AiSearchApiResponse {
 
 export async function aiSearch(query: string): Promise<AiSearchResult> {
   try {
-    const { data } = await api.post<AiSearchApiResponse>("/api/ai/chat", { query });
+    const lang = i18n.language?.split("-")[0] || "en";
+    const { data } = await api.post<AiSearchApiResponse>("/api/ai/chat", { query, lang });
 
     const recommendedIds = (data.productIds || []).map(String);
     const addToCartIds = (data.addToCartIds || []).map(String);

@@ -109,9 +109,9 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1 md:gap-2">
-          <Button variant="ghost" className="relative gap-1.5 text-white hover:bg-white/10 text-sm font-medium" onClick={() => setShowAiSearch(!showAiSearch)}>
+          <Button variant="ghost" className="relative gap-1.5 text-green-300 hover:text-green-200 hover:bg-white/10 text-sm font-medium" onClick={() => setShowAiSearch(!showAiSearch)}>
             <Sparkles className="h-5 w-5 text-green-300" />
-            <span className="hidden sm:inline text-white/90">ASK AI</span>
+            <span className="hidden sm:inline">ASK AI</span>
           </Button>
           {user && (
             <div className="hidden md:block mr-2">
@@ -157,7 +157,7 @@ export function Header() {
                   <Settings className="mr-2 h-4 w-4" /> Account Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => { setUser(null); navigate("/"); }} className="text-red-500 focus:text-red-500">
+                <DropdownMenuItem onClick={() => { setUser(null); navigate("/"); }} className="text-red-500 hover:!text-white focus:!text-white hover:!bg-red-500 focus:!bg-red-500">
                   <LogOut className="mr-2 h-4 w-4" /> {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
