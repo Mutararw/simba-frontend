@@ -1,6 +1,7 @@
 import axios from "axios";
 import { API_URL } from "./config";
 import { authClient } from "./auth-client";
+import { useAuth } from "@/store/auth";
 
 export class ApiError extends Error {
   status?: number;
@@ -40,7 +41,17 @@ export const api = axios.create({
 api.interceptors.request.use(async (config) => {
   config.headers['x-guest-id'] = getGuestId()
   if (config.url?.startsWith("/api/admin")) {
-    try { await authClient.getSession(); } catch {}
+    const storeUser = useAuth.getState().user;
+    if (storeUser) {
+      try {
+        const { data: s } = await authClient.getSession();
+        if (!s?.user || s.user.id !== storeUser.id) {
+          useAuth.getState().setUser(null);
+          window.location.href = "/login";
+          return Promise.reject("Session mismatch");
+        }
+      } catch {}
+    }
   }
   return config
 })
@@ -48,6 +59,13 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 403 && error.config?.url?.startsWith("/api/admin")) {
+      const storeUser = useAuth.getState().user;
+      if (storeUser) {
+        useAuth.getState().setUser(null);
+        window.location.href = "/login";
+      }
+    }
     const message = error.response?.data?.message || error.message || "An unexpected error occurred";
     return Promise.reject(
       new ApiError(message, {
