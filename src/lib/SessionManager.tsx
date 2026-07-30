@@ -8,6 +8,9 @@ export function SessionManager() {
   const setUser = useAuth((s) => s.setUser);
   const setupDone = useRef(false);
 
+  // First mount: auto-login from cookie if store is empty.
+  // After setup: clear store if session became null (logout) or
+  // changed to a different user (cross-tab sign-in).
   useEffect(() => {
     if (isPending) return;
     if (!setupDone.current) {
@@ -23,27 +26,33 @@ export function SessionManager() {
       }
       return;
     }
+    if (!user) return;
+    if (!session?.user) {
+      setUser(null);
+      return;
+    }
+    if (session.user.id !== user.id) {
+      setUser(null);
+    }
   }, [session, isPending, setUser, user]);
 
+  // Tab focus/visibility: verify session against store on return
   useEffect(() => {
-    const checkSession = async () => {
+    const check = async () => {
       const storeUser = useAuth.getState().user;
       if (!storeUser) return;
       try {
         const { data: s } = await authClient.getSession();
-        if (s?.user?.id && s.user.id !== storeUser.id) {
+        if (!s?.user || (s.user.id && s.user.id !== storeUser.id)) {
           useAuth.getState().setUser(null);
         }
       } catch {}
     };
-
-    const onShow = () => checkSession();
-    document.addEventListener("visibilitychange", onShow);
-    window.addEventListener("focus", onShow);
-
+    addEventListener("visibilitychange", check);
+    addEventListener("focus", check);
     return () => {
-      document.removeEventListener("visibilitychange", onShow);
-      window.removeEventListener("focus", onShow);
+      removeEventListener("visibilitychange", check);
+      removeEventListener("focus", check);
     };
   }, []);
 
