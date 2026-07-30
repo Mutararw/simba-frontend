@@ -4,6 +4,7 @@ import type { CartItem } from "@/lib/types";
 
 export interface PickupOrder {
   id: string;
+  userId?: string;
   branchId?: string;
   branchName?: string;
   pickupTime?: string;

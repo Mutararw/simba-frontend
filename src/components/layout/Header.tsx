@@ -120,10 +120,10 @@ export function Header() {
           )}
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/wishlist")} aria-label="Wishlist">
+          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white hidden sm:inline-flex" onClick={() => navigate("/wishlist")} aria-label="Wishlist">
             <Heart className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white" onClick={() => navigate("/notifications")} aria-label="Notifications">
+          <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/20 hover:text-white hidden sm:inline-flex" onClick={() => navigate("/notifications")} aria-label="Notifications">
             <Bell className="h-5 w-5" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-white ring-2 ring-[#fd7e14]" />
           </Button>

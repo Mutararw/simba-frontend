@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { ApiError, api } from "@/lib/api";
 import { formatRWF } from "@/lib/products";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, Calendar, MapPin, RotateCcw, WifiOff } from "lucide-react";
+import { Loader2, Package, Calendar, MapPin, RotateCcw, Trash2, WifiOff } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -49,6 +49,17 @@ export default function Orders() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const deleteOrder = async (orderId: number) => {
+    if (!confirm("Delete this order permanently?")) return;
+    try {
+      await api.delete(`/api/orders/${orderId}`);
+      setOrders(prev => prev.filter(o => o.orderId !== orderId));
+      toast.success("Order deleted");
+    } catch {
+      toast.error("Failed to delete order");
+    }
+  };
 
   const displayOrders = orders;
 
@@ -133,6 +144,16 @@ export default function Orders() {
                   >
                     {order.status}
                   </span>
+                  {(order.status === "Delivered" || order.status === "completed" || order.status === "Cancelled") && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                      onClick={() => deleteOrder(order.orderId)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
               </div>
 

@@ -97,6 +97,17 @@ export default function AdminDashboard() {
     }
   };
 
+  const deleteOrder = async (orderId: number) => {
+    if (!confirm("Delete this order permanently?")) return;
+    try {
+      await api.delete(`/api/admin/orders/${orderId}`);
+      toast.success(`Order #${orderId} deleted`);
+      fetchAllOrders();
+    } catch (err) {
+      toast.error("Failed to delete order");
+    }
+  };
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -239,6 +250,34 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* Mobile Tab Nav */}
+      <div className="lg:hidden overflow-x-auto no-scrollbar border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
+        <div className="flex gap-1 p-2 whitespace-nowrap">
+          {[
+            { id: "overview", icon: Globe, label: "Overview" },
+            { id: "branches", icon: Building2, label: "Branches" },
+            { id: "inventory", icon: Package, label: "Inventory" },
+            { id: "orders", icon: ShoppingBag, label: "Orders" },
+            { id: "requests", icon: UserCheck, label: "Requests", count: (pendingUsers || []).length },
+            { id: "users", icon: Users, label: "Users" },
+            { id: "suppliers", icon: Truck, label: "Suppliers" },
+            { id: "broadcast", icon: MessageSquare, label: "Broadcast" },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+                activeTab === tab.id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <tab.icon className="h-3.5 w-3.5" />
+              {tab.label}
+              {(tab as any).count ? <span className="ml-1 h-4 min-w-4 rounded-full bg-primary/20 px-1 text-[10px] font-bold">{tab.count}</span> : null}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Sidebar */}
       <div className="hidden lg:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl">
         <div className="p-6">
@@ -658,6 +697,14 @@ export default function AdminDashboard() {
                       >
                         <CheckCircle2 className="h-4 w-4" /> Mark Delivered
                       </Button>
+                      {order.status === 'Delivered' && (
+                        <Button 
+                          className="rounded-xl h-11 bg-red-600 hover:bg-red-700 gap-2 ml-auto"
+                          onClick={() => deleteOrder(order.id)}
+                        >
+                          <Trash2 className="h-4 w-4" /> Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -688,8 +735,8 @@ export default function AdminDashboard() {
                 </Button>
               </div>
 
-              <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden">
-                <table className="w-full text-left">
+               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden overflow-x-auto">
+                <table className="w-full text-left min-w-[600px]">
                   <thead className="bg-muted/30 border-b border-border">
                     <tr>
                       <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">User</th>
@@ -859,7 +906,7 @@ export default function AdminDashboard() {
                 </div>
                 
                 <form onSubmit={handleAddProduct} className="p-8 space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Product Name</label>
                       <Input 
@@ -954,7 +1001,7 @@ export default function AdminDashboard() {
               />
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                className="relative w-full max-w-4xl aspect-video rounded-[3rem] bg-card border-4 border-primary shadow-2xl overflow-hidden flex flex-col"
+                className="relative w-full max-w-4xl rounded-[3rem] bg-card border-4 border-primary shadow-2xl overflow-hidden flex flex-col mx-4 md:mx-0"
               >
                 {!currentMeetingId ? (
                   <div className="flex-1 p-8 flex flex-col overflow-hidden">

@@ -245,9 +245,6 @@ export default function Index() {
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
-            {/* Location Finder */}
-            <BranchRouteFinder />
-
             <CategoryRail />
 
             <div className="space-y-16 pb-16">

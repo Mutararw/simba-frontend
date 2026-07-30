@@ -42,7 +42,7 @@ export function Footer() {
   return (
     <footer className="relative bg-[#fd7e14] text-white pt-16 pb-8 overflow-hidden shadow-md">
       <div className="container relative z-10">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4 lg:gap-8">
           {/* Brand Column */}
           <div className="flex flex-col gap-6">
             <Link to="/" className="flex items-center gap-2 group">

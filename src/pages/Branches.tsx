@@ -4,6 +4,7 @@ import { Star, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BRANCHES } from "@/lib/branches";
 import { useOrder } from "@/store/order";
+import { BranchRouteFinder } from "@/components/shop/BranchRouteFinder";
 
 const TIMES = ["10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00"];
 
@@ -20,6 +21,8 @@ export default function Branches() {
   return (
     <div className="container py-8">
       <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{t("nav.branches")}</h1>
+
+      <BranchRouteFinder />
 
       <div className="mt-8 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {BRANCHES.map((b) => {

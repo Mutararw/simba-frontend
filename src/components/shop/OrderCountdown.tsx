@@ -3,17 +3,21 @@ import { Clock, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useOrder } from "@/store/order";
+import { useAuth } from "@/store/auth";
 import { useTranslation } from "react-i18next";
 
 export function OrderCountdown() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const user = useAuth((s) => s.user);
   const lastOrder = useOrder((s) => s.lastOrder);
   const [timeLeft, setTimeLeft] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
 
+  const isOwnOrder = lastOrder && user && lastOrder.userId === user.id;
+
   useEffect(() => {
-    if (!lastOrder || !lastOrder.pickupTime) {
+    if (!isOwnOrder || !lastOrder.pickupTime) {
       setTimeLeft(null);
       return;
     }
@@ -49,7 +53,7 @@ export function OrderCountdown() {
     return () => clearInterval(interval);
   }, [lastOrder]);
 
-  if (!lastOrder) {
+  if (!isOwnOrder) {
     return (
       <Button
         variant="ghost"

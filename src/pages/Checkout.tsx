@@ -116,6 +116,7 @@ export default function Checkout() {
 
       setLastOrder({
         id: serverOrder.id.toString(),
+        userId: user.id,
         branchId: branch?.id,
         branchName: branch?.name,
         pickupTime: draft.pickupTime,

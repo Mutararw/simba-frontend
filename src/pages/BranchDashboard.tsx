@@ -221,6 +221,33 @@ export default function BranchDashboard() {
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] bg-background">
+      {/* Mobile Tab Nav */}
+      <div className="lg:hidden overflow-x-auto no-scrollbar border-b border-border bg-card/50 backdrop-blur-xl sticky top-0 z-30">
+        <div className="flex gap-1 p-2 whitespace-nowrap">
+          {[
+            { id: "overview", icon: TrendingUp, label: "Overview" },
+            { id: "orders", icon: ShoppingBag, label: "Orders" },
+            { id: "payments", icon: DollarSign, label: "Payments" },
+            { id: "inventory", icon: Package, label: "Inventory" },
+            { id: "team", icon: Users, label: "Team" },
+            { id: "customers", icon: UserPlus, label: "Customers" },
+            { id: "suppliers", icon: Truck, label: "Suppliers" },
+            { id: "chat", icon: MessageSquare, label: "Messages" },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+                activeTab === tab.id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              <tab.icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Sidebar */}
       <div className="hidden lg:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl">
         <div className="p-6">
@@ -471,8 +498,8 @@ export default function BranchDashboard() {
                   </div>
                </div>
 
-               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden shadow-sm">
-                  <table className="w-full text-left border-collapse">
+               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden overflow-x-auto shadow-sm">
+                  <table className="w-full text-left border-collapse min-w-[600px]">
                     <thead className="bg-muted/30 border-b border-border">
                       <tr>
                         <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Order ID</th>
@@ -635,8 +662,8 @@ export default function BranchDashboard() {
                   </div>
                </div>
 
-               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden">
-                 <table className="w-full text-left">
+               <div className="rounded-[2.5rem] border border-border bg-card overflow-hidden overflow-x-auto">
+                  <table className="w-full text-left min-w-[600px]">
                    <thead className="bg-muted/30 border-b border-border">
                      <tr>
                        <th className="px-8 py-5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Customer</th>
