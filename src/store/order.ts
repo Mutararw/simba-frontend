@@ -34,6 +34,10 @@ interface OrderState {
   setDraft: (d: Partial<OrderState["pendingDraft"]>) => void;
   lastOrder: PickupOrder | null;
   setLastOrder: (o: PickupOrder | null) => void;
+  routeUserCoords: { lat: number; lng: number } | null;
+  routeStartAddress: string;
+  routeShowMap: boolean;
+  setRouteState: (d: Partial<Pick<OrderState, "routeUserCoords" | "routeStartAddress" | "routeShowMap">>) => void;
 }
 
 export const useOrder = create<OrderState>()(
@@ -43,10 +47,18 @@ export const useOrder = create<OrderState>()(
       setDraft: (d) => set((s) => ({ pendingDraft: { ...s.pendingDraft, ...d } })),
       lastOrder: null,
       setLastOrder: (o) => set({ lastOrder: o }),
+      routeUserCoords: null,
+      routeStartAddress: "",
+      routeShowMap: false,
+      setRouteState: (d) => set(d),
     }),
     {
       name: "simba_order",
       storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        pendingDraft: state.pendingDraft,
+        lastOrder: state.lastOrder,
+      }),
     }
   )
 );

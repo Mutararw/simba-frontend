@@ -16,7 +16,8 @@ export default function Branches() {
   const isCheckout = params.get("next") === "checkout";
   const draft = useOrder((s) => s.pendingDraft);
   const setDraft = useOrder((s) => s.setDraft);
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const userCoords = useOrder((s) => s.routeUserCoords);
+  const setRouteState = useOrder((s) => s.setRouteState);
   const [isLocating, setIsLocating] = useState(false);
 
   const selectedBranch = BRANCHES.find((b) => b.id === draft.branchId);
@@ -29,7 +30,8 @@ export default function Branches() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setRouteState({ routeUserCoords: coords, routeStartAddress: `${pos.coords.latitude},${pos.coords.longitude}` });
         setIsLocating(false);
       },
       () => {

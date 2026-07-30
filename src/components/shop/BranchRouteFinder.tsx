@@ -12,22 +12,38 @@ export function BranchRouteFinder() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const setDraft = useOrder((s) => s.setDraft);
+  const routeUserCoords = useOrder((s) => s.routeUserCoords);
+  const routeStartAddress = useOrder((s) => s.routeStartAddress);
+  const routeShowMap = useOrder((s) => s.routeShowMap);
+  const setRouteState = useOrder((s) => s.setRouteState);
+  const draftBranchId = useOrder((s) => s.pendingDraft.branchId);
 
-  const [startLocation, setStartLocation] = useState("");
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
+  const [selectedBranchId, setSelectedBranchId] = useState(draftBranchId || "");
   const [nearestBranchId, setNearestBranchId] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [showMap, setShowMap] = useState(false);
   const [showActionPopup, setShowActionPopup] = useState(false);
+
+  // Sync from draft.branchId (set by branch card clicks)
+  useEffect(() => {
+    if (draftBranchId && draftBranchId !== selectedBranchId) {
+      setSelectedBranchId(draftBranchId);
+    }
+  }, [draftBranchId]);
+
+  // Auto-show route when branch is selected externally and coords are available
+  useEffect(() => {
+    if (draftBranchId && routeUserCoords) {
+      setRouteState({ routeShowMap: true });
+    }
+  }, [draftBranchId, routeUserCoords]);
 
   // Auto-find nearest branch when coords are set
   useEffect(() => {
-    if (userCoords) {
+    if (routeUserCoords) {
       let minDistance = Infinity;
       let nearestId = "";
       for (const [id, coords] of Object.entries(BRANCH_COORDS)) {
-        const dist = getDistanceKm(userCoords.lat, userCoords.lng, coords.lat, coords.lng);
+        const dist = getDistanceKm(routeUserCoords.lat, routeUserCoords.lng, coords.lat, coords.lng);
         if (dist < minDistance) {
           minDistance = dist;
           nearestId = id;
@@ -36,9 +52,10 @@ export function BranchRouteFinder() {
       setNearestBranchId(nearestId);
       if (!selectedBranchId) {
         setSelectedBranchId(nearestId);
+        setDraft({ branchId: nearestId });
       }
     }
-  }, [userCoords, selectedBranchId]);
+  }, [routeUserCoords]);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -48,8 +65,9 @@ export function BranchRouteFinder() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setStartLocation(`${pos.coords.latitude},${pos.coords.longitude}`);
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        const addr = `${pos.coords.latitude},${pos.coords.longitude}`;
+        setRouteState({ routeUserCoords: coords, routeStartAddress: addr });
         setIsLocating(false);
       },
       (err) => {
@@ -61,12 +79,9 @@ export function BranchRouteFinder() {
   };
 
   const handleShowRoute = () => {
-    if (!startLocation || !selectedBranchId) return;
-    setShowMap(true);
-    // Show action popup 3 seconds after map loads
-    setTimeout(() => {
-      setShowActionPopup(true);
-    }, 3000);
+    if (!routeStartAddress || !selectedBranchId) return;
+    setRouteState({ routeShowMap: true });
+    setTimeout(() => setShowActionPopup(true), 3000);
   };
 
   const handlePickUp = () => {
@@ -104,8 +119,8 @@ export function BranchRouteFinder() {
                 <div className="flex gap-2">
                   <Input 
                     placeholder="E.g. Kigali Heights" 
-                    value={startLocation}
-                    onChange={(e) => setStartLocation(e.target.value)}
+                    value={routeStartAddress}
+                    onChange={(e) => setRouteState({ routeStartAddress: e.target.value })}
                     className="flex-1 rounded-xl"
                   />
                   <Button 
@@ -125,7 +140,10 @@ export function BranchRouteFinder() {
                 </label>
                 <select
                   value={selectedBranchId}
-                  onChange={(e) => setSelectedBranchId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedBranchId(e.target.value);
+                    setDraft({ branchId: e.target.value });
+                  }}
                   className="flex h-10 w-full items-center justify-between rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="" disabled>{t("route.selectBranch")}</option>
@@ -143,7 +161,7 @@ export function BranchRouteFinder() {
               <Button 
                 onClick={handleShowRoute}
                 className="w-full rounded-xl py-6 font-bold text-base mt-2"
-                disabled={!startLocation || !selectedBranchId}
+                disabled={!routeStartAddress || !selectedBranchId}
               >
                 <Navigation className="mr-2 h-5 w-5" />
                 {t("route.cta")}
@@ -160,8 +178,8 @@ export function BranchRouteFinder() {
               frameBorder="0"
               className="absolute inset-0 h-full w-full object-cover"
               src={
-                showMap && startLocation && selectedBranch
-                  ? `https://maps.google.com/maps?saddr=${encodeURIComponent(startLocation)}&daddr=Simba+Supermarket+${encodeURIComponent(selectedBranch.area)}+Kigali&t=&z=13&ie=UTF8&iwloc=&output=embed`
+                routeShowMap && routeStartAddress && selectedBranch
+                  ? `https://maps.google.com/maps?saddr=${encodeURIComponent(routeStartAddress)}&daddr=Simba+Supermarket+${encodeURIComponent(selectedBranch.area)}+Kigali&t=&z=13&ie=UTF8&iwloc=&output=embed`
                   : selectedBranch
                   ? `https://maps.google.com/maps?q=Simba+Supermarket+${encodeURIComponent(selectedBranch.area)}+Kigali&t=&z=14&ie=UTF8&iwloc=&output=embed`
                   : `https://maps.google.com/maps?q=Kigali&t=&z=12&ie=UTF8&iwloc=&output=embed`
