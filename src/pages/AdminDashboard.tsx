@@ -9,7 +9,8 @@ import {
   MessageSquare, Shield, Globe, Search,
   ArrowUpRight, ArrowDownRight, Package, Truck,
   CheckCircle2, AlertCircle, Send, MoreVertical,
-  Filter, Video, Trash2, Edit3, UserCheck, XCircle, Mic, Plus, Check
+  Filter, Video, Trash2, Edit3, UserCheck, XCircle, 
+  Mic, Plus, Check, RotateCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
