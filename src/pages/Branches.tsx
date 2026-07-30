@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Star, MapPin, Clock, Crosshair, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BRANCHES } from "@/lib/branches";
+import { BRANCHES, BRANCH_COORDS, getDistanceKm } from "@/lib/branches";
 import { useOrder } from "@/store/order";
 import { BranchRouteFinder } from "@/components/shop/BranchRouteFinder";
 
@@ -15,12 +16,51 @@ export default function Branches() {
   const isCheckout = params.get("next") === "checkout";
   const draft = useOrder((s) => s.pendingDraft);
   const setDraft = useOrder((s) => s.setDraft);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   const selectedBranch = BRANCHES.find((b) => b.id === draft.branchId);
 
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+        alert("Failed to get your location. Please allow location access.");
+      }
+    );
+  };
+
+  const getDistance = (branchId: string) => {
+    if (!userCoords) return null;
+    const coords = BRANCH_COORDS[branchId];
+    if (!coords) return null;
+    const dist = getDistanceKm(userCoords.lat, userCoords.lng, coords.lat, coords.lng);
+    return dist < 1 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`;
+  };
+
   return (
     <div className="container py-8">
-      <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{t("nav.branches")}</h1>
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{t("nav.branches")}</h1>
+        <Button
+          variant="outline"
+          className="rounded-full gap-2 border-primary/20 h-10"
+          onClick={handleGetLocation}
+          disabled={isLocating}
+        >
+          <Crosshair className={`h-4 w-4 text-primary ${isLocating ? "animate-spin" : ""}`} />
+          {userCoords ? "My Location" : "Detect My Location"}
+        </Button>
+      </div>
 
       <BranchRouteFinder />
 
@@ -50,6 +90,14 @@ export default function Branches() {
                 </span>
                 <span>{t("branch.reviews", { count: b.reviews })}</span>
                 <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {b.hours}</span>
+                {(() => {
+                  const dist = getDistance(b.id);
+                  return dist ? (
+                    <span className="inline-flex items-center gap-1 ml-auto text-primary font-semibold">
+                      <Navigation className="h-3 w-3" /> {dist}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </button>
           );

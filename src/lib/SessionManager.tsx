@@ -1,13 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/store/auth";
 import { useSession } from "./auth-client";
 
 export function SessionManager() {
   const { data: session, isPending } = useSession();
+  const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!isPending) {
+    if (isPending) return;
+
+    if (!initialized.current) {
+      initialized.current = true;
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -16,13 +21,18 @@ export function SessionManager() {
           image: session.user.image,
           role: (session.user as any).accountType || "customer",
         });
-      } else {
-        // Clear user if no session is found (e.g. expired or logged out elsewhere)
-        // But only if we currently have a user (to avoid infinite loops or unnecessary state updates)
-        setUser(null);
       }
+      return;
     }
-  }, [session, isPending, setUser]);
+
+    if (session?.user && user && session.user.id !== user.id) {
+      return;
+    }
+
+    if (!session?.user && user) {
+      setUser(null);
+    }
+  }, [session, isPending, setUser, user]);
 
   return null;
 }
