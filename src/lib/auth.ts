@@ -1,6 +1,7 @@
 import { authClient } from "./auth-client";
 import { getAppPath, getAppUrl } from "./config";
 import type { User } from "./types";
+import { useAuth } from "@/store/auth";
 
 function getAuthErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) {
@@ -94,6 +95,7 @@ export async function signInWithGithub() {
 
 export async function logout() {
   await authClient.signOut();
+  useAuth.getState().setUser(null);
   window.location.href = getAppPath("/login");
 }
 
