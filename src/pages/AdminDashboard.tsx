@@ -98,14 +98,14 @@ export default function AdminDashboard() {
   };
 
   const deleteOrder = async (orderId: number) => {
-    if (!confirm("Delete this order permanently?")) return;
+    if (!confirm("Archive this order?")) return;
     try {
-      await api.delete(`/api/admin/orders/${orderId}`);
-      toast.success(`Order #${orderId} deleted`);
+      await api.patch(`/api/orders/${orderId}`, { status: "Deleted" });
+      toast.success(`Order #${orderId} archived`);
       fetchAllOrders();
     } catch (err) {
       console.error("delete order error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to delete order");
+      toast.error(err instanceof Error ? err.message : "Failed to archive order");
     }
   };
 
@@ -724,7 +724,7 @@ export default function AdminDashboard() {
                             className="rounded-xl h-11 bg-red-600 hover:bg-red-700 gap-2 ml-auto"
                             onClick={() => deleteOrder(order.id)}
                           >
-                            <Trash2 className="h-4 w-4" /> Delete Order
+                            <Trash2 className="h-4 w-4" /> Archive Order
                           </Button>
                         )}
                       </div>
