@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/store/auth";
 import { useSession, authClient } from "./auth-client";
 
@@ -6,27 +6,10 @@ export function SessionManager() {
   const { data: session, isPending } = useSession();
   const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
-  const setupDone = useRef(false);
 
-  // First mount: auto-login from cookie if store is empty.
-  // After setup: clear store if session became null (logout) or
-  // changed to a different user (cross-tab sign-in).
+  // React to session atom changes (broadcast from sign-out, refetch on focus)
   useEffect(() => {
-    if (isPending) return;
-    if (!setupDone.current) {
-      setupDone.current = true;
-      if (!user && session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.name,
-          image: session.user.image,
-          role: (session.user as any).accountType || "customer",
-        });
-      }
-      return;
-    }
-    if (!user) return;
+    if (isPending || !user) return;
     if (!session?.user) {
       setUser(null);
       return;
@@ -36,7 +19,7 @@ export function SessionManager() {
     }
   }, [session, isPending, setUser, user]);
 
-  // Tab focus/visibility: verify session against store on return
+  // Tab visibility/focus: verify session against store on return
   useEffect(() => {
     const check = async () => {
       const storeUser = useAuth.getState().user;
@@ -50,6 +33,7 @@ export function SessionManager() {
     };
     addEventListener("visibilitychange", check);
     addEventListener("focus", check);
+    window.addEventListener("pageshow", (e) => { if (e.persisted) check(); });
     return () => {
       removeEventListener("visibilitychange", check);
       removeEventListener("focus", check);
