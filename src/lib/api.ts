@@ -44,6 +44,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 403 && error.config?.url?.startsWith("/api/admin")) {
+      import("@/store/auth").then(({ useAuth }) => {
+        useAuth.getState().setUser(null);
+      });
+      window.location.href = "/login";
+    }
     const message = error.response?.data?.message || error.message || "An unexpected error occurred";
     return Promise.reject(
       new ApiError(message, {
