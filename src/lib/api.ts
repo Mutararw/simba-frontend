@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_URL } from "./config";
+import { authClient } from "./auth-client";
 
 export class ApiError extends Error {
   status?: number;
@@ -36,8 +37,11 @@ export const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   config.headers['x-guest-id'] = getGuestId()
+  if (config.url?.startsWith("/api/admin")) {
+    try { await authClient.getSession(); } catch {}
+  }
   return config
 })
 
