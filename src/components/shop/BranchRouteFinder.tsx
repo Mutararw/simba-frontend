@@ -6,31 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useOrder } from "@/store/order";
-import { BRANCHES } from "@/lib/branches";
-
-const BRANCH_COORDS: Record<string, { lat: number; lng: number }> = {
-  remera: { lat: -1.9585, lng: 30.1116 },
-  kimironko: { lat: -1.9367, lng: 30.1264 },
-  kacyiru: { lat: -1.9392, lng: 30.0768 },
-  nyamirambo: { lat: -1.9833, lng: 30.0456 },
-  gikondo: { lat: -1.9722, lng: 30.0786 },
-  kanombe: { lat: -1.9688, lng: 30.1342 },
-  kinyinya: { lat: -1.9167, lng: 30.0911 },
-  kibagabaga: { lat: -1.9317, lng: 30.1065 },
-  nyanza: { lat: -1.9868, lng: 30.0903 },
-};
-
-function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+import { BRANCHES, BRANCH_COORDS, getDistanceKm } from "@/lib/branches";
 
 export function BranchRouteFinder() {
   const { t } = useTranslation();
@@ -51,7 +27,7 @@ export function BranchRouteFinder() {
       let minDistance = Infinity;
       let nearestId = "";
       for (const [id, coords] of Object.entries(BRANCH_COORDS)) {
-        const dist = getDistance(userCoords.lat, userCoords.lng, coords.lat, coords.lng);
+        const dist = getDistanceKm(userCoords.lat, userCoords.lng, coords.lat, coords.lng);
         if (dist < minDistance) {
           minDistance = dist;
           nearestId = id;

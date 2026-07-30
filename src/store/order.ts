@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { CartItem } from "@/lib/types";
 
 export interface PickupOrder {
@@ -44,6 +44,9 @@ export const useOrder = create<OrderState>()(
       lastOrder: null,
       setLastOrder: (o) => set({ lastOrder: o }),
     }),
-    { name: "simba_order" }
+    {
+      name: "simba_order",
+      storage: createJSONStorage(() => sessionStorage),
+    }
   )
 );

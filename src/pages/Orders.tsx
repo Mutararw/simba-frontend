@@ -56,8 +56,9 @@ export default function Orders() {
       await api.delete(`/api/orders/${orderId}`);
       setOrders(prev => prev.filter(o => o.orderId !== orderId));
       toast.success("Order deleted");
-    } catch {
-      toast.error("Failed to delete order");
+    } catch (err) {
+      console.error("delete order error:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete order");
     }
   };
 

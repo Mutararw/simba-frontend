@@ -104,7 +104,8 @@ export default function AdminDashboard() {
       toast.success(`Order #${orderId} deleted`);
       fetchAllOrders();
     } catch (err) {
-      toast.error("Failed to delete order");
+      console.error("delete order error:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to delete order");
     }
   };
 
