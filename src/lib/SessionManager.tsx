@@ -1,30 +1,35 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/store/auth";
-import { API_URL } from "./config";
+import { useSession } from "./auth-client";
 
 export function SessionManager() {
+  const { data: session, isPending } = useSession();
   const user = useAuth((s) => s.user);
   const setUser = useAuth((s) => s.setUser);
+  const done = useRef(false);
 
   useEffect(() => {
+    if (done.current) {
+      if (!isPending && session && user && session.user?.id !== user.id) {
+        useAuth.getState().setUser(null);
+      }
+      return;
+    }
+    if (isPending) return;
+    done.current = true;
+
     if (user) return;
 
-    const baseURL = API_URL.endsWith("/api/auth") ? API_URL : `${API_URL}/api/auth`;
-    fetch(`${baseURL}/get-session`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.user) {
-          setUser({
-            id: data.user.id,
-            email: data.user.email,
-            name: data.user.name,
-            image: data.user.image,
-            role: (data.user as any).accountType || "customer",
-          });
-        }
-      })
-      .catch(() => {});
-  }, []);
+    if (session?.user) {
+      setUser({
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        image: session.user.image,
+        role: (session.user as any).accountType || "customer",
+      });
+    }
+  }, [session, isPending, setUser, user]);
 
   return null;
 }

@@ -628,87 +628,109 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid gap-6">
-                {allOrders.map(order => (
-                  <div key={order.id} className="p-6 rounded-[2rem] border border-border bg-card shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                      <div className="flex items-center gap-4">
-                         <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center">
-                           <ShoppingBag className="h-6 w-6 text-primary" />
-                         </div>
-                         <div>
-                           <div className="font-bold text-lg">Order #{order.id}</div>
-                           <div className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleString()}</div>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={`${
-                          order.status === 'Delivered' ? 'bg-green-500' : 'bg-amber-500'
-                        } rounded-full`}>
-                          {order.status}
-                        </Badge>
+                {allOrders.map(order => {
+                  const stages = ["Pending", "Confirmed", "Packed", "Out for Delivery", "Delivered"];
+                  const currentIdx = Math.max(0, stages.indexOf(order.status));
+                  const user = users.find(u => u.id === order.userId);
+
+                  return (
+                    <div key={order.id} className="p-6 rounded-[2rem] border border-border bg-card shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-primary/5 flex items-center justify-center">
+                            <ShoppingBag className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-lg">Order #{order.id}</div>
+                            <div className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleString()}</div>
+                          </div>
+                        </div>
                         <Badge variant="outline" className="rounded-full">
                           {order.orderType}
                         </Badge>
                       </div>
-                    </div>
 
-                    <div className="grid md:grid-cols-3 gap-6 mb-6">
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Customer</div>
-                        <div className="font-bold text-sm">{order.userId}</div>
-                        <div className="text-xs text-muted-foreground">{order.phone}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Amount</div>
-                        <div className="font-black text-primary text-lg">RWF {Number(order.totalAmount).toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Delivery Info</div>
-                        <div className="text-sm font-medium">{order.address || order.branchId || "N/A"}</div>
-                        <div className="text-xs text-muted-foreground">{order.zone || order.pickupTime}</div>
-                      </div>
-                    </div>
+                      {/* Stage Pipeline */}
+                      <div className="mb-8">
+                        <div className="flex items-center justify-between">
+                          {stages.map((stage, i) => {
+                            const isCompleted = i < currentIdx;
+                            const isCurrent = i === currentIdx;
+                            const isAhead = i > currentIdx;
 
-                    <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
-                      <Button 
-                        disabled={order.status === 'Confirmed'}
-                        className="rounded-xl h-11 bg-blue-600 hover:bg-blue-700 gap-2"
-                        onClick={() => updateOrderStatus(order.id, 'Confirmed')}
-                      >
-                        <Check className="h-4 w-4" /> Confirm Order
-                      </Button>
-                      <Button 
-                        disabled={order.status === 'Packed'}
-                        className="rounded-xl h-11 bg-orange-500 hover:bg-orange-600 gap-2"
-                        onClick={() => updateOrderStatus(order.id, 'Packed')}
-                      >
-                        <Package className="h-4 w-4" /> Mark as Packed
-                      </Button>
-                      <Button 
-                        disabled={order.status === 'Out for Delivery'}
-                        className="rounded-xl h-11 bg-indigo-600 hover:bg-indigo-700 gap-2"
-                        onClick={() => updateOrderStatus(order.id, 'Out for Delivery')}
-                      >
-                        <Truck className="h-4 w-4" /> Out for Delivery
-                      </Button>
-                      <Button 
-                        disabled={order.status === 'Delivered'}
-                        className="rounded-xl h-11 bg-green-600 hover:bg-green-700 gap-2"
-                        onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                      >
-                        <CheckCircle2 className="h-4 w-4" /> Mark Delivered
-                      </Button>
-                      {order.status === 'Delivered' && (
-                        <Button 
-                          className="rounded-xl h-11 bg-red-600 hover:bg-red-700 gap-2 ml-auto"
-                          onClick={() => deleteOrder(order.id)}
-                        >
-                          <Trash2 className="h-4 w-4" /> Delete
-                        </Button>
-                      )}
+                            return (
+                              <div key={stage} className="flex items-center flex-1 last:flex-none">
+                                <button
+                                  onClick={() => isAhead && updateOrderStatus(order.id, stage)}
+                                  disabled={!isAhead}
+                                  className={`relative flex flex-col items-center gap-1.5 ${
+                                    isAhead ? 'cursor-pointer hover:opacity-80' : 'cursor-default'
+                                  }`}
+                                >
+                                  <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                                    isCompleted ? 'bg-green-500 text-white' :
+                                    isCurrent ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' :
+                                    'bg-muted text-muted-foreground'
+                                  }`}>
+                                    {isCompleted ? <Check className="h-5 w-5" /> : i + 1}
+                                  </div>
+                                  <span className={`text-[10px] font-black uppercase whitespace-nowrap ${
+                                    isCurrent || isCompleted ? 'text-foreground' : 'text-muted-foreground'
+                                  }`}>
+                                    {stage}
+                                  </span>
+                                </button>
+                                {i < stages.length - 1 && (
+                                  <div className={`flex-1 h-1 mx-2 rounded-full ${
+                                    i < currentIdx ? 'bg-green-500' : 'bg-muted'
+                                  }`} />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Order Details */}
+                      <div className="grid md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                          <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Customer</div>
+                          <div className="font-bold text-sm">{user?.name || order.userId}</div>
+                          <div className="text-xs text-muted-foreground">{user?.email || order.phone}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Total Amount</div>
+                          <div className="font-black text-primary text-lg">RWF {Number(order.totalAmount).toLocaleString()}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] font-black uppercase text-muted-foreground mb-1">Delivery Info</div>
+                          <div className="text-sm font-medium">{order.address || order.branchId || "N/A"}</div>
+                          <div className="text-xs text-muted-foreground">{order.zone || order.pickupTime}</div>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-3 pt-6 border-t border-border">
+                        {currentIdx < stages.length - 1 ? (
+                          <Button
+                            className="rounded-xl h-11 gap-2"
+                            onClick={() => updateOrderStatus(order.id, stages[currentIdx + 1])}
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                            Mark as {stages[currentIdx + 1]}
+                          </Button>
+                        ) : (
+                          <Button
+                            className="rounded-xl h-11 bg-red-600 hover:bg-red-700 gap-2 ml-auto"
+                            onClick={() => deleteOrder(order.id)}
+                          >
+                            <Trash2 className="h-4 w-4" /> Delete Order
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {allOrders.length === 0 && (
                   <div className="py-20 text-center border-2 border-dashed border-border rounded-[3rem]">
                     <ShoppingBag className="h-16 w-16 mx-auto mb-4 opacity-20" />
